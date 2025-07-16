@@ -1144,14 +1144,3 @@ footer {
     min-width: 160px !important;
   }
 }
-
-
-/* Para o texto da tela final da entrevista */
-.final-container .subtitle {
-  color: #ffffff !important;
-}
-
-/* Ou se quiser para todos os subtitles */
-.subtitle {
-  color: #ffffff !important;
-}
