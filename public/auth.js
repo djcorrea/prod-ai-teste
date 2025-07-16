@@ -227,6 +227,14 @@ window.confirmSMSCode = async function() {
     localStorage.setItem("idToken", idToken);
     localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
 
+    // cria/atualiza documento do usuario para evitar redirecionamento incorreto
+    try {
+      await db.collection('usuarios').doc(phoneUser.user.uid)
+        .set({ entrevistaConcluida: false }, { merge: true });
+    } catch (e) {
+      console.error('Erro ao criar documento de usuario:', e);
+    }
+
     // garante que novos usuarios sejam direcionados para a entrevista
     setTimeout(() => {
       try {
