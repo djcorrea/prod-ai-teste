@@ -102,7 +102,7 @@ body {
 
 .subtitle {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(125, 15, 216, 0.678);
   font-weight: 300;
   letter-spacing: 0.5px;
   margin-bottom: 1rem;
@@ -1143,4 +1143,15 @@ footer {
   .btn-plus {
     min-width: 160px !important;
   }
+}
+
+
+/* Para o texto da tela final da entrevista */
+.final-container .subtitle {
+  color: #ffffff !important;
+}
+
+/* Ou se quiser para todos os subtitles */
+.subtitle {
+  color: #ffffff !important;
 }
