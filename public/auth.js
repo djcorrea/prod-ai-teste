@@ -227,7 +227,14 @@ window.confirmSMSCode = async function() {
     localStorage.setItem("idToken", idToken);
     localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
 
-    window.location.href = "entrevista.html";
+    // garante que novos usuarios sejam direcionados para a entrevista
+    setTimeout(() => {
+      try {
+        window.location.replace("entrevista.html");
+      } catch (e) {
+        console.error("Falha ao redirecionar:", e);
+      }
+    }, 150);
   } catch (error) {
     console.error("Erro no cadastro:", error);
     showMessage(error, "error");
