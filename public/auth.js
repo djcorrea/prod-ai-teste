@@ -79,6 +79,7 @@ async function getFingerprint() {
 
 let confirmationResult = null;
 let lastPhone = "";
+let isNewUserRegistering = false; // Flag para controlar novos usuários
 
 window.showSMSSection = function () {
   const smsSection = document.getElementById('sms-section');
@@ -186,6 +187,7 @@ window.signUp = async function () {
   const formattedPhone = '+55' + rawPhone.replace(/\D/g, '').replace(/^55/, '');
 
   if (!confirmationResult || lastPhone !== formattedPhone) {
+    isNewUserRegistering = true; // Marca que é um novo usuário
     const sent = await sendSMS(rawPhone);
     if (!sent) return;
     return;
@@ -227,20 +229,23 @@ window.confirmSMSCode = async function() {
     localStorage.setItem("idToken", idToken);
     localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
 
-    // garante que novos usuarios sejam direcionados para a entrevista
+    // CORRIGIDO: Pausa temporariamente o listener do checkAuthState e redireciona
+    const currentListener = auth.onAuthStateChanged;
+    auth.onAuthStateChanged = () => {}; // Para o listener temporariamente
+    
+    console.log("🎯 Redirecionando novo usuário para entrevista.html");
+    window.location.replace("entrevista.html");
+    
+    // Restaura o listener após 5 segundos (caso algo dê errado)
     setTimeout(() => {
-      try {
-        window.location.replace("entrevista.html");
-      } catch (e) {
-        console.error("Falha ao redirecionar:", e);
-      }
-    }, 150);
+      auth.onAuthStateChanged = currentListener;
+    }, 5000);
+
   } catch (error) {
     console.error("Erro no cadastro:", error);
     showMessage(error, "error");
   }
 };
-
 
 window.register = window.signUp;
 
@@ -262,6 +267,14 @@ function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
       clearTimeout(timeout);
       const isLoginPage = window.location.pathname.includes("login.html");
+      const isEntrevistaPage = window.location.pathname.includes("entrevista.html");
+
+      // Se for novo usuário registrando, não interfere
+      if (isNewUserRegistering && isEntrevistaPage) {
+        isNewUserRegistering = false; // Reset da flag
+        resolve(user);
+        return;
+      }
 
       if (!user && !isLoginPage) {
         window.location.href = "login.html";
@@ -270,13 +283,16 @@ function checkAuthState() {
           const snap = await db.collection('usuarios').doc(user.uid).get();
           if (snap.exists && snap.data().entrevistaConcluida === false) {
             window.location.href = "entrevista.html";
-          } else {
+          } else if (snap.exists && snap.data().entrevistaConcluida === true) {
             window.location.href = "index.html";
+          } else {
+            // Usuário não tem documento ainda - é novo
+            window.location.href = "entrevista.html";
           }
         } catch (e) {
-          window.location.href = "index.html";
+          window.location.href = "entrevista.html"; // Em caso de erro, vai para entrevista
         }
-      } else if (user) {
+      } else if (user && !isLoginPage) {
         try {
           const idToken = await user.getIdToken();
           localStorage.setItem("idToken", idToken);
@@ -286,7 +302,7 @@ function checkAuthState() {
           }));
           try {
             const snap = await db.collection('usuarios').doc(user.uid).get();
-            if (snap.exists && snap.data().entrevistaConcluida === false && !window.location.pathname.includes('entrevista.html') && !window.location.pathname.includes('entrevista-final.html')) {
+            if (snap.exists && snap.data().entrevistaConcluida === false && !isEntrevistaPage) {
               window.location.href = "entrevista.html";
               return;
             }
