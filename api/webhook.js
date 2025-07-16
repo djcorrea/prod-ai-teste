@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     const uid = data.external_reference;
     await admin
       .firestore()
-      .collection('users')
+      .collection('usuarios')
       .doc(uid)
       .set({
         isPlus:     true,
