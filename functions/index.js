@@ -17,6 +17,7 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
       mensagensRestantes: 10,
       dataUltimoReset: admin.firestore.Timestamp.now(),
       createdAt: admin.firestore.Timestamp.now(),
+      entrevistaConcluida: false,
     });
   }
 });

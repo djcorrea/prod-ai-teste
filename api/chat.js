@@ -101,23 +101,24 @@ async function handleUserLimits(db, uid, email) {
           });
         }
 
-        // Verificar limite para usuários gratuitos
-        if (userData.plano === 'gratis' && userData.mensagensRestantes <= 0) {
-          throw new Error('LIMIT_EXCEEDED');
+        // Verificar limite e decremento apenas no plano gratuito
+        if (userData.plano === 'gratis') {
+          if (userData.mensagensRestantes <= 0) {
+            throw new Error('LIMIT_EXCEEDED');
+          }
+          tx.update(userRef, {
+            mensagensRestantes: FieldValue.increment(-1),
+          });
+          userData.mensagensRestantes =
+            (userData.mensagensRestantes || 10) - 1;
         }
-
-        // Decrementar contador
-        tx.update(userRef, {
-          mensagensRestantes: FieldValue.increment(-1),
-        });
-        userData.mensagensRestantes =
-          (userData.mensagensRestantes || 10) - 1;
       }
 
       return userData;
     });
 
-    return result;
+    const finalSnap = await userRef.get();
+    return { ...result, perfil: finalSnap.data().perfil };
   } catch (error) {
     if (error.message === 'LIMIT_EXCEEDED') {
       console.warn('🚫 Limite de mensagens atingido para:', email);
@@ -130,7 +131,7 @@ async function handleUserLimits(db, uid, email) {
 
 
 // Função para chamar a API da OpenAI
-async function callOpenAI(messages) {
+async function callOpenAI(messages, profileInfo = '') {
   const requestBody = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
@@ -138,7 +139,7 @@ async function callOpenAI(messages) {
     messages: [
       {
         role: 'system',
-        content: `Você é o Prod.AI 🎵, especialista master em produção musical. Sua missão é ajudar produtores, beatmakers e músicos a criar, mixar e masterizar, ajudar a resolver qualquer desafio com precisão técnica, criatividade e linguagem acessível. tirar duvidas gerais sobre produção musical e a industria da música com excelência.
+        content: `Você é o Prod.AI 🎵, especialista master em produção musical. Sua missão é ajudar produtores, beatmakers e músicos a criar, mixar e masterizar, ajudar a resolver qualquer desafio com precisão técnica, criatividade e linguagem acessível. tirar duvidas gerais sobre produção musical e a industria da música com excelência.${profileInfo}
 
 🎯 SUAS ESPECIALIDADES:
 • Produção musical (beats, arranjos, composição)
@@ -323,8 +324,14 @@ export default async function handler(req, res) {
       { role: 'user', content: message },
     ];
 
+    let profileInfo = '';
+    if (userData.plano === 'plus' && userData.perfil) {
+      const p = userData.perfil;
+      profileInfo = `\n\nPERFIL DO USUÁRIO:\nNome artístico: ${p.nomeArtistico || ''}; Nível: ${p.nivelTecnico || ''}; DAW: ${p.daw || ''}; Estilo: ${p.estilo || ''}; Dificuldade: ${p.dificuldade || ''}.`;
+    }
+
     // 6. Chamar OpenAI
-    const reply = await callOpenAI(messages);
+    const reply = await callOpenAI(messages, profileInfo);
 
     // 7. Log de sucesso
     if (userData.plano === 'gratis') {

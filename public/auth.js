@@ -227,7 +227,7 @@ window.confirmSMSCode = async function() {
     localStorage.setItem("idToken", idToken);
     localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
 
-    window.location.href = "index.html";
+    window.location.href = "entrevista.html";
   } catch (error) {
     console.error("Erro no cadastro:", error);
     showMessage(error, "error");
@@ -259,7 +259,16 @@ function checkAuthState() {
       if (!user && !isLoginPage) {
         window.location.href = "login.html";
       } else if (user && isLoginPage) {
-        window.location.href = "index.html";
+        try {
+          const snap = await db.collection('usuarios').doc(user.uid).get();
+          if (snap.exists && snap.data().entrevistaConcluida === false) {
+            window.location.href = "entrevista.html";
+          } else {
+            window.location.href = "index.html";
+          }
+        } catch (e) {
+          window.location.href = "index.html";
+        }
       } else if (user) {
         try {
           const idToken = await user.getIdToken();
@@ -268,6 +277,13 @@ function checkAuthState() {
             uid: user.uid,
             email: user.email
           }));
+          try {
+            const snap = await db.collection('usuarios').doc(user.uid).get();
+            if (snap.exists && snap.data().entrevistaConcluida === false && !window.location.pathname.includes('entrevista.html') && !window.location.pathname.includes('entrevista-final.html')) {
+              window.location.href = "entrevista.html";
+              return;
+            }
+          } catch (e) {}
         } catch (error) {
           console.error('Erro ao obter token:', error);
         }
