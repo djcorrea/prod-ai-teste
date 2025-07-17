@@ -44,7 +44,22 @@
     @keyframes particlesMove { 0% { transform:translate(0,0); } 100% { transform:translate(-200px,-100px); } }
     .fade { opacity:0; transform:translateY(20px); transition:opacity .8s ease, transform .8s ease; }
     .fade.show { opacity:1; transform:translateY(0); }
-    @media(max-width:768px){ h1 { font-size:2rem; } .intro-img{max-width:280px;} }
+    @media(max-width:768px){
+      h1 { font-size:2rem; }
+      .intro-img{ max-width:280px; }
+      header { flex-direction:column; align-items:center; padding:1rem; }
+      .logo { font-size:1.5rem; margin-bottom:.75rem; }
+      .login-btn { font-size:.9rem; padding:.5rem 1rem; }
+      .cta { flex-direction:column; gap:.75rem; }
+      .hero-content { padding-top:3rem; }
+    }
+    @media(max-width:480px){
+      h1 { font-size:1.5rem; }
+      p.description{ font-size:1rem; }
+      .logo{ font-size:1.25rem; }
+      .login-btn{ font-size:.8rem; padding:.4rem .8rem; }
+      .cta{ gap:.5rem; }
+    }
   </style>
 </head>
 <body>
