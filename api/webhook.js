@@ -20,12 +20,16 @@ export default async function handler(req, res) {
     const uid = data.external_reference;
     await admin
       .firestore()
-      .collection('users')
+      .collection('usuarios')
       .doc(uid)
-      .set({
-        isPlus:     true,
-        upgradedAt: admin.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+      .set(
+        {
+          isPlus:     true,
+          plano:      'plus',
+          upgradedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
   }
 
   return res.sendStatus(200);
