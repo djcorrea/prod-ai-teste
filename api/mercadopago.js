@@ -86,11 +86,12 @@ app.post('/api/webhook', async (req, res) => {
     if (payment.status === 'approved') {
       await admin
         .firestore()
-        .collection('users')
+        .collection('usuarios')
         .doc(uid)
         .set(
           {
             isPlus:     true,
+            plano:      'plus',
             upgradedAt: admin.firestore.FieldValue.serverTimestamp(),
           },
           { merge: true }
