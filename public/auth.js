@@ -98,7 +98,17 @@ window.login = async function () {
     const idToken = await result.user.getIdToken();
     localStorage.setItem("user", JSON.stringify(result.user));
     localStorage.setItem("idToken", idToken);
-    window.location.href = "index.html";
+
+    try {
+      const snap = await db.collection('usuarios').doc(result.user.uid).get();
+      if (!snap.exists || snap.data().entrevistaConcluida === false) {
+        window.location.href = "entrevista.html";
+      } else {
+        window.location.href = "index.html";
+      }
+    } catch (e) {
+      window.location.href = "entrevista.html";
+    }
   } catch (error) {
     showMessage(error, "error");
     console.error(error);
