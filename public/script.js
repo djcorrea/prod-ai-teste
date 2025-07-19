@@ -54,6 +54,7 @@ async function sendFirstMessage() {
 
     input.value = message;
     await sendMessage();
+    startInput.value = '';
 
   } catch (error) {
     console.error('Erro ao enviar primeira mensagem:', error);
