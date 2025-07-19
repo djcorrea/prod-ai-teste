@@ -151,14 +151,33 @@
       const signUpBtn = document.getElementById("signUpBtn");
       const confirmBtn = document.getElementById("confirmCodeBtn");
       const forgotLink = document.getElementById("forgotPasswordLink");
+      const phoneInput = document.getElementById("phone");
 
       if (loginBtn) loginBtn.addEventListener("click", () => window.login?.());
       if (signUpBtn) signUpBtn.addEventListener("click", () => window.signUp?.());
       if (confirmBtn) confirmBtn.addEventListener("click", () => window.confirmSMSCode?.());
-      if (forgotLink) forgotLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        window.forgotPassword?.();
-      });
+      if (forgotLink) {
+        forgotLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.forgotPassword?.();
+        });
+      }
+
+      if (phoneInput) {
+        phoneInput.addEventListener("focus", () => {
+          if (!phoneInput.value.trim().startsWith("+55")) {
+            phoneInput.value = "+55";
+            setTimeout(() => {
+              phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
+            }, 1);
+          }
+        });
+        phoneInput.addEventListener("blur", () => {
+          if (phoneInput.value.trim() === "+55") {
+            phoneInput.value = "";
+          }
+        });
+      }
     });
     
   </script>
