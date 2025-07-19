@@ -1,0 +1,180 @@
+/* Futuristic site styles */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Rajdhani', sans-serif;
+  min-height:100vh;
+  background:linear-gradient(160deg,#0c0a16,#090a1a 40%,#0e0932);
+  color:#f3f4f6;
+  overflow-x:hidden;
+}
+
+header{
+  position:fixed;
+  top:0;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  padding:20px 40px;
+  z-index:50;
+  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.4);
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+
+header .logo{
+  font-family:'Orbitron', sans-serif;
+  font-size:1.6rem;
+  font-weight:700;
+  color:#67e8f9;
+  text-shadow:0 0 8px rgba(103,232,249,0.8);
+}
+
+nav a{
+  margin-left:20px;
+  text-decoration:none;
+  color:#f3f4f6;
+  font-weight:600;
+  transition:color .3s;
+}
+
+nav a:hover{
+  color:#a78bfa;
+  text-shadow:0 0 6px #a78bfa;
+}
+
+main{
+  padding-top:120px;
+  padding-bottom:60px;
+}
+
+section{
+  padding:80px 40px;
+  position:relative;
+}
+
+section::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.05);
+  box-shadow:inset 0 0 20px rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+  border-radius:8px;
+  z-index:-1;
+}
+
+.hero{
+  text-align:center;
+}
+
+.hero h1{
+  font-family:'Orbitron', sans-serif;
+  font-size:3rem;
+  color:#a78bfa;
+  text-shadow:0 0 8px rgba(167,139,250,0.8);
+}
+
+.hero p{
+  margin-top:1rem;
+  font-size:1.25rem;
+  max-width:600px;
+  margin-left:auto;
+  margin-right:auto;
+  color:#cbd5e1;
+}
+
+.btn{
+  display:inline-block;
+  margin-top:2rem;
+  padding:12px 32px;
+  border-radius:6px;
+  background:#7c3aed;
+  color:white;
+  text-decoration:none;
+  font-weight:700;
+  box-shadow:0 0 10px #7c3aed,0 0 30px rgba(124,58,237,0.6);
+  transition:background .3s,transform .3s;
+}
+
+.btn:hover{
+  background:#8b5cf6;
+  transform:translateY(-4px);
+}
+
+.cards{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:30px;
+  margin-top:40px;
+}
+
+.card{
+  width:280px;
+  padding:30px;
+  background:rgba(255,255,255,0.05);
+  border-radius:8px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.5);
+  backdrop-filter:blur(4px);
+  transition:transform .3s, box-shadow .3s;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 30px rgba(0,0,0,0.7);
+}
+
+.card h3{
+  color:#67e8f9;
+  margin-bottom:10px;
+  font-size:1.3rem;
+}
+
+.card p{
+  color:#e2e8f0;
+}
+
+footer{
+  text-align:center;
+  padding:40px 20px 20px;
+  color:#94a3b8;
+}
+
+/* simple parallax background */
+.parallax {
+  background-attachment:fixed;
+  background-size:cover;
+  background-position:center;
+}
+
+.hero.parallax{
+  background-image:radial-gradient(circle at 50% 20%,rgba(124,58,237,0.3),rgba(12,8,24,0.95)),url('https://images.unsplash.com/photo-1508830524289-0adcbe822b40?auto=format&fit=crop&w=1400&q=80');
+}
+
+/* hologram style images */
+.holo{
+  position:relative;
+  overflow:hidden;
+}
+
+.holo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(45deg,rgba(103,232,249,0.2),rgba(167,139,250,0.2));
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+
+/* neon hover effect */
+a.neon:hover{
+  text-shadow:0 0 5px #67e8f9,0 0 10px #67e8f9,0 0 20px #67e8f9;
+}
+
