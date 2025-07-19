@@ -79,13 +79,14 @@ body {
 }
 
 .logo {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Orbitron', monospace;
   font-size: 3.5rem;
-  font-weight: 700;
+  font-weight: 900;
   background: linear-gradient(135deg, #00fff7, #d946ef);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-transform: uppercase;
   text-fill-color: transparent;
   margin-bottom: 0.5rem;
   filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.8));
