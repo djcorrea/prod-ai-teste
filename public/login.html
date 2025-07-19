@@ -7,34 +7,86 @@
   <link rel="stylesheet" href="style.css" />
   
   <style>
+    body {
+      background: linear-gradient(120deg, #0b0b15, #0e1330, #0b0b15);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .container {
       max-width: 400px;
       padding: 2rem;
       margin: 4rem auto;
       text-align: center;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 0 20px rgba(59,130,246,0.2), 0 0 40px rgba(168,85,247,0.15);
+      position: relative;
     }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      bottom: -2px;
+      left: -2px;
+      background: linear-gradient(90deg, #3b82f6, #a855f7, #3b82f6);
+      background-size: 200% 200%;
+      border-radius: inherit;
+      z-index: -1;
+      filter: blur(10px);
+      animation: borderAnim 6s linear infinite;
+    }
+
+    @keyframes borderAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .logo {
+      background: linear-gradient(90deg, #3b82f6, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
     .subtitle {
       color: rgba(255,255,255,0.7);
       margin-bottom: 1.5rem;
     }
+
     .input-group {
       margin-bottom: 1rem;
     }
+
     .input-group input {
       width: 100%;
       padding: 0.9rem 1rem;
-      border: 2px solid rgba(147, 51, 234,0.3);
+      border: 1px solid rgba(255,255,255,0.25);
       border-radius: 12px;
-      background: rgba(10,10,25,0.8);
+      background: rgba(255,255,255,0.08);
       color: #fff;
       font-size: 1rem;
       outline: none;
       transition: all 0.3s;
+      backdrop-filter: blur(10px);
     }
+
     .input-group input:focus {
-      border-color: #9333ea;
-      box-shadow: 0 0 0 3px rgba(147,51,234,0.2);
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.25);
     }
+
     .button-group {
       display: flex;
       gap: 0.75rem;
@@ -42,14 +94,15 @@
       margin-top: 1rem;
       flex-wrap: wrap;
     }
+
     .btn-plus {
-      background: linear-gradient(to right, #9a00ff, #5f00ff);
+      background: linear-gradient(90deg, #3b82f6, #a855f7);
       color: #ffffff;
       padding: 10px 20px;
       border-radius: 10px;
       font-weight: bold;
       text-decoration: none;
-      box-shadow: 0 0 10px rgba(159, 0, 255, 0.6);
+      box-shadow: 0 0 10px rgba(59,130,246,0.5);
       transition: transform 0.2s, box-shadow 0.2s;
       border: none;
       min-width: 140px;
@@ -60,10 +113,12 @@
       justify-content: center;
       margin-bottom: 0;
     }
+
     .btn-plus:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(159, 0, 255, 0.8);
+      box-shadow: 0 0 15px rgba(168,85,247,0.7);
     }
+
     .error-message {
       background: rgba(255,0,0,0.2);
       color: #ff6961;
@@ -74,13 +129,16 @@
       font-weight: 600;
       text-align: center;
     }
+
     .error-message[style*="display: block"] {
       display: block !important;
     }
+
     #sms-section {
       display: none;
       margin-top: 1.5rem;
     }
+
     #sms-section p {
       color: rgba(255,255,255,0.7);
       margin-bottom: 0.5rem;
