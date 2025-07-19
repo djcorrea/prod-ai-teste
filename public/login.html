@@ -51,8 +51,9 @@
       letter-spacing: 1px;
       text-decoration: none;
       color: #ffffff;
-      background: linear-gradient(135deg, rgba(217,70,239,0.1), rgba(147,51,234,0.1));
-      border: 2px solid #d946ef;
+      background: linear-gradient(135deg, rgba(217,70,239,0.1), rgba(147,51,234,0.1)) padding-box,
+                  linear-gradient(135deg, #00fff7, #d946ef) border-box;
+      border: 2px solid transparent;
       border-radius: 50px;
       position: relative;
       overflow: hidden;
@@ -65,6 +66,8 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 0;
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
     }
     .btn-plus::before {
       content: '';
