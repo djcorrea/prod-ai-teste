@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prod.AI - Landing Futurista</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  body {
+    margin:0;
+    font-family:'Inter', sans-serif;
+    color:#fff;
+    background:linear-gradient(135deg,#040712,#0a0f2d 50%,#1a1040);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  .particles {
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    pointer-events:none;
+    background-image:
+      radial-gradient(2px 2px at 20px 30px,rgba(147,51,234,.4),transparent),
+      radial-gradient(2px 2px at 40px 70px,rgba(59,130,246,.4),transparent),
+      radial-gradient(1px 1px at 90px 40px,rgba(236,72,153,.4),transparent),
+      radial-gradient(1px 1px at 130px 80px,rgba(147,51,234,.4),transparent);
+    background-size:200px 100px;
+    animation:move 25s linear infinite;
+    z-index:1;
+  }
+  @keyframes move {from{transform:translate(0,0);}to{transform:translate(-200px,-100px);}}
+  header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 40px;
+    position:relative;
+    z-index:2;
+  }
+  .logo {
+    font-family:'Orbitron', sans-serif;
+    font-size:1.8rem;
+    color:#a78bfa;
+    text-shadow:0 0 15px rgba(167,139,250,.8);
+  }
+  .auth {
+    display:flex;
+    gap:15px;
+  }
+  .btn-outline, .btn-solid {
+    padding:8px 18px;
+    border-radius:30px;
+    font-weight:600;
+    text-decoration:none;
+    border:2px solid #60a5fa;
+    color:#fff;
+    transition:all .3s;
+  }
+  .btn-outline:hover{background:rgba(96,165,250,.2);}
+  .btn-solid{
+    background:#0ea5e9;
+    border-color:#0ea5e9;
+    box-shadow:0 0 12px rgba(14,165,233,.6);
+  }
+  .btn-solid:hover{background:#38bdf8;border-color:#38bdf8;}
+  main {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    padding:60px 40px;
+    position:relative;
+    z-index:2;
+  }
+  .text {
+    flex:1 1 400px;
+    max-width:600px;
+  }
+  .text h1 {
+    font-family:'Orbitron', sans-serif;
+    font-size:2.6rem;
+    line-height:1.2;
+    background:linear-gradient(90deg,#a78bfa,#3b82f6);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:20px;
+  }
+  .text h2 {
+    color:#a78bfa;
+    margin-bottom:15px;
+  }
+  .text p {
+    margin-bottom:25px;
+    color:#e2e8f0;
+    line-height:1.6;
+  }
+  .cta {
+    display:inline-block;
+    padding:12px 28px;
+    background:#0ea5e9;
+    color:#fff;
+    border-radius:30px;
+    text-decoration:none;
+    font-weight:600;
+    box-shadow:0 0 15px rgba(14,165,233,.6);
+    transition:all .3s;
+  }
+  .cta:hover{background:#38bdf8;box-shadow:0 0 20px rgba(56,189,248,.8);}  
+  .visual {
+    flex:1 1 350px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    position:relative;
+    max-width:500px;
+  }
+  .brain-svg {
+    width:100%;
+    max-width:350px;
+  }
+  footer {
+    text-align:center;
+    padding:30px 20px 20px;
+    color:#94a3b8;
+    font-size:.9rem;
+    position:relative;
+    z-index:2;
+  }
+</style>
+</head>
+<body>
+<div class="particles"></div>
+<header>
+  <div class="logo">PROD.AI</div>
+  <div class="auth">
+    <a href="#login" class="btn-outline">LOGIN</a>
+    <a href="#cadastro" class="btn-solid">CADASTRAR</a>
+  </div>
+</header>
+<main>
+  <div class="text">
+    <h1>BEM VINDO AO FUTURO DA PRODUÇÃO MUSICAL</h1>
+    <h2>PRODUÇÃO MUSICAL INTELIGENTE</h2>
+    <p>Prod.AI é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais. Usando inteligência artificial, ele te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.</p>
+    <a href="#" class="cta">EXPERIMENTE GRATUITAMENTE</a>
+  </div>
+  <div class="visual">
+    <svg class="brain-svg" viewBox="0 0 260 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="headGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="rgba(59,130,246,0.4)"/>
+          <stop offset="100%" stop-color="rgba(147,51,234,0.4)"/>
+        </linearGradient>
+      </defs>
+      <path d="M130 10c40 0 80 30 80 80v40c0 10 5 20 10 30 10 20 10 40 0 60-10 20-30 30-50 30h-10l-10 20h-30l-10-20h-5c-30 0-55-25-55-55v-35c0-10-10-20-20-25-15-10-20-30-20-45 0-45 35-80 80-80h40z" fill="url(#headGrad)" stroke="#60a5fa" stroke-width="2" opacity="0.7"/>
+      <g id="network">
+        <circle cx="110" cy="80" r="4" fill="#fff"/>
+        <circle cx="150" cy="60" r="4" fill="#fff"/>
+        <circle cx="170" cy="100" r="4" fill="#fff"/>
+        <circle cx="140" cy="120" r="4" fill="#fff"/>
+        <circle cx="115" cy="140" r="4" fill="#fff"/>
+        <line x1="110" y1="80" x2="150" y2="60" stroke="#3b82f6" stroke-width="2"/>
+        <line x1="150" y1="60" x2="170" y2="100" stroke="#9333ea" stroke-width="2"/>
+        <line x1="170" y1="100" x2="140" y2="120" stroke="#3b82f6" stroke-width="2"/>
+        <line x1="140" y1="120" x2="115" y2="140" stroke="#9333ea" stroke-width="2"/>
+        <text x="140" y="95" text-anchor="middle" font-family="Orbitron" font-size="24" fill="#f0abfc" font-weight="700">AI</text>
+      </g>
+      <g id="gears">
+        <circle cx="100" cy="200" r="12" stroke="#ec4899" stroke-width="3" fill="none"/>
+        <circle cx="160" cy="210" r="12" stroke="#3b82f6" stroke-width="3" fill="none"/>
+      </g>
+    </svg>
+  </div>
+</main>
+<footer>© 2025 PROD.AI – Todos os direitos reservados</footer>
+</body>
+</html>
