@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prod.AI – Login</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="futuristic.css" />
   
   <style>
     .container {
@@ -91,7 +92,10 @@
 </head>
 
 <body>
-  <div class="particles"></div>
+  <div class="background-container">
+    <div class="grid-lines"></div>
+    <div class="particles" id="particles"></div>
+  </div>
 
   <div class="container fade-in">
     <h1 class="logo">Prod.AI</h1>
@@ -160,6 +164,20 @@
       });
     });
     
+  </script>
+  <script>
+    const particlesContainer = document.getElementById('particles');
+    if (particlesContainer) {
+      const particleCount = 50;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 10 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
   </script>
 </body>
 </html>
