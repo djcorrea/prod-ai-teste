@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prod.AI - Futurista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: radial-gradient(circle at 50% 50%, #110022 0%, #000 100%);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      background-image:
+        radial-gradient(2px 2px at 20px 20px, rgba(255, 0, 204, 0.4), transparent),
+        radial-gradient(2px 2px at 60px 40px, rgba(0, 200, 255, 0.4), transparent),
+        radial-gradient(2px 2px at 120px 80px, rgba(255, 102, 0, 0.4), transparent);
+      background-size: 200px 100px;
+      animation: floatDots 25s linear infinite;
+      z-index: -1;
+    }
+    @keyframes floatDots { to { transform: translate(-200px, -100px); } }
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: #ff00cc;
+      text-shadow: 0 0 10px #ff00cc, 0 0 20px rgba(0,0,0,0.5);
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+      gap: 1.5rem;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      color: #00d4ff;
+      text-shadow: 0 0 15px #00d4ff;
+    }
+    p {
+      max-width: 600px;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+    a.cta {
+      display: inline-block;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 30px;
+      background: linear-gradient(45deg, #ff00cc, #3333ff);
+      box-shadow: 0 0 20px rgba(255,0,204,0.5);
+      transition: transform 0.3s;
+    }
+    a.cta:hover { transform: translateY(-5px); }
+    /* Cube */
+    .scene { width: 200px; height: 200px; margin: 40px auto; perspective: 800px; }
+    .cube {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotateCube 12s infinite linear;
+    }
+    .cube div {
+      position: absolute;
+      width: 200px; height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(5px);
+    }
+    .front  { transform: translateZ(100px); }
+    .back   { transform: rotateY(180deg) translateZ(100px); }
+    .right  { transform: rotateY(90deg) translateZ(100px); }
+    .left   { transform: rotateY(-90deg) translateZ(100px); }
+    .top    { transform: rotateX(90deg) translateZ(100px); }
+    .bottom { transform: rotateX(-90deg) translateZ(100px); }
+    @keyframes rotateCube {
+      from { transform: rotateX(0) rotateY(0); }
+      to   { transform: rotateX(360deg) rotateY(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>PROD.AI</header>
+  <div class="scene">
+    <div class="cube">
+      <div class="front">IA</div>
+      <div class="back">MÚSICA</div>
+      <div class="right">FUTURO</div>
+      <div class="left">PROD</div>
+      <div class="top">AI</div>
+      <div class="bottom">SOM</div>
+    </div>
+  </div>
+  <main>
+    <h1>Produção Musical do Futuro</h1>
+    <p>Uma experiência visual vibrante com inteligência artificial para potencializar suas produções.</p>
+    <a href="login.html" class="cta">Entrar</a>
+  </main>
+</body>
+</html>
