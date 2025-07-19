@@ -189,6 +189,14 @@ window.signUp = async function () {
   const password = document.getElementById("password").value.trim();
   const rawPhone = document.getElementById("phone").value.trim();
 
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const history = JSON.parse(localStorage.getItem('signupHistory') || '[]').filter(ts => now - ts < weekMs);
+  if (history.length >= 2) {
+    showMessage('Limite de cadastros excedido neste dispositivo. Tente novamente em 7 dias.', 'error');
+    return;
+  }
+
   if (!email || !password || !rawPhone) {
     showMessage("Preencha todos os campos.", "error");
     return;
@@ -238,6 +246,12 @@ window.confirmSMSCode = async function() {
     const idToken = await phoneUser.user.getIdToken();
     localStorage.setItem("idToken", idToken);
     localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
+
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const history = JSON.parse(localStorage.getItem('signupHistory') || '[]').filter(ts => now - ts < weekMs);
+    history.push(now);
+    localStorage.setItem('signupHistory', JSON.stringify(history));
 
     // CORRIGIDO: Pausa temporariamente o listener do checkAuthState e redireciona
     const currentListener = auth.onAuthStateChanged;
