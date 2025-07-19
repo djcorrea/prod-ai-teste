@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROD.AI - Landing Futurista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, #0a0118 0%, #1a0d3d 40%, #2d1b69 70%, #0a0118 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* digital particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(139, 92, 246, 0.4), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(59, 130, 246, 0.4), transparent),
+        radial-gradient(2px 2px at 90px 40px, rgba(236, 72, 153, 0.4), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(139, 92, 246, 0.4), transparent);
+      background-size: 200px 100px;
+      animation: particles 25s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes particles {
+      0% { transform: translate(0,0); }
+      100% { transform: translate(-200px,-100px); }
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: #8b5cf6;
+    }
+
+    .nav-right a {
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 20px;
+      border-radius: 4px;
+      transition: background .3s, color .3s;
+    }
+
+    .nav-right .login {
+      border: 1px solid #e2e8f0;
+      color: #e2e8f0;
+    }
+
+    .nav-right .login:hover {
+      background: rgba(226,232,240,0.1);
+    }
+
+    .nav-right .signup {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    .nav-right .signup:hover {
+      background: #60a5fa;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding-top: 25vh;
+      padding-bottom: 10vh;
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.2rem;
+      color: #a855f7;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      margin-bottom: .75rem;
+      color: #ffffff;
+    }
+
+    p.description {
+      max-width: 600px;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+
+    .cta {
+      padding: 12px 26px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #3b82f6;
+      box-shadow: 0 0 10px #3b82f6, 0 0 20px rgba(59,130,246,0.6);
+      color: #ffffff;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .3s;
+    }
+
+    .cta:hover {
+      background: #60a5fa;
+    }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 60px;
+    }
+
+    .card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 20px;
+      width: 260px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+    }
+
+    .card span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px 20px;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">PROD.AI</div>
+    <div class="nav-right">
+      <a href="#" class="login">LOGIN</a>
+      <a href="#" class="signup">CADASTRAR</a>
+    </div>
+  </header>
+  <main>
+    <h1>BEM VINDO AO FUTURO DA PRODUÇÃO MUSICAL</h1>
+    <h2>PRODUÇÃO MUSICAL INTELIGENTE</h2>
+    <p class="description">Prod.AI é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais. Usando inteligência artificial, ele te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.</p>
+    <a href="#" class="cta">EXPERIMENTE GRATUITAMENTE</a>
+    <div class="cards">
+      <div class="card">
+        <span>🤖</span>
+        <strong>Inteligência Artificial</strong>
+        <p>Tire dúvidas e receba orientações instantâneas com um assistente inteligente treinado para produção musical.</p>
+      </div>
+      <div class="card">
+        <span>💬</span>
+        <strong>Chat Personalizado</strong>
+        <p>Respostas inteligentes adaptadas ao seu perfil técnico.</p>
+      </div>
+      <div class="card">
+        <span>🧠</span>
+        <strong>IA que Aprende com Você</strong>
+        <p>Quanto mais você usa, mais a IA entende seu estilo, preferências e necessidades técnicas.</p>
+      </div>
+    </div>
+  </main>
+  <footer>©️ 2025 PROD.AI – Todos os direitos reservados</footer>
+</body>
+</html>
