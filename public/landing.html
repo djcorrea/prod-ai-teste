@@ -138,20 +138,25 @@
             text-align: center;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem 1rem 3rem 1rem;
+            padding: 4rem 2rem 5rem 2rem;
         }
 
         .hero-title {
-            font-size: clamp(2rem, 7vw, 4rem);
-            font-weight: 900;
-            margin-bottom: 1rem;
+            font-size: clamp(2.2rem, 5.5vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
             background: linear-gradient(45deg, #6b46c1, #4c1d95, #3730a3, #1e40af);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: glow 2s ease-in-out infinite alternate;
-            line-height: 1.1;
+            line-height: 1.2;
             text-align: center;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            word-break: keep-all;
+            hyphens: none;
         }
 
         @keyframes glow {
@@ -164,42 +169,53 @@
         }
 
         .hero-subtitle {
-            font-size: clamp(1rem, 3vw, 1.5rem);
-            margin-bottom: 1.5rem;
+            font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+            margin-bottom: 2rem;
             background: linear-gradient(45deg, #00d4ff, #0ea5e9, #3b82f6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 600;
             letter-spacing: 1px;
+            word-break: keep-all;
+            hyphens: none;
+            max-width: 85%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-description {
-            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
             line-height: 1.7;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             color: rgba(255, 255, 255, 0.85);
-            max-width: 700px;
+            max-width: 750px;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
+            padding: 0 1rem;
+            word-break: keep-all;
+            hyphens: auto;
         }
 
         .cta-button {
             display: inline-block;
-            padding: 1rem 2.5rem;
+            padding: 1.2rem 3rem;
             background: linear-gradient(45deg, #00d4ff, #0080ff);
             color: white;
             text-decoration: none;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-            font-weight: bold;
+            font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+            font-weight: 700;
             border-radius: 50px;
             transition: all 0.3s ease;
             box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
             position: relative;
             overflow: hidden;
-            letter-spacing: 1px;
-            margin-bottom: 0;
+            letter-spacing: 0.8px;
+            margin-bottom: 1rem;
+            min-width: 250px;
+            word-break: keep-all;
+            white-space: nowrap;
         }
 
         .cta-button::before {
@@ -241,11 +257,14 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(0, 212, 255, 0.2);
             border-radius: 20px;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
             text-align: center;
             transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
+            flex: 1 1 300px;
+            max-width: 350px;
+            min-height: 280px;
         }
 
         .card::before {
@@ -276,19 +295,23 @@
         }
 
         .card-title {
-            font-size: clamp(1.1rem, 3vw, 1.3rem);
-            font-weight: bold;
-            margin-bottom: 1rem;
+            font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+            font-weight: 700;
+            margin-bottom: 1.2rem;
             background: linear-gradient(45deg, #00d4ff, #6b46c1, #0066ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            word-break: keep-all;
+            hyphens: none;
         }
 
         .card-description {
             color: rgba(255, 255, 255, 0.8);
             line-height: 1.6;
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+            word-break: keep-all;
+            hyphens: auto;
         }
 
         /* Footer */
@@ -309,78 +332,86 @@
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
+        @media screen and (max-width: 768px) {
             .auth-buttons {
                 gap: 0.5rem;
             }
             
             .btn-login, .btn-signup {
-                padding: 0.6rem 1.2rem;
+                padding: 0.6rem 1rem;
                 font-size: 0.85rem;
                 white-space: nowrap;
             }
             
             main {
                 margin-top: 85px;
-                padding: 1.5rem 1rem;
+                padding: 1rem;
                 min-height: calc(100vh - 180px);
             }
             
             .hero-section {
-                padding: 1rem 0.5rem 2rem 0.5rem;
+                padding: 2.5rem 1rem 3rem 1rem;
                 max-width: 100%;
             }
             
             .hero-title {
-                font-size: clamp(1.6rem, 7vw, 2.8rem);
-                line-height: 1.15;
-                margin-bottom: 0.8rem;
-                word-wrap: break-word;
-                hyphens: auto;
+                font-size: clamp(1.6rem, 6vw, 2.5rem);
+                line-height: 1.25;
+                margin-bottom: 1.2rem;
+                max-width: 95%;
+                word-break: keep-all;
+                hyphens: none;
+                padding: 0 0.5rem;
             }
             
             .hero-subtitle {
-                font-size: clamp(0.85rem, 4vw, 1.1rem);
-                margin-bottom: 1.2rem;
+                font-size: clamp(0.9rem, 4vw, 1.3rem);
+                margin-bottom: 1.5rem;
                 letter-spacing: 0.5px;
-                word-wrap: break-word;
+                max-width: 90%;
+                word-break: keep-all;
+                hyphens: none;
+                padding: 0 0.5rem;
             }
             
             .hero-description {
-                font-size: clamp(0.9rem, 3.5vw, 1rem);
-                margin-bottom: 1.5rem;
-                padding: 0 0.5rem;
+                font-size: clamp(0.9rem, 3.5vw, 1.05rem);
+                margin-bottom: 2rem;
+                padding: 0 1rem;
                 line-height: 1.6;
-                word-wrap: break-word;
-                max-width: 100%;
+                max-width: 95%;
+                word-break: keep-all;
+                hyphens: auto;
             }
             
             .cta-button {
-                padding: 0.9rem 2.2rem;
-                font-size: 0.9rem;
-                margin-bottom: 0;
-                min-width: 200px;
-                word-wrap: break-word;
+                padding: 1rem 2rem;
+                font-size: clamp(0.85rem, 3.5vw, 1rem);
+                margin-bottom: 0.5rem;
+                min-width: 220px;
+                white-space: nowrap;
             }
 
             .features-section {
-                padding: 2rem 0.5rem;
+                padding: 3rem 1rem;
                 max-width: 100%;
             }
 
             .cards-container {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
+                flex-direction: column;
+                align-items: center;
+                gap: 2rem;
                 margin-top: 0;
                 padding: 0;
-                width: 100%;
             }
 
             .card {
-                padding: 1.5rem;
-                margin: 0 auto;
+                padding: 2rem 1.5rem;
+                margin: 0;
                 max-width: 100%;
                 width: 100%;
+                flex: none;
+                min-height: auto;
                 box-sizing: border-box;
             }
 
@@ -391,32 +422,32 @@
 
             .card-title {
                 font-size: clamp(1rem, 4vw, 1.2rem);
-                margin-bottom: 0.8rem;
-                word-wrap: break-word;
-                hyphens: auto;
+                margin-bottom: 1rem;
+                word-break: keep-all;
+                hyphens: none;
             }
 
             .card-description {
                 font-size: clamp(0.85rem, 3.5vw, 0.95rem);
                 line-height: 1.5;
-                word-wrap: break-word;
+                word-break: keep-all;
                 hyphens: auto;
             }
 
             footer {
                 padding: 1.5rem 1rem;
-                margin-top: 2rem;
+                margin-top: 2.5rem;
                 width: 100%;
                 box-sizing: border-box;
             }
 
             .footer-text {
                 font-size: clamp(0.8rem, 3vw, 0.9rem);
-                word-wrap: break-word;
+                word-break: keep-all;
             }
         }
 
-        @media (max-width: 480px) {
+        @media screen and (max-width: 480px) {
             header {
                 padding: 0.8rem 1rem;
             }
@@ -432,49 +463,54 @@
 
             main {
                 margin-top: 75px;
-                padding: 1rem 0.5rem;
+                padding: 0.5rem;
                 min-height: calc(100vh - 150px);
             }
 
             .hero-section {
-                padding: 0.8rem 0.25rem 1.5rem 0.25rem;
+                padding: 2rem 0.75rem 2.5rem 0.75rem;
             }
             
             .hero-title {
-                font-size: clamp(1.4rem, 8vw, 2.2rem);
-                margin-bottom: 0.6rem;
-                line-height: 1.1;
+                font-size: clamp(1.4rem, 7vw, 2rem);
+                margin-bottom: 1rem;
+                line-height: 1.2;
+                padding: 0 0.25rem;
+                max-width: 98%;
             }
             
             .hero-subtitle {
-                font-size: clamp(0.8rem, 4.5vw, 1rem);
-                margin-bottom: 1rem;
+                font-size: clamp(0.8rem, 4.5vw, 1.1rem);
+                margin-bottom: 1.2rem;
                 letter-spacing: 0.3px;
+                padding: 0 0.25rem;
+                max-width: 95%;
             }
 
             .hero-description {
                 font-size: clamp(0.85rem, 4vw, 0.95rem);
-                margin-bottom: 1.2rem;
-                padding: 0 0.25rem;
+                margin-bottom: 1.8rem;
+                padding: 0 0.5rem;
                 line-height: 1.55;
+                max-width: 98%;
             }
 
             .cta-button {
-                padding: 0.8rem 1.8rem;
-                font-size: 0.85rem;
-                min-width: 180px;
+                padding: 0.9rem 1.5rem;
+                font-size: clamp(0.8rem, 4vw, 0.9rem);
+                min-width: 200px;
             }
             
             .features-section {
-                padding: 1.5rem 0.25rem;
+                padding: 2.5rem 0.5rem;
             }
 
             .cards-container {
-                gap: 1.2rem;
+                gap: 1.5rem;
             }
 
             .card {
-                padding: 1.2rem;
+                padding: 1.8rem 1.2rem;
                 border-radius: 15px;
             }
 
@@ -485,7 +521,7 @@
 
             .card-title {
                 font-size: clamp(0.95rem, 4.5vw, 1.1rem);
-                margin-bottom: 0.7rem;
+                margin-bottom: 0.8rem;
             }
 
             .card-description {
@@ -494,62 +530,41 @@
             }
 
             footer {
-                margin-top: 1.5rem;
+                margin-top: 2rem;
                 padding: 1.2rem 0.5rem;
-            }
-
-            .footer-text {
-                font-size: clamp(0.75rem, 3.5vw, 0.85rem);
             }
         }
 
-        @media (max-width: 360px) {
+        @media screen and (max-width: 360px) {
             .hero-title {
-                font-size: clamp(1.2rem, 9vw, 1.8rem);
-                line-height: 1.05;
+                font-size: clamp(1.2rem, 8vw, 1.6rem);
+                line-height: 1.15;
+                padding: 0;
             }
             
             .hero-subtitle {
-                font-size: clamp(0.75rem, 5vw, 0.9rem);
+                font-size: clamp(0.75rem, 5vw, 0.95rem);
+                padding: 0;
             }
 
             .hero-description {
                 font-size: clamp(0.8rem, 4.5vw, 0.9rem);
+                padding: 0 0.25rem;
             }
 
             .cta-button {
-                padding: 0.7rem 1.5rem;
+                padding: 0.8rem 1.2rem;
                 font-size: 0.8rem;
-                min-width: 160px;
+                min-width: 180px;
             }
 
             .card {
-                padding: 1rem;
+                padding: 1.5rem 1rem;
             }
 
             .card-icon {
                 font-size: 2rem;
             }
-        }
-
-        /* Garantir que nenhum elemento vaze horizontalmente */
-        * {
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* Evitar overflow horizontal */
-        body, html {
-            overflow-x: hidden;
-            width: 100%;
-        }
-
-        /* Garantir que textos longos quebrem corretamente */
-        .hero-title, .hero-subtitle, .hero-description, 
-        .card-title, .card-description, .footer-text {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
         }
 
         /* Efeitos adicionais */
