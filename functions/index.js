@@ -26,18 +26,40 @@ export const registerAccount = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Login necessário');
   }
+
   const { fingerprint, phone } = data;
   if (!fingerprint || !phone) {
     throw new functions.https.HttpsError('invalid-argument', 'Dados inválidos');
   }
-  const fpRef = db.collection('fingerprints').doc(fingerprint);
-  const phoneRef = db.collection('phones').doc(phone);
-  const [fpSnap, phoneSnap] = await Promise.all([fpRef.get(), phoneRef.get()]);
+
+  const ip = (context.rawRequest.ip || '').replace('::ffff:', '');
+  const oneWeekAgo = admin.firestore.Timestamp.fromMillis(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const registrations = db.collection('registrations');
+
+  // Checa tentativas recentes por IP, telefone e fingerprint
+  const [ipRecent, phoneRecent, fpRecent, fpSnap, phoneSnap] = await Promise.all([
+    registrations.where('ip', '==', ip).where('createdAt', '>=', oneWeekAgo).get(),
+    registrations.where('phone', '==', phone).where('createdAt', '>=', oneWeekAgo).get(),
+    registrations.where('fingerprint', '==', fingerprint).where('createdAt', '>=', oneWeekAgo).get(),
+    db.collection('fingerprints').doc(fingerprint).get(),
+    db.collection('phones').doc(phone).get()
+  ]);
+
   if (fpSnap.exists || phoneSnap.exists) {
     throw new functions.https.HttpsError('already-exists', 'Fingerprint ou telefone já utilizados');
   }
+
+  const limitReached = ipRecent.size >= 2 || phoneRecent.size >= 2 || fpRecent.size >= 2;
+  if (limitReached) {
+    throw new functions.https.HttpsError('resource-exhausted', 'Limite de cadastro excedido');
+  }
+
   const now = admin.firestore.Timestamp.now();
-  await fpRef.set({ uid: context.auth.uid, phone, createdAt: now });
-  await phoneRef.set({ uid: context.auth.uid, fingerprint, createdAt: now });
+  await Promise.all([
+    db.collection('fingerprints').doc(fingerprint).set({ uid: context.auth.uid, phone, createdAt: now }),
+    db.collection('phones').doc(phone).set({ uid: context.auth.uid, fingerprint, createdAt: now }),
+    registrations.add({ uid: context.auth.uid, ip, phone, fingerprint, createdAt: now })
+  ]);
+
   return { success: true };
 });
