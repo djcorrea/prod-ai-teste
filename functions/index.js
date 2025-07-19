@@ -30,6 +30,22 @@ export const registerAccount = functions.https.onCall(async (data, context) => {
   if (!fingerprint || !phone) {
     throw new functions.https.HttpsError('invalid-argument', 'Dados inválidos');
   }
+  // Limit each user to two registrations per week
+  const oneWeekAgo = admin.firestore.Timestamp.fromDate(
+    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  );
+  const regSnap = await db
+    .collection('registrations')
+    .where('uid', '==', context.auth.uid)
+    .where('createdAt', '>', oneWeekAgo)
+    .get();
+
+  if (regSnap.size >= 2) {
+    throw new functions.https.HttpsError(
+      'resource-exhausted',
+      'Limite de 2 cadastros por semana atingido.'
+    );
+  }
   const fpRef = db.collection('fingerprints').doc(fingerprint);
   const phoneRef = db.collection('phones').doc(phone);
   const [fpSnap, phoneSnap] = await Promise.all([fpRef.get(), phoneRef.get()]);
@@ -39,5 +55,11 @@ export const registerAccount = functions.https.onCall(async (data, context) => {
   const now = admin.firestore.Timestamp.now();
   await fpRef.set({ uid: context.auth.uid, phone, createdAt: now });
   await phoneRef.set({ uid: context.auth.uid, fingerprint, createdAt: now });
+  await db.collection('registrations').add({
+    uid: context.auth.uid,
+    phone,
+    fingerprint,
+    createdAt: now,
+  });
   return { success: true };
 });
