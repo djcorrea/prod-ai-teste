@@ -104,28 +104,6 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Landing style logo reused on index */
-.logo-landing {
-  font-family: 'Orbitron', monospace;
-  font-size: 2.5rem;
-  font-weight: 900;
-  background: linear-gradient(45deg, #00ffff, #ff00ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-  animation: logo-pulse 2s ease-in-out infinite;
-}
-
-@keyframes logo-pulse {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.2);
-  }
-}
 
 @keyframes logoGlow {
   from { 
