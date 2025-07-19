@@ -4,65 +4,176 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prod.AI – Plataforma Inteligente</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; min-height: 100vh; color: #ffffff; background: linear-gradient(135deg, #050509 0%, #120a2b 50%, #050509 100%); display:flex; flex-direction:column; overflow-x:hidden; }
-    header { position:absolute; top:0; left:0; width:100%; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; }
-    .logo { font-family:'Space Grotesk',sans-serif; font-size:1.75rem; font-weight:700; background:linear-gradient(90deg,#7e22ce,#2563eb); -webkit-background-clip:text; color:transparent; text-shadow:0 2px 10px rgba(0,0,0,0.5); }
-    .login-btn { text-decoration:none; background:linear-gradient(to right,#9a00ff,#5f00ff); padding:0.6rem 1.2rem; border-radius:8px; color:#fff; font-weight:600; transition:transform .2s, box-shadow .2s; box-shadow:0 4px 15px rgba(95,0,255,0.3); }
-    .login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(147,51,234,0.5); }
-    .hero { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; padding:2rem 1rem; position:relative; }
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      color: #ffffff;
+      background: linear-gradient(135deg, #09021d 0%, #190730 50%, #09021d 100%);
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    header {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 0 8px #8b5cf6, 0 0 18px #3b82f6;
+    }
+    .login-btn {
+      text-decoration: none;
+      background: linear-gradient(to right,#9a00ff,#5f00ff);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 15px rgba(95,0,255,0.3);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(147,51,234,0.5);
+    }
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1rem;
+      position: relative;
+    }
     .hero::before {
       content: '';
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(75deg, rgba(5,5,15,0.85), rgba(5,5,15,0.3) 50%, rgba(5,5,15,0.85)),
-        url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1350&q=80') left center/cover no-repeat,
-        url('https://images.unsplash.com/photo-1531379410501-662b1c82ad38?auto=format&fit=crop&w=1350&q=80') right center/cover no-repeat;
-      background-size: cover, 55% 100%, 55% 100%;
-      background-position: center, left center, right center;
+        linear-gradient(75deg, rgba(5,5,25,0.85), rgba(5,5,25,0.3) 50%, rgba(5,5,25,0.85)),
+        url('https://images.unsplash.com/photo-1581091870621-9b24c664b2d0?auto=format&fit=crop&w=1350&q=80') left center/cover no-repeat,
+        url('https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=1350&q=80') right center/cover no-repeat;
+      background-size: cover,55% 100%,55% 100%;
+      background-position: center,left center,right center;
       background-repeat: no-repeat;
-      opacity: 0.4;
+      opacity: 0.35;
       filter: grayscale(10%);
       z-index: -2;
     }
-    .hero::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(20,0,40,0.8),rgba(40,0,60,0.8)); z-index:-1; }
-    .hero-content { max-width:800px; margin:auto; }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,rgba(30,0,60,0.8),rgba(50,0,80,0.8));
+      z-index: -1;
+    }
+    .hero-content { max-width: 800px; margin: auto; }
     h1 {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       font-size: 3rem;
       text-transform: uppercase;
-      background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+      background: linear-gradient(90deg,#c084fc,#60a5fa);
       -webkit-background-clip: text;
       color: transparent;
       margin-bottom: 1rem;
+      text-shadow: 0 0 10px rgba(192,132,252,0.6);
     }
-    .intro-img { width:80%; max-width:360px; border-radius:20px; box-shadow:0 8px 20px rgba(0,0,0,0.5); margin:1.5rem auto; }
-    p.description { line-height:1.6; font-size:1.1rem; color:rgba(255,255,255,0.9); margin-bottom:1.5rem; }
-    .cta { margin-top:1.5rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
-    .btn { background:linear-gradient(to right,#9a00ff,#5f00ff); color:#fff; padding:0.9rem 2rem; border-radius:12px; text-decoration:none; font-weight:600; transition:transform .2s, box-shadow .2s; box-shadow:0 5px 20px rgba(95,0,255,0.3); }
-    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(95,0,255,0.5); }
-    .particles { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; background-image: radial-gradient(2px 2px at 20px 30px, rgba(147,51,234,0.3), transparent), radial-gradient(2px 2px at 40px 70px, rgba(59,130,246,0.3), transparent), radial-gradient(1px 1px at 90px 40px, rgba(236,72,153,0.3), transparent), radial-gradient(1px 1px at 130px 80px, rgba(147,51,234,0.3), transparent), radial-gradient(2px 2px at 160px 30px, rgba(59,130,246,0.3), transparent); background-repeat:repeat; background-size:200px 100px; animation:particlesMove 20s linear infinite; }
-    @keyframes particlesMove { 0% { transform:translate(0,0); } 100% { transform:translate(-200px,-100px); } }
-    .fade { opacity:0; transform:translateY(20px); transition:opacity .8s ease, transform .8s ease; }
-    .fade.show { opacity:1; transform:translateY(0); }
+    .intro-img {
+      width: 80%;
+      max-width: 360px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      margin: 1.5rem auto;
+    }
+    p.description {
+      line-height: 1.6;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 1.5rem;
+    }
+    .music-icons {
+      font-size: 1.7rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .music-icons i {
+      color: #8b5cf6;
+      text-shadow: 0 0 6px rgba(139,92,246,0.8);
+    }
+    .cta {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      background: linear-gradient(to right,#9a00ff,#5f00ff);
+      color: #fff;
+      padding: 0.9rem 2rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 5px 20px rgba(95,0,255,0.3);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(95,0,255,0.5);
+    }
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(147,51,234,0.3), transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(59,130,246,0.3), transparent),
+        radial-gradient(1px 1px at 90px 40px, rgba(236,72,153,0.3), transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(147,51,234,0.3), transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(59,130,246,0.3), transparent);
+      background-repeat: repeat;
+      background-size: 200px 100px;
+      animation: particlesMove 20s linear infinite;
+    }
+    @keyframes particlesMove {
+      0% { transform: translate(0,0); }
+      100% { transform: translate(-200px,-100px); }
+    }
+    .fade { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s ease; }
+    .fade.show { opacity: 1; transform: translateY(0); }
     @media(max-width:768px){
-      h1 { font-size:2rem; }
-      .intro-img{ max-width:280px; }
-      header { flex-direction:column; align-items:center; padding:1rem; }
-      .logo { font-size:1.5rem; margin-bottom:.75rem; }
-      .login-btn { font-size:.9rem; padding:.5rem 1rem; }
-      .cta { flex-direction:column; gap:.75rem; }
-      .hero-content { padding-top:3rem; }
+      h1 { font-size: 2rem; }
+      .intro-img{ max-width: 280px; }
+      header { flex-direction: column; align-items: center; padding: 1rem; }
+      .logo { font-size: 1.5rem; margin-bottom: .75rem; }
+      .login-btn { font-size: .9rem; padding: .5rem 1rem; }
+      .cta { flex-direction: column; gap: .75rem; }
+      .hero-content { padding-top: 3rem; }
     }
     @media(max-width:480px){
-      h1 { font-size:1.5rem; }
-      p.description{ font-size:1rem; }
-      .logo{ font-size:1.25rem; }
-      .login-btn{ font-size:.8rem; padding:.4rem .8rem; }
-      .cta{ gap:.5rem; }
+      h1 { font-size: 1.5rem; }
+      p.description{ font-size: 1rem; }
+      .logo{ font-size: 1.25rem; }
+      .login-btn{ font-size: .8rem; padding: .4rem .8rem; }
+      .cta{ gap: .5rem; }
     }
   </style>
 </head>
@@ -74,9 +185,16 @@
   </header>
   <section class="hero">
     <div class="hero-content fade" id="content">
-      <h1>Bem-vindo ao futuro da produção musical</h1>
-      <p class="description">O que é o Prod.AI? O prod.ai é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais. Usando inteligência artificial, ele te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música. Seja você iniciante ou experiente, o prod.ai está aqui pra acelerar seu fluxo criativo e facilitar sua vida no estúdio.</p>
-      <h2 style="margin-bottom:1rem; font-family:'Space Grotesk',sans-serif;">Bora liberar todo seu potencial?</h2>
+      <img src="https://images.unsplash.com/photo-1581091860309-c8612c8fd951?auto=format&fit=crop&w=800&q=80" alt="Cabe\xC3\xA7a de rob\xC3\xB4 digital" class="intro-img">
+      <h1>Bem-vindo ao futuro da produ\xC3\xA7\xC3\xA3o musical</h1>
+      <p class="description">O que \xC3\xA9 o Prod.AI? O prod.ai \xC3\xA9 uma plataforma inteligente que usa intelig\xC3\xAAncia artificial para impulsionar a produtividade de produtores musicais. Usando intelig\xC3\xAAncia artificial, ele te ajuda a tirar d\xC3\xBAvidas, resolver problemas t\xC3\xA9cnicos, aprender novas t\xC3\xA9cnicas e encontrar solu\xC3\xA7\xC3\xB5es r\xC3\xA1pidas para tudo o que envolve produzir m\xC3\xBAsica. Seja voc\xC3\xAA iniciante ou experiente, o prod.ai est\xC3\xA1 aqui pra acelerar seu fluxo criativo e facilitar sua vida no est\xC3\xBAdio.</p>
+      <h2 style="margin-bottom:1rem; font-family:'Orbitron',sans-serif;">Bora liberar todo seu potencial?</h2>
+      <div class="music-icons">
+        <i class="fas fa-headphones"></i>
+        <i class="fas fa-music"></i>
+        <i class="fas fa-wave-square"></i>
+        <i class="fas fa-microchip"></i>
+      </div>
       <div class="cta">
         <a href="login.html" class="btn">Experimente gratuitamente</a>
       </div>
