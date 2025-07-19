@@ -82,7 +82,7 @@ body {
   font-family: 'Orbitron', monospace;
   font-size: 3.5rem;
   font-weight: 900;
-  background: linear-gradient(180deg, #0a0000, #8b2eff);
+  background: linear-gradient(45deg, #00ffff, #ff00ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
