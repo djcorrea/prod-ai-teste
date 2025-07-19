@@ -338,4 +338,21 @@ document.addEventListener("DOMContentLoaded", function () {
       window.forgotPassword();
     });
   }
+
+  const phoneInput = document.getElementById('phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('focus', () => {
+      if (!phoneInput.value.trim().startsWith('+55')) {
+        phoneInput.value = '+55';
+        setTimeout(() => {
+          phoneInput.setSelectionRange(phoneInput.value.length, phoneInput.value.length);
+        }, 1);
+      }
+    });
+    phoneInput.addEventListener('blur', () => {
+      if (phoneInput.value.trim() === '+55') {
+        phoneInput.value = '';
+      }
+    });
+  }
 });
