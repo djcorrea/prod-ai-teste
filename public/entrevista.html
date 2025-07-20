@@ -349,9 +349,51 @@
     <div class="interview-container">
         <h1 class="main-title">Antes de começar, queremos te conhecer melhor para personalizar suas respostas</h1>
         
-        <div id="question" class="form-label"></div>
-        <div id="inputArea"></div>
-        <button id="nextBtn" class="submit-button">Próximo</button>
+        <form id="interviewForm" action="entrevista-final.html">
+            <div class="form-group">
+                <label class="form-label">Nome Artístico</label>
+                <input id="nomeArtistico" type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Nível Técnico</label>
+                <select id="nivelTecnico" class="form-select" required>
+                    <option value="">Selecione seu nível</option>
+                    <option value="iniciante">Iniciante</option>
+                    <option value="intermediario">Intermediário</option>
+                    <option value="avancado">Avançado</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">DAW Usada</label>
+                <select id="daw" class="form-select" required>
+                    <option value="">Selecione sua DAW</option>
+                    <option value="fl-studio">FL Studio</option>
+                    <option value="ableton">Ableton</option>
+                    <option value="logic">Logic</option>
+                    <option value="reaper">Reaper</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Maior Dificuldade na Produção</label>
+                <input id="dificuldade" type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Estilo Musical</label>
+                <input id="estilo" type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Me conte mais sobre você</label>
+                <textarea id="sobre" class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-button">Enviar Respostas</button>
+        </form>
     </div>
     
     <script>
