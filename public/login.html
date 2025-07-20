@@ -8,8 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    /* Ajuste: garantir gradient roxo escuro em todas as telas */
     body {
-      background: radial-gradient(ellipse at top, #0f0f23 0%, #050510 100%);
+      /* Fallback para navegadores sem suporte a gradient */
+      background-color: #0f0f23;
+      background-image: radial-gradient(ellipse at top, #0f0f23 0%, #050510 100%);
       font-family: 'Space Grotesk', sans-serif;
     }
 
