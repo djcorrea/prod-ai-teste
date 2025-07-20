@@ -12,7 +12,7 @@
             --bg-tertiary: #2a2a2a;
             --neon-blue: #00ffff;
             --neon-purple: #8b5cf6;
-            --neon-green: #39ff14;
+            --neon-green: #a855f7;
             --neon-pink: #ff6b9d;
             --silver: #c0c0c0;
             --gold-rose: #ff6b9d;
@@ -449,8 +449,8 @@
         .personalization-status {
             margin: 1rem 0;
             padding: 1rem;
-            background: rgba(57, 255, 20, 0.1);
-            border: 1px solid rgba(57, 255, 20, 0.3);
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
             border-radius: 10px;
         }
 
@@ -595,7 +595,7 @@
         .support-contact {
             text-align: center;
             padding: 2rem;
-            background: linear-gradient(135deg, var(--glass-bg), rgba(57, 255, 20, 0.05));
+            background: linear-gradient(135deg, var(--glass-bg), rgba(168, 85, 247, 0.05));
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             margin-top: 2rem;
@@ -1802,7 +1802,7 @@
                     
                     // Destacar visualmente que há mudanças não salvas
                     emailInput.style.borderColor = 'var(--neon-green)';
-                    emailInput.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.3)';
+                    emailInput.style.boxShadow = '0 0 15px rgba(168, 85, 247, 0.3)';
                     
                 } else {
                     showNotification('⚠️ Formato de e-mail inválido', 'error');
@@ -1983,7 +1983,7 @@
                     
                     // Destacar visualmente
                     this.style.borderColor = 'var(--neon-green)';
-                    this.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.3)';
+                    this.style.boxShadow = '0 0 15px rgba(168, 85, 247, 0.3)';
                     
                     // Mostrar indicador de mudanças não salvas
                     showUnsavedIndicator();
@@ -2009,14 +2009,14 @@
                     bottom: 20px;
                     left: 50%;
                     transform: translateX(-50%);
-                    background: linear-gradient(45deg, var(--neon-green), rgba(57, 255, 20, 0.8));
+                    background: linear-gradient(45deg, var(--neon-green), rgba(168, 85, 247, 0.8));
                     color: var(--bg-primary);
                     padding: 0.8rem 1.5rem;
                     border-radius: 25px;
                     font-weight: 600;
                     z-index: 1500;
                     animation: slideInBottom 0.3s ease;
-                    box-shadow: 0 5px 15px rgba(57, 255, 20, 0.4);
+                    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4);
                     font-family: 'Exo 2', sans-serif;
                 `;
                 newIndicator.innerHTML = '⚠️ Você tem alterações não salvas';
@@ -2202,7 +2202,7 @@
                 input.addEventListener('input', function() {
                     if (this.checkValidity()) {
                         this.style.borderColor = 'var(--neon-green)';
-                        this.style.boxShadow = '0 0 20px rgba(57, 255, 20, 0.3)';
+                        this.style.boxShadow = '0 0 20px rgba(168, 85, 247, 0.3)';
                     } else {
                         this.style.borderColor = '#ff1744';
                         this.style.boxShadow = '0 0 20px rgba(255, 23, 68, 0.3)';
