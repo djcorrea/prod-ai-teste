@@ -352,22 +352,22 @@
         <form id="interviewForm" action="entrevista-final.html">
             <div class="form-group">
                 <label class="form-label">Nome Artístico</label>
-                <input type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
+                <input id="nomeArtistico" type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Nível Técnico</label>
-                <select class="form-select" required>
+                <select id="nivelTecnico" class="form-select" required>
                     <option value="">Selecione seu nível</option>
                     <option value="iniciante">Iniciante</option>
                     <option value="intermediario">Intermediário</option>
                     <option value="avancado">Avançado</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">DAW Usada</label>
-                <select class="form-select" required>
+                <select id="daw" class="form-select" required>
                     <option value="">Selecione sua DAW</option>
                     <option value="fl-studio">FL Studio</option>
                     <option value="ableton">Ableton</option>
@@ -376,22 +376,22 @@
                     <option value="outro">Outro</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Maior Dificuldade na Produção</label>
-                <input type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
+                <input id="dificuldade" type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Estilo Musical</label>
-                <input type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
+                <input id="estilo" type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label">Me conte mais sobre você</label>
-                <textarea class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
+                <textarea id="sobre" class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
             </div>
-            
+
             <button type="submit" class="submit-button">Enviar Respostas</button>
         </form>
     </div>
@@ -416,11 +416,16 @@
             input.addEventListener('focus', function() {
                 this.parentElement.style.transform = 'scale(1.02)';
             });
-            
+
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
             });
         });
     </script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+    <script src="entrevista.js"></script>
 </body>
 </html>

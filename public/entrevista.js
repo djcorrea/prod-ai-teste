@@ -15,62 +15,45 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const questions = [
-  { key: 'nomeArtistico',  text: 'Qual seu nome artístico?', type: 'text' },
-  { key: 'nivelTecnico',   text: 'Qual seu nível técnico?', type: 'select', options: ['Iniciante','Intermediário','Avançado','Profissional'] },
-  { key: 'daw',            text: 'Qual DAW você usa? (ex: FL Studio, Ableton, Logic...)', type: 'text' },
-  { key: 'estilo',         text: 'Qual estilo musical você produz?', type: 'text' },
-  { key: 'dificuldade',    text: 'Qual sua maior dificuldade na produção musical?', type: 'text' },
-  { key: 'sobre',          text: 'Me conte mais sobre você', type: 'textarea' }
-];
-
-let current = 0;
-const answers = {};
-
-function showQuestion() {
-  const q = questions[current];
-  if (!q) return;
-  const questionEl = document.getElementById('question');
-  const inputArea = document.getElementById('inputArea');
-  questionEl.textContent = q.text;
-  let inputHtml = '';
-  if (q.type === 'select') {
-    inputHtml = `<select class="input-field" id="answerField">${q.options.map(o => `<option value="${o}">${o}</option>`).join('')}</select>`;
-  } else if (q.type === 'textarea') {
-    inputHtml = `<textarea class="input-field" id="answerField" rows="4"></textarea>`;
-  } else {
-    inputHtml = `<input class="input-field" id="answerField" type="text" />`;
-  }
-  inputArea.innerHTML = inputHtml;
+// Verifica autenticação e se a entrevista já foi concluída
+async function checkAccess() {
+  return new Promise((resolve) => {
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const snap = await db.collection('usuarios').doc(user.uid).get();
+      if (snap.exists && snap.data().entrevistaConcluida) {
+        window.location.href = 'index.html';
+        return;
+      }
+      resolve(user);
+    });
+  });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  showQuestion();
-  const btn = document.getElementById('nextBtn');
-  btn.addEventListener('click', async () => {
-    const field = document.getElementById('answerField');
-    if (!field) return;
-    const value = field.value.trim();
-    if (!value) { field.focus(); return; }
-    answers[questions[current].key] = value;
-    current++;
-    if (current < questions.length) {
-      showQuestion();
-      if (current === questions.length - 1) btn.textContent = 'Enviar';
-    } else {
-      btn.disabled = true;
-      try {
-        const user = auth.currentUser;
-        if (!user) throw new Error('Usuário não autenticado');
-        await db.collection('usuarios').doc(user.uid).set({
-          perfil: answers,
-          entrevistaConcluida: true
-        }, { merge: true });
-        window.location.href = 'entrevista-final.html';
-      } catch (e) {
-        console.error(e);
-        btn.disabled = false;
-      }
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await checkAccess();
+  const form = document.getElementById('interviewForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const perfil = {
+      nomeArtistico: document.getElementById('nomeArtistico').value.trim(),
+      nivelTecnico: document.getElementById('nivelTecnico').value,
+      daw: document.getElementById('daw').value,
+      dificuldade: document.getElementById('dificuldade').value.trim(),
+      estilo: document.getElementById('estilo').value.trim(),
+      sobre: document.getElementById('sobre').value.trim(),
+    };
+    try {
+      await db.collection('usuarios').doc(user.uid).set({
+        perfil,
+        entrevistaConcluida: true,
+      }, { merge: true });
+      window.location.href = 'entrevista-final.html';
+    } catch (err) {
+      console.error(err);
     }
   });
 });

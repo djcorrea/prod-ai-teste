@@ -118,7 +118,12 @@ async function handleUserLimits(db, uid, email) {
     });
 
     const finalSnap = await userRef.get();
-    return { ...result, perfil: finalSnap.data().perfil };
+    const data = finalSnap.data();
+    return {
+      ...result,
+      perfil: data.perfil,
+      entrevistaConcluida: data.entrevistaConcluida,
+    };
   } catch (error) {
     if (error.message === 'LIMIT_EXCEEDED') {
       console.warn('🚫 Limite de mensagens atingido para:', email);
@@ -325,7 +330,11 @@ export default async function handler(req, res) {
     ];
 
     let profileInfo = '';
-    if (userData.plano === 'plus' && userData.perfil) {
+    if (
+      userData.plano === 'plus' &&
+      userData.entrevistaConcluida &&
+      userData.perfil
+    ) {
       const p = userData.perfil;
       profileInfo = `\n\nPERFIL DO USUÁRIO:\nNome artístico: ${p.nomeArtistico || ''}; Nível: ${p.nivelTecnico || ''}; DAW: ${p.daw || ''}; Estilo: ${p.estilo || ''}; Dificuldade: ${p.dificuldade || ''}.`;
     }
