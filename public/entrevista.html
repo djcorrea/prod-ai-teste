@@ -416,11 +416,20 @@
             input.addEventListener('focus', function() {
                 this.parentElement.style.transform = 'scale(1.02)';
             });
-            
+
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
             });
         });
+
+        // Redirect to the final page on submit
+        const form = document.getElementById('interviewForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                window.location.href = 'entrevista-final.html';
+            });
+        }
     </script>
 </body>
 </html>
