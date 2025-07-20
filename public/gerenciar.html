@@ -1235,25 +1235,25 @@
                 <div id="interviewData" class="interview-data">
                     <div class="interview-item">
                         <label class="form-label">Nome Artístico</label>
-                        <div class="data-display" data-field="artistName">DJ Phoenix</div>
+                        <div class="data-display" data-field="artistName" id="nomeArtistico">DJ Phoenix</div>
                         <button class="btn-edit" onclick="editField('artistName')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Estilo Musical</label>
-                        <div class="data-display" data-field="musicStyle">Progressive House, Deep House</div>
+                        <div class="data-display" data-field="musicStyle" id="estiloMusical">Progressive House, Deep House</div>
                         <button class="btn-edit" onclick="editField('musicStyle')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Maior Dificuldade</label>
-                        <div class="data-display" data-field="difficulty">Criar transições suaves entre faixas</div>
+                        <div class="data-display" data-field="difficulty" id="dificuldade">Criar transições suaves entre faixas</div>
                         <button class="btn-edit" onclick="editField('difficulty')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">DAW Utilizada</label>
-                        <div class="data-display" data-field="daw">Ableton Live 11</div>
+                        <div class="data-display" data-field="daw" id="dawUtilizada">Ableton Live 11</div>
                         <button class="btn-edit" onclick="editField('daw')">✏️</button>
                     </div>
                     
@@ -1278,10 +1278,10 @@
                     </div>
                 </div>
 
-                <button class="btn btn-secondary btn-full" onclick="retakeInterview()">
+                <button class="btn btn-secondary btn-full" onclick="refazerEntrevista()">
                     🔄 Refazer Entrevista Completa
                 </button>
-                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="savePersonalization()">
+                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="salvarPreferencias()">
                     💾 Salvar Alterações
                 </button>
             </div>
@@ -1294,20 +1294,20 @@
                 </h2>
                 <div class="form-group">
                     <label class="form-label">Senha Atual</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+                    <input type="password" class="form-input" id="senhaAtual" placeholder="••••••••" autocomplete="current-password">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nova Senha</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                    <input type="password" class="form-input" id="novaSenha" placeholder="••••••••" autocomplete="new-password">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirmar Nova Senha</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                    <input type="password" class="form-input" id="confirmarSenha" placeholder="••••••••" autocomplete="new-password">
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="changePassword()">
+                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1328,7 +1328,7 @@
                     <p>✓ Respostas prioritárias</p>
                     <p>✓ Recursos avançados</p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="cancelSubscription()">
+                <button class="btn btn-danger btn-full" onclick="cancelarAssinatura()">
                     Cancelar Assinatura
                 </button>
             </div>
@@ -1343,7 +1343,7 @@
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
-                        <button class="btn btn-secondary" onclick="changeEmail()">✏️ Alterar</button>
+                        <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -1400,7 +1400,7 @@
                         Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
                     </p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="deleteAccount()">
+                <button class="btn btn-danger btn-full" onclick="excluirConta()">
                     Excluir Conta Permanentemente
                 </button>
             </div>
@@ -1408,7 +1408,7 @@
 
         <!-- Botão de retorno ao chat -->
         <div class="back-to-chat-container">
-            <button class="btn-back-to-chat" onclick="backToChat()">
+            <button class="btn-back-to-chat" onclick="voltarAoChat()">
                 <div class="chat-icon">💬</div>
                 <div class="chat-text">
                     <span class="chat-main">Voltar ao Chat</span>
@@ -2639,6 +2639,69 @@
 
         // Verificar performance na inicialização
         optimizePerformance();
+    </script>
+
+    <script>
+        function voltarAoChat() {
+            window.location.href = 'index.html';
+        }
+
+        function alterarSenha() {
+            const atual = document.getElementById('senhaAtual').value;
+            const nova = document.getElementById('novaSenha').value;
+            const confirmar = document.getElementById('confirmarSenha').value;
+
+            if (nova !== confirmar) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
+                alert('Senha fraca.');
+                return;
+            }
+
+            localStorage.setItem('userPassword', nova);
+            alert('Senha alterada com sucesso!');
+        }
+
+        function alterarEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const novoEmail = prompt('Novo e-mail:', emailInput.value);
+            if (novoEmail) {
+                emailInput.value = novoEmail;
+                localStorage.setItem('userEmail', novoEmail);
+                alert('E-mail atualizado!');
+            }
+        }
+
+        function refazerEntrevista() {
+            window.location.href = 'entrevista.html';
+        }
+
+        function salvarPreferencias() {
+            const nomeArtistico = document.getElementById('nomeArtistico').textContent;
+            const estilo = document.getElementById('estiloMusical').textContent;
+            const dificuldade = document.getElementById('dificuldade').textContent;
+            const daw = document.getElementById('dawUtilizada').textContent;
+
+            const perfil = { nomeArtistico, estilo, dificuldade, daw };
+            localStorage.setItem('perfilMusical', JSON.stringify(perfil));
+            alert('Preferências salvas!');
+        }
+
+        function cancelarAssinatura() {
+            if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
+                alert('Assinatura cancelada.');
+            }
+        }
+
+        function excluirConta() {
+            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
+                localStorage.clear();
+                alert('Conta excluída.');
+                window.location.href = 'index.html';
+            }
+        }
     </script>
 </body>
 </html>
