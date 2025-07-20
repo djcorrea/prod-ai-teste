@@ -275,6 +275,24 @@ function setupEventListeners() {
   }
 }
 
+async function updateFooterBadge() {
+  await waitForFirebase();
+  const user = firebase.auth().currentUser;
+  const footer = document.getElementById('footerCenterText');
+  if (!footer || !user) return;
+  try {
+    const snap = await firebase.firestore().collection('usuarios').doc(user.uid).get();
+    if (snap.exists && snap.data().plano === 'plus') {
+      footer.innerHTML = '<span class="plus-label">PLUS</span>';
+    } else {
+      footer.innerHTML =
+        'Siga no Instagram: <a href="https://instagram.com/djcorreaoriginal" target="_blank">@djcorreaoriginal</a>';
+    }
+  } catch (e) {
+    console.error('Erro ao verificar plano do usuário:', e);
+  }
+}
+
 function initializeApp() {
   setTimeout(() => {
     setupEventListeners();
@@ -284,6 +302,7 @@ function initializeApp() {
 
     const startInputEl = document.getElementById('start-input');
     if (startInputEl) startInputEl.focus();
+    updateFooterBadge();
   }, 100);
 }
 
