@@ -44,7 +44,26 @@ function showQuestion() {
   inputArea.innerHTML = inputHtml;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Verifica autenticação e se a entrevista já foi concluída
+async function checkAccess() {
+  return new Promise((resolve) => {
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const snap = await db.collection('usuarios').doc(user.uid).get();
+      if (snap.exists && snap.data().entrevistaConcluida) {
+        window.location.href = 'index.html';
+        return;
+      }
+      resolve(user);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkAccess();
   showQuestion();
   const btn = document.getElementById('nextBtn');
   btn.addEventListener('click', async () => {

@@ -586,5 +586,29 @@
             }).onfinish = () => sparkle.remove();
         });
     </script>
+    <!-- Firebase: garante que a página só aparece se a entrevista estiver concluída -->
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+        authDomain: "prodai-58436.firebaseapp.com",
+        projectId: "prodai-58436",
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+          return;
+        }
+        const snap = await db.collection('usuarios').doc(user.uid).get();
+        if (!snap.exists || !snap.data().entrevistaConcluida) {
+          window.location.href = 'entrevista.html';
+        }
+      });
+    </script>
 </body>
 </html>
