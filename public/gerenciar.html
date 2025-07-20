@@ -1520,9 +1520,9 @@
     <div class="loading" id="loading"></div>
 
     <script>
-        // Dados simulados do usuário
+        // Dados do usuário (carregados da API)
         const userData = {
-            userType: 'PLUS', // 'FREE' ou 'PLUS'
+            userType: 'FREE', // será atualizado pela API
             interviewData: {
                 artistName: 'DJ Phoenix',
                 musicStyle: 'Progressive House, Deep House',
@@ -1559,28 +1559,35 @@
             dataDisplay.querySelector('.edit-field-input').focus();
         }
 
-        function saveField(fieldName) {
+        async function saveField(fieldName) {
             const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
             const input = dataDisplay.querySelector('.edit-field-input');
             const newValue = input.value.trim();
-            
-            if (newValue) {
-                // Atualizar dados locais
-                userData.interviewData[fieldName] = newValue;
-                
-                // Simular salvamento no backend
-                simulateAsync(() => {
-                    dataDisplay.innerHTML = newValue;
-                    dataDisplay.classList.remove('editing');
-                    showNotification('✅ Campo atualizado com sucesso!', 'success');
-                    
-                    // Se for usuário PLUS, atualizar personalização do chat
-                    if (userData.userType === 'PLUS') {
-                        updateChatPersonalization();
-                    }
-                }, 1000);
-            } else {
+
+            if (!newValue) {
                 showNotification('⚠️ Campo não pode estar vazio', 'error');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/interview-data', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ [fieldName]: newValue })
+                });
+                userData.interviewData[fieldName] = newValue;
+                dataDisplay.innerHTML = newValue;
+                dataDisplay.classList.remove('editing');
+                showNotification('✅ Campo atualizado com sucesso!', 'success');
+                if (userData.userType === 'PLUS') {
+                    updateChatPersonalization();
+                }
+            } catch (e) {
+                showNotification('❌ Erro ao salvar campo', 'error');
             }
         }
 
@@ -1604,37 +1611,42 @@
             openModal('retakeModal');
         }
 
-        function confirmRetake() {
+        async function confirmRetake() {
             closeModal('retakeModal');
-            simulateAsync(() => {
-                // Redirecionar para entrevista.html
-                window.location.href = 'entrevista.html';
-            }, 500);
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/retake-interview', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+                window.location.href = 'entrevista.html?retake=true';
+            } catch (e) {
+                showNotification('❌ Erro ao acessar entrevista', 'error');
+            }
         }
 
         // Salvar personalização com validação completa
-        function savePersonalization() {
+        async function savePersonalization() {
             if (userData.userType === 'FREE') {
                 showNotification('⚠️ Personalização limitada na versão FREE', 'warning');
                 return;
             }
 
             showLoading();
-            
-            // Simular envio para backend
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/save-personalization', { method: 'POST', body: JSON.stringify(userData.interviewData) });
-                    
-                    showNotification('✅ Personalização salva com sucesso!', 'success');
-                    updateChatPersonalization();
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao salvar personalização. Tente novamente.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1500);
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/interview-data', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + token
+                    },
+                    body: JSON.stringify(userData.interviewData)
+                });
+                showNotification('✅ Personalização salva com sucesso!', 'success');
+                updateChatPersonalization();
+            } catch (error) {
+                showNotification('❌ Erro ao salvar personalização. Tente novamente.', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
         // Alterar senha com validação robusta
@@ -1665,51 +1677,45 @@
             }
             
             showLoading();
-            
-            simulateAsync(() => {
+            (async () => {
                 try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/change-password', { method: 'POST', body: JSON.stringify({currentPassword, newPassword}) });
-                    
-                    // Limpar campos após sucesso
+                    const token = localStorage.getItem('idToken');
+                    const res = await fetch('/api/user/change-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+                    if (!res.ok) throw new Error();
                     document.querySelectorAll('#securityCard input[type="password"]').forEach(input => input.value = '');
-                    
                     showNotification('✅ Senha alterada com sucesso!', 'success');
                     playSound('success');
-                    
                 } catch (error) {
                     showNotification('❌ Erro ao alterar senha. Verifique a senha atual.', 'error');
-                    console.error('Erro:', error);
+                } finally {
+                    hideLoading();
                 }
-            }, 2000);
+            })();
         }
 
         // Cancelar assinatura com redirecionamento real
-        function confirmCancel() {
+        async function confirmCancel() {
             closeModal('cancelModal');
-            
-            showNotification('🔗 Redirecionando para cancelamento...', 'info');
-            
-            // Aguardar um momento antes do redirecionamento
-            setTimeout(() => {
-                try {
-                    // Redirecionar para Mercado Pago
-                    window.open('https://www.mercadopago.com.br/subscriptions', '_blank');
-                    
-                    // Atualizar status local após redirecionamento
-                    setTimeout(() => {
-                        showNotification('📋 Siga as instruções no Mercado Pago para cancelar', 'info');
-                    }, 1000);
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao abrir página de cancelamento', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1000);
+            showNotification('🔗 Cancelando assinatura...', 'info');
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/cancel-subscription', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+                showNotification('✅ Assinatura cancelada', 'success');
+                document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
+            } catch (error) {
+                showNotification('❌ Erro ao cancelar assinatura', 'error');
+            }
         }
 
         // Salvar informações pessoais com validação completa
-        function savePersonalInfo() {
+        async function savePersonalInfo() {
             const email = document.getElementById('emailInput').value.trim();
             const phone = document.querySelector('#personalCard input[type="tel"]').value.trim();
             const avatar = document.querySelector('#personalCard input[type="file"]').files[0];
@@ -1728,29 +1734,28 @@
             }
             
             showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/update-personal-info', { method: 'POST', body: formData });
-                    
-                    // Atualizar dados locais
-                    userData.personalInfo.email = email;
-                    userData.personalInfo.phone = phone;
-                    
-                    if (avatar) {
-                        userData.personalInfo.avatar = avatar.name;
-                        // Aqui seria o upload da imagem
-                    }
-                    
-                    showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
-                    playSound('success');
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1500);
+            try {
+                const token = localStorage.getItem('idToken');
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('phone', phone);
+                if (avatar) formData.append('avatar', avatar);
+                const res = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: { Authorization: 'Bearer ' + token },
+                    body: formData
+                });
+                if (!res.ok) throw new Error();
+                userData.personalInfo.email = email;
+                userData.personalInfo.phone = phone;
+                if (avatar) userData.personalInfo.avatar = avatar.name;
+                showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
+                playSound('success');
+            } catch (error) {
+                showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
         // Validação de telefone
@@ -1761,7 +1766,7 @@
         }
 
         // Excluir conta com processo de segurança
-        function confirmDelete() {
+        async function confirmDelete() {
             const password = document.querySelector('#deleteModal input[type="password"]').value;
             const code = document.querySelector('#deleteModal input[type="text"]').value;
             
@@ -1779,26 +1784,28 @@
             
             closeModal('deleteModal');
             showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/delete-account', { method: 'DELETE', body: JSON.stringify({password, code}) });
-                    
-                    showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                    
-                    // Simular limpeza de dados e logout
-                    setTimeout(() => {
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        window.location.href = '/login?deleted=true';
-                    }, 2000);
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 3000);
+            try {
+                const token = localStorage.getItem('idToken');
+                const res = await fetch('/api/user/account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ password, code })
+                });
+                if (!res.ok) throw new Error();
+                showNotification('⚠️ Conta excluída permanentemente!', 'error');
+                setTimeout(() => {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = '/login?deleted=true';
+                }, 2000);
+            } catch (error) {
+                showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
         // Refazer entrevista com verificação PLUS
@@ -1810,21 +1817,15 @@
             openModal('retakeModal');
         }
 
-        function confirmRetake() {
+        async function confirmRetake() {
             closeModal('retakeModal');
-            showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Redirecionar para entrevista.html
-                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
-                    window.location.href = 'entrevista.html?retake=true';
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao acessar entrevista', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 800);
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/retake-interview', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+                window.location.href = 'entrevista.html?retake=true';
+            } catch (error) {
+                showNotification('❌ Erro ao acessar entrevista', 'error');
+            }
         }
 
         // Alterar e-mail com validação
@@ -1907,11 +1908,7 @@
         }
 
         function confirmRetake() {
-            closeModal('retakeModal');
-            simulateAsync(() => {
-                alert('🚀 Entrevista iniciada! Redirecionando...');
-                // Aqui seria o redirect para a página de entrevista
-            });
+            // duplicado removido
         }
 
         function validateEmail(email) {
@@ -1924,16 +1921,7 @@
             openModal('cancelModal');
         }
 
-        function confirmCancel() {
-            closeModal('cancelModal');
-            simulateAsync(() => {
-                alert('✅ Assinatura cancelada com sucesso!');
-                // Atualizar UI para refletir o cancelamento
-                document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                document.querySelector('.plan-badge').className = 'plan-badge';
-                document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
-            });
-        }
+        // confirmCancel duplicado removido
 
         // Verificar e-mail
         function verifyEmail() {
@@ -1957,14 +1945,16 @@
         }
 
         // Excluir conta
-        function deleteAccount() {
-            // Primeiro, simular envio de código de verificação
+        async function deleteAccount() {
             showNotification('📧 Enviando código de verificação para seu e-mail...', 'info');
-            
-            setTimeout(() => {
+            try {
+                const token = localStorage.getItem('idToken');
+                await fetch('/api/user/send-delete-code', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
                 openModal('deleteModal');
                 showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
-            }, 1500);
+            } catch (e) {
+                showNotification('❌ Erro ao enviar código', 'error');
+            }
         }
 
         // Upgrade da conta
@@ -2186,20 +2176,7 @@
             showNotification('🔌 Você ficou offline', 'warning');
         });
 
-        function confirmDelete() {
-            const password = document.querySelector('#deleteModal input[type="password"]').value;
-            const code = document.querySelector('#deleteModal input[type="text"]').value;
-            
-            if (password.length > 0 && code.length === 6) {
-                closeModal('deleteModal');
-                simulateAsync(() => {
-                    alert('⚠️ Conta excluída permanentemente!');
-                    // Aqui seria o redirect para página de logout
-                }, 3000);
-            } else {
-                alert('⚠️ Preencha todos os campos corretamente');
-            }
-        }
+        // confirmDelete duplicado removido
 
         // Validação em tempo real dos formulários
         function setupFormValidation() {
@@ -2413,6 +2390,8 @@
             
             // Verificar se há dados salvos localmente
             loadUserDataFromStorage();
+            // Buscar dados reais da API
+            loadUserDataFromAPI();
             
             // Pequeno delay para efeitos visuais
             setTimeout(() => {
@@ -2449,7 +2428,7 @@
         });
 
         // Função para carregar dados do usuário
-        function loadUserDataFromStorage() {
+function loadUserDataFromStorage() {
             try {
                 const savedData = localStorage.getItem('prodai_user_data');
                 if (savedData) {
@@ -2459,7 +2438,36 @@
                     
                     // Atualizar interface com dados carregados
                     updateUIWithUserData();
+}
+
+        // Carregar dados reais do backend
+        async function loadUserDataFromAPI() {
+            const token = localStorage.getItem('idToken');
+            if (!token) return;
+            try {
+                const [profileRes, interviewRes, subRes] = await Promise.all([
+                    fetch('/api/user/profile', { headers: { Authorization: 'Bearer ' + token } }),
+                    fetch('/api/user/interview-data', { headers: { Authorization: 'Bearer ' + token } }),
+                    fetch('/api/user/subscription', { headers: { Authorization: 'Bearer ' + token } })
+                ]);
+
+                if (profileRes.ok) {
+                    const profile = await profileRes.json();
+                    Object.assign(userData.personalInfo, { email: profile.email, phone: profile.phone });
+                    userData.userType = profile.planType;
                 }
+                if (interviewRes.ok) {
+                    const interview = await interviewRes.json();
+                    Object.assign(userData.interviewData, interview);
+                }
+                if (subRes.ok) {
+                    userData.subscription = await subRes.json();
+                }
+                updateUIWithUserData();
+            } catch (e) {
+                console.error('Erro ao carregar dados da API:', e);
+            }
+        }
             } catch (error) {
                 console.log('Erro ao carregar dados salvos:', error);
             }
