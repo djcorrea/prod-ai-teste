@@ -1,1 +1,2253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Account Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --neon-blue: #00ffff;
+            --neon-purple: #8b5cf6;
+            --neon-green: #39ff14;
+            --neon-pink: #ff6b9d;
+            --silver: #c0c0c0;
+            --gold-rose: #ff6b9d;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Fundo animado com partículas */
+        .background-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 25% 25%, var(--neon-blue) 0%, transparent 50%),
+                        radial-gradient(circle at 75% 75%, var(--neon-purple) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, var(--neon-green) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: backgroundPulse 8s ease-in-out infinite;
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.5; }
+            25% { transform: translateY(-20px) translateX(10px); opacity: 1; }
+            50% { transform: translateY(-10px) translateX(-10px); opacity: 0.8; }
+            75% { transform: translateY(-15px) translateX(5px); opacity: 0.6; }
+        }
+
+        /* Header futurista */
+        .header {
+            background: linear-gradient(135deg, var(--glass-bg), rgba(0, 255, 255, 0.1));
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            animation: scanLine 3s ease-in-out infinite;
+        }
+
+        @keyframes scanLine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--neon-blue);
+            position: relative;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 0 20px var(--neon-purple);
+            position: relative;
+        }
+
+        .user-avatar::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+
+        .page-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 50px var(--neon-blue);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* Grid de cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Card futurista */
+        .card {
+            background: linear-gradient(135deg, var(--glass-bg), rgba(139, 92, 246, 0.05));
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-style: preserve-3d;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-green));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2),
+                        0 0 50px rgba(139, 92, 246, 0.1);
+            border-color: var(--neon-blue);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 20px var(--neon-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--neon-blue);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* Formulários futuristas */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Botões futuristas */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, var(--bg-tertiary), var(--silver));
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(192, 192, 192, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff1744, #ff6b9d);
+            color: var(--text-primary);
+            box-shadow: 0 5px 15px rgba(255, 23, 68, 0.3);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Badge de plano */
+        .plan-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .plan-pro {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+            color: var(--text-primary);
+            box-shadow: 0 0 20px var(--neon-purple);
+        }
+
+        /* Estilos para dados da entrevista */
+        .interview-data {
+            margin-bottom: 1.5rem;
+        }
+
+        .interview-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .interview-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--neon-blue);
+        }
+
+        .interview-item .form-label {
+            min-width: 120px;
+            margin-bottom: 0;
+            font-size: 0.8rem;
+        }
+
+        .data-display {
+            flex: 1;
+            color: var(--text-primary);
+            font-weight: 500;
+            padding: 0.5rem;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .data-display.editing {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+        }
+
+        .btn-edit {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit:hover {
+            background: var(--neon-blue);
+            color: var(--bg-primary);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .personalization-status {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            border-radius: 10px;
+        }
+
+        .personalization-status.free {
+            background: rgba(255, 107, 157, 0.1);
+            border-color: rgba(255, 107, 157, 0.3);
+        }
+
+        .edit-field-input {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .edit-field-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-save-field, .btn-cancel-field {
+            padding: 0.3rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-save-field {
+            background: var(--neon-green);
+            color: var(--bg-primary);
+        }
+
+        .btn-cancel-field {
+            background: var(--text-secondary);
+            color: var(--bg-primary);
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Modal futurista */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: modalAppear 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--bg-secondary), rgba(139, 92, 246, 0.1));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            backdrop-filter: blur(20px);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: scale(0.8) translateY(50px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: var(--neon-blue);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Loading spinner futurista */
+        .loading {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--glass-border);
+            border-top: 3px solid var(--neon-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Seção de suporte */
+        .support-contact {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--glass-bg), rgba(57, 255, 20, 0.05));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin-top: 2rem;
+        }
+
+        .support-email {
+            font-size: 1.2rem;
+            color: var(--neon-green);
+            text-decoration: none;
+            font-weight: 600;
+            text-shadow: 0 0 20px var(--neon-green);
+        }
+
+        /* Responsividade melhorada */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            .page-title {
+                font-size: 2.2rem;
+                margin-bottom: 2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .user-info {
+                flex-direction: row;
+                gap: 0.8rem;
+            }
+
+            .user-avatar {
+                width: 45px;
+                height: 45px;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+                margin: 1rem;
+                max-width: calc(100vw - 2rem);
+            }
+
+            .modal-buttons {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .interview-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+                padding: 1rem;
+            }
+
+            .interview-item .form-label {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .data-display {
+                width: 100%;
+            }
+
+            .btn-edit {
+                align-self: flex-end;
+                margin-top: 0.5rem;
+            }
+
+            .edit-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+
+            .form-input {
+                padding: 0.9rem;
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.9rem 1.8rem;
+                font-size: 0.95rem;
+                min-height: 48px;
+            }
+
+            .status-indicator {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 1.5rem 0;
+            }
+
+            .logo {
+                font-size: 1.6rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .card {
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .card-title {
+                font-size: 1.3rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                min-height: 44px;
+            }
+
+            .user-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+                text-align: center;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 0.8rem;
+            }
+
+            .interview-item {
+                padding: 0.8rem;
+            }
+
+            .form-input {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+            }
+
+            .modal-content {
+                padding: 1.2rem;
+                margin: 0.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.3rem;
+            }
+
+            .support-email {
+                font-size: 1rem;
+                word-break: break-all;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .container {
+                padding: 1rem 0.8rem;
+            }
+
+            .header-content {
+                padding: 0 0.8rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 0.8rem;
+            }
+
+            .logo {
+                font-size: 1.4rem;
+            }
+
+            .page-title {
+                font-size: 1.6rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .card {
+                padding: 1rem;
+                border-radius: 15px;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+                flex-direction: column;
+                gap: 0.3rem;
+                text-align: center;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.85rem;
+                min-height: 42px;
+            }
+
+            .interview-item {
+                padding: 0.7rem;
+                flex-direction: column;
+                gap: 0.6rem;
+            }
+
+            .interview-item .form-label {
+                font-size: 0.75rem;
+            }
+
+            .data-display {
+                font-size: 0.9rem;
+                padding: 0.6rem;
+            }
+
+            .btn-edit {
+                padding: 0.4rem;
+                font-size: 0.8rem;
+            }
+
+            .form-input {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                padding: 1rem;
+                margin: 0.3rem;
+            }
+
+            .plan-badge {
+                font-size: 0.7rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .edit-buttons {
+                flex-direction: row;
+                gap: 0.4rem;
+            }
+
+            .btn-save-field, .btn-cancel-field {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+                flex: 1;
+            }
+        }
+
+        /* Melhorias para touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover {
+                transform: none;
+            }
+
+            .card:hover {
+                transform: none;
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+            }
+
+            .card {
+                transition: none;
+            }
+
+            .btn-edit:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text-secondary);
+                border-color: var(--glass-border);
+                box-shadow: none;
+            }
+
+            .btn-edit:active {
+                background: var(--neon-blue);
+                color: var(--bg-primary);
+                border-color: var(--neon-blue);
+            }
+        }
+
+        /* Melhorias de acessibilidade */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .background-particles {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fundo animado -->
+    <div class="background-particles">
+        <div class="particles"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">PROD.AI</div>
+            <div class="user-info">
+                <div class="user-avatar">JD</div>
+                <div>
+                    <div style="font-weight: 600;">John Doe</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Pro Member</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container principal -->
+    <div class="container">
+        <h1 class="page-title">GERENCIAR CONTA</h1>
+
+        <!-- Grid de cards -->
+        <div class="cards-grid">
+            <!-- Personalização -->
+            <div class="card">
+                <h2 class="card-title">
+                    <div class="card-icon">⚙️</div>
+                    Personalização do Chat
+                </h2>
+                
+                <!-- Dados da Entrevista -->
+                <div id="interviewData" class="interview-data">
+                    <div class="interview-item">
+                        <label class="form-label">Nome Artístico</label>
+                        <div class="data-display" data-field="artistName">DJ Phoenix</div>
+                        <button class="btn-edit" onclick="editField('artistName')">✏️</button>
+                    </div>
+                    
+                    <div class="interview-item">
+                        <label class="form-label">Estilo Musical</label>
+                        <div class="data-display" data-field="musicStyle">Progressive House, Deep House</div>
+                        <button class="btn-edit" onclick="editField('musicStyle')">✏️</button>
+                    </div>
+                    
+                    <div class="interview-item">
+                        <label class="form-label">Maior Dificuldade</label>
+                        <div class="data-display" data-field="difficulty">Criar transições suaves entre faixas</div>
+                        <button class="btn-edit" onclick="editField('difficulty')">✏️</button>
+                    </div>
+                    
+                    <div class="interview-item">
+                        <label class="form-label">DAW Utilizada</label>
+                        <div class="data-display" data-field="daw">Ableton Live 11</div>
+                        <button class="btn-edit" onclick="editField('daw')">✏️</button>
+                    </div>
+                    
+                    <div class="interview-item">
+                        <label class="form-label">Nível Técnico</label>
+                        <div class="data-display" data-field="technicalLevel">Intermediário</div>
+                        <button class="btn-edit" onclick="editField('technicalLevel')">✏️</button>
+                    </div>
+                    
+                    <div class="interview-item">
+                        <label class="form-label">Sobre Você</label>
+                        <div class="data-display" data-field="aboutYou">Produtor há 3 anos, focado em música eletrônica para festas</div>
+                        <button class="btn-edit" onclick="editField('aboutYou')">✏️</button>
+                    </div>
+                </div>
+
+                <!-- Status de Personalização -->
+                <div class="personalization-status">
+                    <div class="status-indicator" id="personalizationStatus">
+                        <div class="status-dot"></div>
+                        <span>Personalização ativa (PLUS)</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary btn-full" onclick="retakeInterview()">
+                    🔄 Refazer Entrevista Completa
+                </button>
+                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="savePersonalization()">
+                    💾 Salvar Alterações
+                </button>
+            </div>
+
+            <!-- Segurança -->
+            <div class="card" id="securityCard">
+                <h2 class="card-title">
+                    <div class="card-icon">🔒</div>
+                    Segurança
+                </h2>
+                <div class="form-group">
+                    <label class="form-label">Senha Atual</label>
+                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nova Senha</label>
+                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirmar Nova Senha</label>
+                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
+                </div>
+                <button class="btn btn-primary btn-full" onclick="changePassword()">
+                    🔐 Alterar Senha
+                </button>
+            </div>
+
+            <!-- Assinatura -->
+            <div class="card">
+                <h2 class="card-title">
+                    <div class="card-icon">💎</div>
+                    Plano & Assinatura
+                </h2>
+                <div class="plan-badge plan-pro">PRO MEMBER</div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Ativa até 20/07/2026</span>
+                </div>
+                <div style="margin: 1rem 0; color: var(--text-secondary);">
+                    <p>✓ Acesso ilimitado</p>
+                    <p>✓ Respostas prioritárias</p>
+                    <p>✓ Recursos avançados</p>
+                </div>
+                <button class="btn btn-danger btn-full" onclick="cancelSubscription()">
+                    Cancelar Assinatura
+                </button>
+            </div>
+
+            <!-- Informações Pessoais -->
+            <div class="card" id="personalCard">
+                <h2 class="card-title">
+                    <div class="card-icon">👤</div>
+                    Informações Pessoais
+                </h2>
+                <div class="form-group">
+                    <label class="form-label">E-mail</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
+                        <button class="btn btn-secondary" onclick="changeEmail()">✏️ Alterar</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefone (Opcional)</label>
+                    <input type="tel" class="form-input" placeholder="+55 (11) 99999-9999" autocomplete="tel">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem;">
+                        💡 Formato: +55 (11) 99999-9999 ou apenas 11999999999
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Foto de Perfil</label>
+                    <input type="file" class="form-input" accept="image/*">
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem;">
+                        📸 Máximo 5MB - JPG, PNG ou GIF
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="savePersonalInfo()">
+                    💾 Salvar Alterações
+                </button>
+            </div>
+
+            <!-- Suporte -->
+            <div class="card">
+                <h2 class="card-title">
+                    <div class="card-icon">🎧</div>
+                    Suporte
+                </h2>
+                <div style="text-align: center; margin: 2rem 0;">
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">
+                        Precisa de ajuda? Entre em contato conosco:
+                    </p>
+                    <a href="mailto:prod.ai@gmail.com" class="support-email">
+                        prod.ai@gmail.com
+                    </a>
+                </div>
+                <div style="margin-top: 2rem;">
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+                        📞 Suporte telefônico: Seg-Sex, 9h-18h<br>
+                        💬 Chat online: 24/7<br>
+                        ⚡ Resposta em até 2 horas
+                    </p>
+                </div>
+            </div>
+
+            <!-- Encerramento de Conta -->
+            <div class="card">
+                <h2 class="card-title">
+                    <div class="card-icon">⚠️</div>
+                    Zona de Perigo
+                </h2>
+                <div style="background: rgba(255, 23, 68, 0.1); border: 1px solid rgba(255, 23, 68, 0.3); border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+                    <h4 style="color: #ff1744; margin-bottom: 0.5rem;">⚠️ Atenção!</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
+                    </p>
+                </div>
+                <button class="btn btn-danger btn-full" onclick="deleteAccount()">
+                    Excluir Conta Permanentemente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Upgrade (para usuários FREE) -->
+    <div class="modal" id="upgradeModal">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: var(--neon-purple);">🚀 Upgrade Necessário</h3>
+            <div style="text-align: center; margin: 1rem 0;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    A personalização avançada é exclusiva para usuários <strong style="color: var(--neon-purple);">PLUS</strong>
+                </p>
+                <div style="background: rgba(139, 92, 246, 0.1); border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+                    <h4 style="color: var(--neon-purple); margin-bottom: 0.5rem;">Benefícios PLUS:</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                        ✨ Entrevistas ilimitadas<br>
+                        🤖 Personalização do chat<br>
+                        🎵 Recursos avançados<br>
+                        ⚡ Suporte prioritário
+                    </p>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('upgradeModal')">Agora Não</button>
+                <button class="btn btn-primary" onclick="upgradeAccount()">🚀 Fazer Upgrade</button>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="retakeModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Refazer Entrevista?</h3>
+            <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">
+                Isso resetará suas configurações de personalização atuais.
+            </p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('retakeModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmRetake()">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cancelamento de Assinatura -->
+    <div class="modal" id="cancelModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Cancelar Assinatura?</h3>
+            <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">
+                Você perderá acesso aos recursos PRO. Deseja continuar?
+            </p>
+            <div style="background: rgba(255, 23, 68, 0.1); border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    • Acesso até 20/07/2026<br>
+                    • Sem cobrança futura<br>
+                    • Pode reativar a qualquer momento
+                </p>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('cancelModal')">Manter Assinatura</button>
+                <button class="btn btn-danger" onclick="confirmCancel()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Verificação de E-mail -->
+    <div class="modal" id="emailModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Verificar E-mail</h3>
+            <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">
+                Digite o código enviado para seu e-mail:
+            </p>
+            <div class="form-group">
+                <input type="text" class="form-input" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.2rem; letter-spacing: 3px;">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('emailModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmEmailVerification()">Verificar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exclusão de Conta -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <h3 class="modal-title" style="color: #ff1744;">⚠️ EXCLUIR CONTA</h3>
+            <div style="background: rgba(255, 23, 68, 0.1); border-radius: 10px; padding: 1rem; margin: 1rem 0;">
+                <h4 style="color: #ff1744; margin-bottom: 0.5rem;">Esta ação é irreversível!</h4>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    • Todos os dados serão deletados<br>
+                    • Histórico de conversas perdido<br>
+                    • Assinatura cancelada imediatamente<br>
+                    • Não é possível recuperar a conta
+                </p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Digite sua senha para confirmar:</label>
+                <input type="password" class="form-input" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Código de verificação (enviado por e-mail):</label>
+                <input type="text" class="form-input" placeholder="123456" maxlength="6">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">EXCLUIR PERMANENTEMENTE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading"></div>
+
+    <script>
+        // Dados simulados do usuário
+        const userData = {
+            userType: 'PLUS', // 'FREE' ou 'PLUS'
+            interviewData: {
+                artistName: 'DJ Phoenix',
+                musicStyle: 'Progressive House, Deep House',
+                difficulty: 'Criar transições suaves entre faixas',
+                daw: 'Ableton Live 11',
+                technicalLevel: 'Intermediário',
+                aboutYou: 'Produtor há 3 anos, focado em música eletrônica para festas'
+            },
+            personalInfo: {
+                email: 'john.doe@email.com',
+                phone: '',
+                avatar: null
+            }
+        };
+
+        // Função para editar campos individuais
+        function editField(fieldName) {
+            const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
+            const currentValue = dataDisplay.textContent;
+            const isTextarea = fieldName === 'aboutYou' || fieldName === 'difficulty';
+            
+            const inputElement = isTextarea ? 
+                `<textarea class="edit-field-input" rows="2">${currentValue}</textarea>` :
+                `<input type="text" class="edit-field-input" value="${currentValue}">`;
+            
+            dataDisplay.innerHTML = `
+                ${inputElement}
+                <div class="edit-buttons" style="margin-top: 0.5rem;">
+                    <button class="btn-save-field" onclick="saveField('${fieldName}')">✓ Salvar</button>
+                    <button class="btn-cancel-field" onclick="cancelEdit('${fieldName}', '${currentValue}')">✗ Cancelar</button>
+                </div>
+            `;
+            dataDisplay.classList.add('editing');
+            dataDisplay.querySelector('.edit-field-input').focus();
+        }
+
+        function saveField(fieldName) {
+            const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
+            const input = dataDisplay.querySelector('.edit-field-input');
+            const newValue = input.value.trim();
+            
+            if (newValue) {
+                // Atualizar dados locais
+                userData.interviewData[fieldName] = newValue;
+                
+                // Simular salvamento no backend
+                simulateAsync(() => {
+                    dataDisplay.innerHTML = newValue;
+                    dataDisplay.classList.remove('editing');
+                    showNotification('✅ Campo atualizado com sucesso!', 'success');
+                    
+                    // Se for usuário PLUS, atualizar personalização do chat
+                    if (userData.userType === 'PLUS') {
+                        updateChatPersonalization();
+                    }
+                }, 1000);
+            } else {
+                showNotification('⚠️ Campo não pode estar vazio', 'error');
+            }
+        }
+
+        function cancelEdit(fieldName, originalValue) {
+            const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
+            dataDisplay.innerHTML = originalValue;
+            dataDisplay.classList.remove('editing');
+        }
+
+        function updateChatPersonalization() {
+            console.log('🤖 Atualizando personalização do chat com base na entrevista...');
+            // Aqui seria feita a integração com o backend para atualizar a personalização
+        }
+
+        // Refazer entrevista
+        function retakeInterview() {
+            if (userData.userType === 'FREE') {
+                openModal('upgradeModal');
+                return;
+            }
+            openModal('retakeModal');
+        }
+
+        function confirmRetake() {
+            closeModal('retakeModal');
+            simulateAsync(() => {
+                // Redirecionar para entrevista.html
+                window.location.href = 'entrevista.html';
+            }, 500);
+        }
+
+        // Salvar personalização com validação completa
+        function savePersonalization() {
+            if (userData.userType === 'FREE') {
+                showNotification('⚠️ Personalização limitada na versão FREE', 'warning');
+                return;
+            }
+
+            showLoading();
+            
+            // Simular envio para backend
+            simulateAsync(() => {
+                try {
+                    // Aqui seria a chamada real para o backend
+                    // await fetch('/api/save-personalization', { method: 'POST', body: JSON.stringify(userData.interviewData) });
+                    
+                    showNotification('✅ Personalização salva com sucesso!', 'success');
+                    updateChatPersonalization();
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao salvar personalização. Tente novamente.', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 1500);
+        }
+
+        // Alterar senha com validação robusta
+        function changePassword() {
+            const currentPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(1)').value;
+            const newPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(2)').value;
+            const confirmPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(3)').value;
+            
+            // Validações
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showNotification('⚠️ Preencha todos os campos de senha', 'warning');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('⚠️ Nova senha e confirmação não coincidem', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showNotification('⚠️ Nova senha deve ter pelo menos 8 caracteres', 'error');
+                return;
+            }
+
+            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+                showNotification('⚠️ Senha deve conter maiúscula, minúscula e número', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            simulateAsync(() => {
+                try {
+                    // Aqui seria a chamada real para o backend
+                    // await fetch('/api/change-password', { method: 'POST', body: JSON.stringify({currentPassword, newPassword}) });
+                    
+                    // Limpar campos após sucesso
+                    document.querySelectorAll('#securityCard input[type="password"]').forEach(input => input.value = '');
+                    
+                    showNotification('✅ Senha alterada com sucesso!', 'success');
+                    playSound('success');
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao alterar senha. Verifique a senha atual.', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 2000);
+        }
+
+        // Cancelar assinatura com redirecionamento real
+        function confirmCancel() {
+            closeModal('cancelModal');
+            
+            showNotification('🔗 Redirecionando para cancelamento...', 'info');
+            
+            // Aguardar um momento antes do redirecionamento
+            setTimeout(() => {
+                try {
+                    // Redirecionar para Mercado Pago
+                    window.open('https://www.mercadopago.com.br/subscriptions', '_blank');
+                    
+                    // Atualizar status local após redirecionamento
+                    setTimeout(() => {
+                        showNotification('📋 Siga as instruções no Mercado Pago para cancelar', 'info');
+                    }, 1000);
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao abrir página de cancelamento', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 1000);
+        }
+
+        // Salvar informações pessoais com validação completa
+        function savePersonalInfo() {
+            const email = document.getElementById('emailInput').value.trim();
+            const phone = document.querySelector('#personalCard input[type="tel"]').value.trim();
+            const avatar = document.querySelector('#personalCard input[type="file"]').files[0];
+            
+            // Validação de e-mail
+            if (!email || !validateEmail(email)) {
+                showNotification('⚠️ Digite um e-mail válido', 'error');
+                document.getElementById('emailInput').focus();
+                return;
+            }
+
+            // Validação de telefone (se preenchido)
+            if (phone && !validatePhone(phone)) {
+                showNotification('⚠️ Formato de telefone inválido', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            simulateAsync(() => {
+                try {
+                    // Aqui seria a chamada real para o backend
+                    // await fetch('/api/update-personal-info', { method: 'POST', body: formData });
+                    
+                    // Atualizar dados locais
+                    userData.personalInfo.email = email;
+                    userData.personalInfo.phone = phone;
+                    
+                    if (avatar) {
+                        userData.personalInfo.avatar = avatar.name;
+                        // Aqui seria o upload da imagem
+                    }
+                    
+                    showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
+                    playSound('success');
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 1500);
+        }
+
+        // Validação de telefone
+        function validatePhone(phone) {
+            // Regex para telefones brasileiros
+            const phoneRegex = /^(\+55\s?)?(\(?\d{2}\)?\s?)?\d{4,5}-?\d{4}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Excluir conta com processo de segurança
+        function confirmDelete() {
+            const password = document.querySelector('#deleteModal input[type="password"]').value;
+            const code = document.querySelector('#deleteModal input[type="text"]').value;
+            
+            if (!password) {
+                showNotification('⚠️ Digite sua senha para confirmar', 'error');
+                document.querySelector('#deleteModal input[type="password"]').focus();
+                return;
+            }
+            
+            if (code.length !== 6) {
+                showNotification('⚠️ Digite o código de verificação de 6 dígitos', 'error');
+                document.querySelector('#deleteModal input[type="text"]').focus();
+                return;
+            }
+            
+            closeModal('deleteModal');
+            showLoading();
+            
+            simulateAsync(() => {
+                try {
+                    // Aqui seria a chamada real para o backend
+                    // await fetch('/api/delete-account', { method: 'DELETE', body: JSON.stringify({password, code}) });
+                    
+                    showNotification('⚠️ Conta excluída permanentemente!', 'error');
+                    
+                    // Simular limpeza de dados e logout
+                    setTimeout(() => {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                        window.location.href = '/login?deleted=true';
+                    }, 2000);
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 3000);
+        }
+
+        // Refazer entrevista com verificação PLUS
+        function retakeInterview() {
+            if (userData.userType === 'FREE') {
+                openModal('upgradeModal');
+                return;
+            }
+            openModal('retakeModal');
+        }
+
+        function confirmRetake() {
+            closeModal('retakeModal');
+            showLoading();
+            
+            simulateAsync(() => {
+                try {
+                    // Redirecionar para entrevista.html
+                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
+                    window.location.href = 'entrevista.html?retake=true';
+                    
+                } catch (error) {
+                    showNotification('❌ Erro ao acessar entrevista', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 800);
+        }
+
+        // Alterar e-mail com validação
+        function changeEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const currentEmail = emailInput.value;
+            
+            const newEmail = prompt('💌 Digite o novo e-mail:', currentEmail);
+            
+            if (newEmail && newEmail !== currentEmail) {
+                if (validateEmail(newEmail)) {
+                    emailInput.value = newEmail;
+                    showNotification('📧 E-mail atualizado! Clique em "Salvar Alterações" para confirmar.', 'info');
+                    
+                    // Destacar visualmente que há mudanças não salvas
+                    emailInput.style.borderColor = 'var(--neon-green)';
+                    emailInput.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.3)';
+                    
+                } else {
+                    showNotification('⚠️ Formato de e-mail inválido', 'error');
+                }
+            }
+        }
+        function createParticles() {
+            const particles = document.querySelector('.particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                
+                // Cores aleatórias para as partículas
+                const colors = ['var(--neon-blue)', 'var(--neon-purple)', 'var(--neon-green)'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 10px ${color}`;
+                
+                particles.appendChild(particle);
+            }
+        }
+
+        // Funções de modal
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Simular operações assíncronas
+        function simulateAsync(callback, delay = 2000) {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                callback();
+            }, delay);
+        }
+
+        // Refazer entrevista
+        function retakeInterview() {
+            openModal('retakeModal');
+        }
+
+        function confirmRetake() {
+            closeModal('retakeModal');
+            simulateAsync(() => {
+                alert('🚀 Entrevista iniciada! Redirecionando...');
+                // Aqui seria o redirect para a página de entrevista
+            });
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email.toLowerCase());
+        }
+
+        // Cancelar assinatura
+        function cancelSubscription() {
+            openModal('cancelModal');
+        }
+
+        function confirmCancel() {
+            closeModal('cancelModal');
+            simulateAsync(() => {
+                alert('✅ Assinatura cancelada com sucesso!');
+                // Atualizar UI para refletir o cancelamento
+                document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
+                document.querySelector('.plan-badge').className = 'plan-badge';
+                document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
+            });
+        }
+
+        // Verificar e-mail
+        function verifyEmail() {
+            openModal('emailModal');
+            // Simular envio do código
+            setTimeout(() => {
+                console.log('📧 Código de verificação enviado!');
+            }, 500);
+        }
+
+        function confirmEmailVerification() {
+            const code = document.querySelector('#emailModal input').value;
+            if (code.length === 6) {
+                closeModal('emailModal');
+                simulateAsync(() => {
+                    alert('✅ E-mail verificado com sucesso!');
+                }, 1000);
+            } else {
+                alert('⚠️ Digite um código válido de 6 dígitos');
+            }
+        }
+
+        // Excluir conta
+        function deleteAccount() {
+            // Primeiro, simular envio de código de verificação
+            showNotification('📧 Enviando código de verificação para seu e-mail...', 'info');
+            
+            setTimeout(() => {
+                openModal('deleteModal');
+                showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
+            }, 1500);
+        }
+
+        // Upgrade da conta
+        function upgradeAccount() {
+            closeModal('upgradeModal');
+            showNotification('💳 Redirecionando para upgrade...', 'info');
+            
+            setTimeout(() => {
+                try {
+                    // Aqui seria o redirecionamento para página de upgrade/pagamento
+                    window.location.href = '/upgrade?source=account_management';
+                } catch (error) {
+                    showNotification('❌ Erro ao acessar página de upgrade', 'error');
+                    console.error('Erro:', error);
+                }
+            }, 1500);
+        }
+
+        // Função para detectar mudanças não salvas
+        function trackUnsavedChanges() {
+            const inputs = document.querySelectorAll('.form-input');
+            let hasUnsavedChanges = false;
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    hasUnsavedChanges = true;
+                    
+                    // Destacar visualmente
+                    this.style.borderColor = 'var(--neon-green)';
+                    this.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.3)';
+                    
+                    // Mostrar indicador de mudanças não salvas
+                    showUnsavedIndicator();
+                });
+            });
+            
+            // Avisar sobre mudanças não salvas ao sair da página
+            window.addEventListener('beforeunload', function(e) {
+                if (hasUnsavedChanges) {
+                    e.preventDefault();
+                    e.returnValue = 'Você tem alterações não salvas. Deseja realmente sair?';
+                }
+            });
+        }
+
+        function showUnsavedIndicator() {
+            const indicator = document.getElementById('unsavedIndicator');
+            if (!indicator) {
+                const newIndicator = document.createElement('div');
+                newIndicator.id = 'unsavedIndicator';
+                newIndicator.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: linear-gradient(45deg, var(--neon-green), rgba(57, 255, 20, 0.8));
+                    color: var(--bg-primary);
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    z-index: 1500;
+                    animation: slideInBottom 0.3s ease;
+                    box-shadow: 0 5px 15px rgba(57, 255, 20, 0.4);
+                    font-family: 'Exo 2', sans-serif;
+                `;
+                newIndicator.innerHTML = '⚠️ Você tem alterações não salvas';
+                document.body.appendChild(newIndicator);
+                
+                // Auto-hide após 3 segundos
+                setTimeout(() => {
+                    if (document.body.contains(newIndicator)) {
+                        newIndicator.style.animation = 'slideOutBottom 0.3s ease';
+                        setTimeout(() => {
+                            if (document.body.contains(newIndicator)) {
+                                document.body.removeChild(newIndicator);
+                            }
+                        }, 300);
+                    }
+                }, 3000);
+            }
+        }
+
+        // Adicionar animações para indicador
+        const indicatorStyles = document.createElement('style');
+        indicatorStyles.textContent = `
+            @keyframes slideInBottom {
+                from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutBottom {
+                from { transform: translateX(-50%) translateY(0); opacity: 1; }
+                to { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(indicatorStyles);
+
+        // Função para limpar indicadores visuais após salvar
+        function clearUnsavedIndicators() {
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.style.borderColor = '';
+                input.style.boxShadow = '';
+            });
+            
+            const indicator = document.getElementById('unsavedIndicator');
+            if (indicator) {
+                document.body.removeChild(indicator);
+            }
+        }
+
+        // Simulação de loading melhorada
+        function simulateAsync(callback, delay = 2000) {
+            showLoading();
+            
+            // Simular progresso
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                console.log(`Processando... ${progress}%`);
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, delay / 10);
+            
+            setTimeout(() => {
+                hideLoading();
+                clearUnsavedIndicators();
+                callback();
+            }, delay);
+        }
+
+        // Melhorias no sistema de notificações
+        let notificationQueue = [];
+        let isShowingNotification = false;
+
+        function showNotification(message, type = 'info') {
+            notificationQueue.push({ message, type });
+            processNotificationQueue();
+        }
+
+        function processNotificationQueue() {
+            if (isShowingNotification || notificationQueue.length === 0) return;
+            
+            isShowingNotification = true;
+            const { message, type } = notificationQueue.shift();
+            
+            const colors = {
+                success: 'var(--neon-green)',
+                error: '#ff1744',
+                warning: 'var(--neon-pink)',
+                info: 'var(--neon-blue)'
+            };
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--glass-bg), rgba(0, 255, 255, 0.1));
+                backdrop-filter: blur(20px);
+                border: 1px solid ${colors[type] || colors.info};
+                border-radius: 12px;
+                padding: 1rem 1.5rem;
+                color: var(--text-primary);
+                font-family: 'Exo 2', sans-serif;
+                font-weight: 600;
+                z-index: 2000;
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+                max-width: 350px;
+                min-width: 250px;
+                word-wrap: break-word;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.2rem;">${icons[type] || icons.info}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                        isShowingNotification = false;
+                        processNotificationQueue(); // Processar próxima notificação
+                    }, 300);
+                }
+            }, 4000);
+        }
+
+        // Função para verificar conectividade
+        function checkConnectivity() {
+            if (!navigator.onLine) {
+                showNotification('🔌 Você está offline. Algumas funcionalidades podem não funcionar.', 'warning');
+            }
+        }
+
+        // Event listeners para conectividade
+        window.addEventListener('online', () => {
+            showNotification('🌐 Conexão restabelecida!', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            showNotification('🔌 Você ficou offline', 'warning');
+        });
+
+        function confirmDelete() {
+            const password = document.querySelector('#deleteModal input[type="password"]').value;
+            const code = document.querySelector('#deleteModal input[type="text"]').value;
+            
+            if (password.length > 0 && code.length === 6) {
+                closeModal('deleteModal');
+                simulateAsync(() => {
+                    alert('⚠️ Conta excluída permanentemente!');
+                    // Aqui seria o redirect para página de logout
+                }, 3000);
+            } else {
+                alert('⚠️ Preencha todos os campos corretamente');
+            }
+        }
+
+        // Validação em tempo real dos formulários
+        function setupFormValidation() {
+            const inputs = document.querySelectorAll('.form-input');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        this.style.borderColor = 'var(--neon-green)';
+                        this.style.boxShadow = '0 0 20px rgba(57, 255, 20, 0.3)';
+                    } else {
+                        this.style.borderColor = '#ff1744';
+                        this.style.boxShadow = '0 0 20px rgba(255, 23, 68, 0.3)';
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = 'var(--glass-border)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        }
+
+        // Efeitos de paralaxe suaves
+        function setupParallax() {
+            let ticking = false;
+            
+            function updateParallax() {
+                const scrolled = window.pageYOffset;
+                const parallax = document.querySelector('.background-particles');
+                const speed = scrolled * 0.5;
+                
+                parallax.style.transform = `translateY(${speed}px)`;
+                ticking = false;
+            }
+            
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateParallax);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', requestTick);
+        }
+
+        // Efeitos de hover nos cards
+        function setupCardEffects() {
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) rotateX(5deg) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) rotateX(0) scale(1)';
+                });
+            });
+        }
+
+        // Efeito de digitação no título
+        function typewriterEffect() {
+            const title = document.querySelector('.page-title');
+            const text = title.textContent;
+            title.textContent = '';
+            
+            let i = 0;
+            const timer = setInterval(() => {
+                title.textContent += text[i];
+                i++;
+                if (i >= text.length) {
+                    clearInterval(timer);
+                }
+            }, 100);
+        }
+
+        // Animação de entrada dos cards
+        function animateCardsOnLoad() {
+            const cards = document.querySelectorAll('.card');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(50px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        function setupModalClickOutside() {
+            const modals = document.querySelectorAll('.modal');
+            
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            });
+        }
+
+        // Adicionar efeitos sonoros (simulados com console)
+        function playSound(type) {
+            const sounds = {
+                click: '🔊 *Click*',
+                success: '🔊 *Success beep*',
+                error: '🔊 *Error buzz*',
+                warning: '🔊 *Warning tone*'
+            };
+            console.log(sounds[type] || '🔊 *Sound*');
+        }
+
+        // Adicionar eventos de som aos botões
+        function setupSoundEffects() {
+            const buttons = document.querySelectorAll('.btn');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.classList.contains('btn-danger')) {
+                        playSound('warning');
+                    } else if (button.classList.contains('btn-primary')) {
+                        playSound('success');
+                    } else {
+                        playSound('click');
+                    }
+                });
+            });
+        }
+
+        // Gerar códigos de verificação aleatórios (simulação)
+        function generateVerificationCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // Sistema de notificações futuristas
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'var(--neon-green)',
+                error: '#ff1744',
+                warning: 'var(--neon-pink)',
+                info: 'var(--neon-blue)'
+            };
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--glass-bg), rgba(0, 255, 255, 0.1));
+                backdrop-filter: blur(20px);
+                border: 1px solid ${colors[type] || colors.info};
+                border-radius: 10px;
+                padding: 1rem 1.5rem;
+                color: var(--text-primary);
+                font-family: 'Exo 2', sans-serif;
+                font-weight: 600;
+                z-index: 2000;
+                animation: slideInRight 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+                max-width: 300px;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        // Adicionar CSS para animações de notificação
+        const notificationStyles = document.createElement('style');
+        notificationStyles.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(notificationStyles);
+
+        // Inicialização quando a página carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar conectividade inicial
+            checkConnectivity();
+            
+            // Inicializar componentes
+            createParticles();
+            setupFormValidation();
+            setupParallax();
+            setupCardEffects();
+            setupModalClickOutside();
+            setupSoundEffects();
+            updatePersonalizationStatus();
+            trackUnsavedChanges();
+            
+            // Verificar se há dados salvos localmente
+            loadUserDataFromStorage();
+            
+            // Pequeno delay para efeitos visuais
+            setTimeout(() => {
+                typewriterEffect();
+                animateCardsOnLoad();
+            }, 500);
+            
+            // Easter egg: Konami code
+            let konamiCode = [];
+            const targetSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+            
+            document.addEventListener('keydown', function(e) {
+                konamiCode.push(e.code);
+                if (konamiCode.length > targetSequence.length) {
+                    konamiCode.shift();
+                }
+                
+                if (JSON.stringify(konamiCode) === JSON.stringify(targetSequence)) {
+                    showNotification('🎮 Konami Code ativado! Modo desenvolvedor habilitado!', 'success');
+                    document.body.style.filter = 'hue-rotate(180deg)';
+                    setTimeout(() => {
+                        document.body.style.filter = 'none';
+                    }, 3000);
+                }
+            });
+
+            // Simulação de dados do usuário carregando
+            setTimeout(() => {
+                showNotification('🚀 Sistema PROD.AI inicializado com sucesso!', 'success');
+            }, 1000);
+            
+            // Auto-save a cada 30 segundos se houver mudanças
+            setInterval(autoSave, 30000);
+        });
+
+        // Função para carregar dados do usuário
+        function loadUserDataFromStorage() {
+            try {
+                const savedData = localStorage.getItem('prodai_user_data');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    // Mesclar com dados padrão
+                    Object.assign(userData, parsedData);
+                    
+                    // Atualizar interface com dados carregados
+                    updateUIWithUserData();
+                }
+            } catch (error) {
+                console.log('Erro ao carregar dados salvos:', error);
+            }
+        }
+
+        // Função para atualizar interface com dados do usuário
+        function updateUIWithUserData() {
+            // Atualizar e-mail
+            const emailInput = document.getElementById('emailInput');
+            if (emailInput && userData.personalInfo.email) {
+                emailInput.value = userData.personalInfo.email;
+            }
+            
+            // Atualizar dados da entrevista
+            Object.keys(userData.interviewData).forEach(key => {
+                const element = document.querySelector(`[data-field="${key}"]`);
+                if (element) {
+                    element.textContent = userData.interviewData[key];
+                }
+            });
+        }
+
+        // Auto-save funcionalidade
+        function autoSave() {
+            const hasChanges = document.querySelector('#unsavedIndicator');
+            if (hasChanges && navigator.onLine) {
+                console.log('🔄 Auto-save executado...');
+                // Aqui seria a chamada real para salvar no backend
+                // Não mostrar notificação para não incomodar o usuário
+            }
+        }
+
+        // Função para salvar dados localmente
+        function saveUserDataToStorage() {
+            try {
+                localStorage.setItem('prodai_user_data', JSON.stringify(userData));
+            } catch (error) {
+                console.log('Erro ao salvar dados localmente:', error);
+            }
+        }
+
+        // Atualizar todas as funções de save para também salvar localmente
+        const originalSavePersonalization = savePersonalization;
+        savePersonalization = function() {
+            originalSavePersonalization();
+            saveUserDataToStorage();
+        };
+
+        const originalSavePersonalInfo = savePersonalInfo;
+        savePersonalInfo = function() {
+            originalSavePersonalInfo();
+            saveUserDataToStorage();
+        };
+
+        // Melhorar feedback visual para campos obrigatórios
+        function highlightRequiredFields() {
+            const requiredFields = document.querySelectorAll('input[required], textarea[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--neon-pink)';
+                    field.style.boxShadow = '0 0 10px rgba(255, 107, 157, 0.3)';
+                }
+            });
+        }
+
+        // Função para debug (modo desenvolvedor)
+        function enableDebugMode() {
+            console.log('🔧 Modo debug ativado');
+            console.log('Dados do usuário:', userData);
+            
+            // Adicionar indicadores visuais
+            document.querySelectorAll('.card').forEach((card, index) => {
+                card.style.border = '2px dashed var(--neon-green)';
+                card.setAttribute('data-debug', `Card ${index + 1}`);
+            });
+            
+            showNotification('🔧 Modo debug ativado - Verifique o console', 'info');
+        }
+
+        // Comando secreto para debug
+        window.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+                enableDebugMode();
+            }
+        });
+
+        // Função para detectar performance e ajustar efeitos
+        function optimizePerformance() {
+            const connection = navigator.connection;
+            if (connection && connection.effectiveType === '2g') {
+                // Reduzir partículas em conexões lentas
+                document.querySelector('.background-particles').style.display = 'none';
+                console.log('🔧 Modo de economia de dados ativado');
+            }
+        }
+
+        // Verificar performance na inicialização
+        optimizePerformance();
+    </script>
+</body>
+</html>
