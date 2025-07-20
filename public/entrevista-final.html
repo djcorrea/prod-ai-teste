@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROD.AI - Configuração do Perfil</title>
+    <title>PROD.AI - Perfil Criado com Sucesso</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap');
         
@@ -17,12 +17,12 @@
             --neon-cyan: #00ffff;
             --neon-purple: #ff00ff;
             --electric-blue: #0080ff;
-            --plasma-pink: #ff0080;
+            --plasma-pink: #9d00ff;
             --dark-bg: #0a0a0f;
             --glass-bg: rgba(255, 255, 255, 0.05);
             --text-primary: #ffffff;
             --text-secondary: #a0a0ff;
-            --input-bg: rgba(255, 255, 255, 0.03);
+            --success-green: #00ff88;
         }
         
         body {
@@ -31,11 +31,7 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
-            padding: 40px 20px;
         }
         
         /* Animated Background */
@@ -46,78 +42,147 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
+            background: radial-gradient(ellipse at top, #0a0a1f 0%, #000000 100%);
         }
         
-        .grid-overlay {
+        .grid-3d {
             position: absolute;
             width: 100%;
             height: 100%;
-            animation: grid-slide 20s linear infinite;
-            transform: perspective(1200px) rotateX(45deg) translateZ(-100px);
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.02) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.02) 2px, transparent 2px);
+            background-size: 100px 100px;
+            transform: perspective(1000px) rotateX(60deg) translateZ(-200px);
+            animation: grid-flow 25s linear infinite;
         }
         
-        @keyframes grid-slide {
-            0% { transform: perspective(1200px) rotateX(45deg) translateZ(-100px) translateY(0); }
-            100% { transform: perspective(1200px) rotateX(45deg) translateZ(-100px) translateY(60px); }
+        @keyframes grid-flow {
+            0% { transform: perspective(1000px) rotateX(60deg) translateZ(-200px) translateY(0); }
+            100% { transform: perspective(1000px) rotateX(60deg) translateZ(-200px) translateY(100px); }
         }
         
-        .particles {
+        .float-elements {
             position: absolute;
             width: 100%;
             height: 100%;
         }
         
-        .particle {
+        .float-element {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: var(--neon-cyan);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent);
             border-radius: 50%;
-            opacity: 0.7;
-            box-shadow: 0 0 15px var(--neon-cyan);
-            animation: particle-float 15s linear infinite;
+            animation: float-random 20s ease-in-out infinite;
         }
         
-        @keyframes particle-float {
-            0% {
-                transform: translateY(100vh) translateX(0) scale(0);
-                opacity: 0;
+        @keyframes float-random {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
             }
-            10% {
-                opacity: 0.7;
-                transform: translateY(90vh) translateX(10px) scale(1);
+            25% {
+                transform: translate(100px, -50px) scale(1.2);
             }
-            90% {
-                opacity: 0.7;
-                transform: translateY(10vh) translateX(-10px) scale(1);
+            50% {
+                transform: translate(-50px, 100px) scale(0.8);
             }
-            100% {
-                transform: translateY(-10vh) translateX(0) scale(0);
-                opacity: 0;
+            75% {
+                transform: translate(-100px, -100px) scale(1.1);
             }
         }
         
         /* Main Container */
-        .interview-container {
-            width: 90%;
-            max-width: 600px;
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Success Message */
+        .success-section {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fade-in-up 0.8s ease-out;
+        }
+        
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            display: inline-block;
+            animation: success-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes success-pulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 30px var(--success-green));
+            }
+            50% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 50px var(--success-green));
+            }
+        }
+        
+        .success-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--success-green), var(--neon-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.5));
+        }
+        
+        .success-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 60px;
+            letter-spacing: 1px;
+        }
+        
+        /* Benefits Grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+        
+        .benefit-card {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 40px 35px;
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.5),
-                inset 0 0 50px rgba(0, 255, 255, 0.05),
-                0 0 100px rgba(0, 255, 255, 0.1);
-            animation: container-entrance 1s ease-out;
+            border-radius: 25px;
+            padding: 40px 30px;
+            text-align: center;
             position: relative;
             overflow: hidden;
-            margin: 20px auto;
+            transition: all 0.3s ease;
+            animation: card-entrance 0.8s ease-out;
+            animation-fill-mode: both;
         }
         
-        @keyframes container-entrance {
+        .benefit-card:nth-child(1) { animation-delay: 0.1s; }
+        .benefit-card:nth-child(2) { animation-delay: 0.2s; }
+        .benefit-card:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes card-entrance {
             0% {
                 opacity: 0;
                 transform: translateY(50px) scale(0.9);
@@ -128,7 +193,7 @@
             }
         }
         
-        .interview-container::before {
+        .benefit-card::before {
             content: '';
             position: absolute;
             top: -50%;
@@ -138,139 +203,118 @@
             background: linear-gradient(
                 45deg,
                 transparent,
-                rgba(0, 255, 255, 0.05),
-                transparent,
-                rgba(255, 0, 255, 0.05),
+                rgba(0, 255, 255, 0.1),
                 transparent
             );
-            animation: shimmer 3s ease-in-out infinite;
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
         }
         
-        @keyframes shimmer {
+        .benefit-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--neon-cyan);
+            box-shadow: 
+                0 20px 40px rgba(0, 255, 255, 0.3),
+                inset 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+        
+        .benefit-card:hover::before {
+            opacity: 1;
+            animation: card-shimmer 1s ease infinite;
+        }
+        
+        @keyframes card-shimmer {
             0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
             100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         
-        /* Typography */
-        .main-title {
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 50px;
-            background: linear-gradient(45deg, var(--neon-cyan), var(--electric-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
-            animation: title-pulse 3s ease-in-out infinite;
-            line-height: 1.2;
-            position: relative;
-            z-index: 1;
+        .benefit-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: icon-float 3s ease-in-out infinite;
         }
         
-        @keyframes title-pulse {
-            0%, 100% { filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5)); }
-            50% { filter: drop-shadow(0 0 50px rgba(255, 0, 255, 0.7)); }
+        .benefit-card:nth-child(odd) .benefit-icon { animation-delay: 0.5s; }
+        
+        @keyframes icon-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         
-        /* Form Styles */
-        .form-group {
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .form-label {
-            display: block;
+        .benefit-title {
             font-family: 'Poppins', sans-serif;
-            font-size: 0.9rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--neon-cyan);
             margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         }
         
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 18px 25px;
-            background: var(--input-bg);
-            border: 2px solid rgba(0, 255, 255, 0.2);
-            border-radius: 15px;
-            color: var(--text-primary);
+        .benefit-description {
             font-size: 1rem;
-            font-family: 'Space Grotesk', sans-serif;
-            transition: all 0.3s ease;
-            outline: none;
-            box-shadow: 
-                inset 0 5px 15px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(0, 255, 255, 0.1);
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
         
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 255, 255, 0.05);
-            box-shadow: 
-                inset 0 5px 20px rgba(0, 255, 255, 0.1),
-                0 0 30px rgba(0, 255, 255, 0.3),
-                0 0 60px rgba(0, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .form-select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%2300ffff" d="M6 8L0 0h12z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 20px center;
-            padding-right: 50px;
-        }
-        
-        .form-select option {
-            background: var(--dark-bg);
-            color: var(--text-primary);
-        }
-        
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        /* Submit Button */
-        .submit-button {
-            display: block;
-            width: 100%;
-            max-width: 300px;
-            margin: 50px auto 0;
-            padding: 20px 40px;
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-decoration: none;
+        /* CTA Section */
+        .cta-section {
             text-align: center;
-            color: var(--dark-bg);
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-            border: none;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05));
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, var(--neon-purple), var(--electric-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.5));
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 16px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            text-transform: uppercase;
             border-radius: 50px;
-            cursor: pointer;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
+        }
+        
+        .cta-button-primary {
+            color: var(--dark-bg);
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
             box-shadow: 
                 0 10px 30px rgba(0, 255, 255, 0.5),
                 inset 0 0 20px rgba(255, 255, 255, 0.2);
-            animation: button-glow 2s ease-in-out infinite;
+            animation: primary-pulse 2s ease-in-out infinite;
         }
         
-        @keyframes button-glow {
+        @keyframes primary-pulse {
             0%, 100% {
                 box-shadow: 
                     0 10px 30px rgba(0, 255, 255, 0.5),
@@ -283,57 +327,123 @@
             }
         }
         
-        .submit-button::before {
+        .cta-button-secondary {
+            color: var(--text-primary);
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .cta-button::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
         }
         
-        .submit-button:hover {
+        .cta-button:hover {
             transform: translateY(-3px) scale(1.05);
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .cta-button-primary:hover {
             box-shadow: 
                 0 15px 40px rgba(0, 255, 255, 0.7),
                 inset 0 0 30px rgba(255, 255, 255, 0.3);
         }
         
-        .submit-button:hover::before {
-            left: 100%;
-        }
-        
-        .submit-button:active {
-            transform: translateY(-1px) scale(1.02);
+        .cta-button-secondary:hover {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.3),
+                inset 0 0 30px rgba(0, 255, 255, 0.1);
         }
         
         /* Responsive */
         @media (max-width: 768px) {
-            body {
+            .main-container {
+                padding: 40px 15px;
+            }
+            
+            .success-icon {
+                font-size: 4rem;
+            }
+            
+            .success-title {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .success-subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 40px;
+            }
+            
+            .benefits-grid {
+                gap: 15px;
+                margin-bottom: 50px;
+            }
+            
+            .benefit-card {
+                padding: 25px 20px;
+            }
+            
+            .benefit-icon {
+                font-size: 2.5rem;
+            }
+            
+            .benefit-title {
+                font-size: 1.1rem;
+            }
+            
+            .benefit-description {
+                font-size: 0.9rem;
+            }
+            
+            .cta-section {
                 padding: 30px 15px;
+                margin: 0 -15px;
+                border-radius: 20px;
             }
             
-            .interview-container {
-                padding: 35px 25px;
+            .cta-title {
+                font-size: 1.5rem;
+                margin-bottom: 30px;
+            }
+            
+            .button-container {
+                gap: 15px;
+            }
+            
+            .cta-button {
+                padding: 14px 30px;
+                font-size: 0.9rem;
                 width: 100%;
-                max-width: 500px;
+                max-width: 280px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .success-title {
+                font-size: 1.5rem;
             }
             
-            .main-title {
-                font-size: 1.4rem;
-                margin-bottom: 35px;
+            .benefit-card {
+                padding: 20px 15px;
             }
             
-            .form-input,
-            .form-select,
-            .form-textarea {
-                padding: 15px 20px;
-            }
-            
-            .form-group {
-                margin-bottom: 25px;
+            .cta-button {
+                padding: 12px 25px;
+                font-size: 0.85rem;
+                letter-spacing: 1px;
             }
         }
     </style>
@@ -341,85 +451,139 @@
 <body>
     <!-- Background -->
     <div class="background-container">
-        <div class="grid-overlay"></div>
-        <div class="particles" id="particles"></div>
+        <div class="grid-3d"></div>
+        <div class="float-elements">
+            <div class="float-element" style="top: 10%; left: 10%;"></div>
+            <div class="float-element" style="top: 20%; right: 15%; animation-delay: 5s;"></div>
+            <div class="float-element" style="bottom: 20%; left: 20%; animation-delay: 10s;"></div>
+            <div class="float-element" style="bottom: 10%; right: 10%; animation-delay: 15s;"></div>
+        </div>
     </div>
     
     <!-- Main Content -->
-    <div class="interview-container">
-        <h1 class="main-title">Antes de começar, queremos te conhecer melhor para personalizar suas respostas</h1>
+    <div class="main-container">
+        <!-- Success Section -->
+        <div class="success-section">
+            <div class="success-icon">✅</div>
+            <h1 class="success-title">Perfil técnico criado com sucesso!</h1>
+            <p class="success-subtitle">Quer respostas personalizadas com base no seu perfil?</p>
+        </div>
         
-        <form id="interviewForm" action="entrevista-final.html">
-            <div class="form-group">
-                <label class="form-label">Nome Artístico</label>
-                <input type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
+        <!-- Benefits Grid -->
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">💬</div>
+                <h3 class="benefit-title">Mensagens ilimitadas</h3>
+                <p class="benefit-description">Converse sem limites e tire todas as suas dúvidas sobre produção musical</p>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">Nível Técnico</label>
-                <select class="form-select" required>
-                    <option value="">Selecione seu nível</option>
-                    <option value="iniciante">Iniciante</option>
-                    <option value="intermediario">Intermediário</option>
-                    <option value="avancado">Avançado</option>
-                </select>
+            <div class="benefit-card">
+                <div class="benefit-icon">🧠</div>
+                <h3 class="benefit-title">Respostas personalizadas</h3>
+                <p class="benefit-description">IA adaptada ao seu nível técnico e estilo musical específico</p>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">DAW Usada</label>
-                <select class="form-select" required>
-                    <option value="">Selecione sua DAW</option>
-                    <option value="fl-studio">FL Studio</option>
-                    <option value="ableton">Ableton</option>
-                    <option value="logic">Logic</option>
-                    <option value="reaper">Reaper</option>
-                    <option value="outro">Outro</option>
-                </select>
+            <div class="benefit-card">
+                <div class="benefit-icon">🚀</div>
+                <h3 class="benefit-title">Prioridade no servidor</h3>
+                <p class="benefit-description">Respostas instantâneas mesmo em horários de pico</p>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Maior Dificuldade na Produção</label>
-                <input type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2 class="cta-title">Assine a versão Plus</h2>
+            <div class="button-container">
+                <a href="planos.html" class="cta-button cta-button-primary">Assinar versão Plus</a>
+                <a href="index.html" class="cta-button cta-button-secondary">Continuar sem assinar</a>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">Estilo Musical</label>
-                <input type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Me conte mais sobre você</label>
-                <textarea class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
-            </div>
-            
-            <button type="submit" class="submit-button">Enviar Respostas</button>
-        </form>
+        </div>
     </div>
     
     <script>
-        // Generate particles
-        const particlesContainer = document.getElementById('particles');
-        const particleCount = 30;
+        // Add parallax effect to floating elements
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            
+            document.querySelectorAll('.float-element').forEach((element, index) => {
+                const speed = (index + 1) * 20;
+                const x = (mouseX - 0.5) * speed;
+                const y = (mouseY - 0.5) * speed;
+                
+                element.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
         
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-            particlesContainer.appendChild(particle);
-        }
+        // Add entrance animation to elements
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
         
-        // Form animation on focus
-        const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Animate cards on hover with 3D effect
+        document.querySelectorAll('.benefit-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / centerY * -10;
+                const rotateY = (x - centerX) / centerX * 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px)`;
             });
             
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
             });
+        });
+        
+        // Success icon animation
+        const successIcon = document.querySelector('.success-icon');
+        successIcon.addEventListener('animationiteration', () => {
+            // Create sparkle effect
+            const sparkle = document.createElement('div');
+            sparkle.style.position = 'absolute';
+            sparkle.style.width = '4px';
+            sparkle.style.height = '4px';
+            sparkle.style.background = '#00ff88';
+            sparkle.style.borderRadius = '50%';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.left = '50%';
+            sparkle.style.top = '50%';
+            sparkle.style.transform = 'translate(-50%, -50%)';
+            sparkle.style.boxShadow = '0 0 10px #00ff88';
+            successIcon.appendChild(sparkle);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 50 + Math.random() * 50;
+            
+            sparkle.animate([
+                { 
+                    transform: 'translate(-50%, -50%) scale(1)',
+                    opacity: 1 
+                },
+                { 
+                    transform: `translate(calc(-50% + ${Math.cos(angle) * distance}px), calc(-50% + ${Math.sin(angle) * distance}px)) scale(0)`,
+                    opacity: 0 
+                }
+            ], {
+                duration: 1000,
+                easing: 'ease-out'
+            }).onfinish = () => sparkle.remove();
         });
     </script>
 </body>
