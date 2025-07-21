@@ -2691,5 +2691,60 @@
             deleteAccount();
         }
     </script>
+
+    <script type="module">
+        import {
+            getAuth,
+            EmailAuthProvider,
+            reauthenticateWithCredential,
+            updatePassword
+        } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+        const auth = getAuth();
+        const btn = document.getElementById('btnAlterarSenha');
+
+        if (btn) {
+            btn.addEventListener('click', async () => {
+                const currentPassword = document.getElementById('senhaAtual').value.trim();
+                const newPassword = document.getElementById('novaSenha').value.trim();
+                const confirmPassword = document.getElementById('confirmarSenha').value.trim();
+
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    alert('Preencha todos os campos.');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    alert('As senhas n\u00e3o coincidem.');
+                    return;
+                }
+
+                const user = auth.currentUser;
+                if (!user || !user.email) {
+                    alert('Usu\u00e1rio n\u00e3o autenticado.');
+                    return;
+                }
+
+                try {
+                    const cred = EmailAuthProvider.credential(user.email, currentPassword);
+                    await reauthenticateWithCredential(user, cred);
+                    await updatePassword(user, newPassword);
+                    alert('Senha alterada com sucesso!');
+
+                    document.getElementById('senhaAtual').value = '';
+                    document.getElementById('novaSenha').value = '';
+                    document.getElementById('confirmarSenha').value = '';
+                } catch (error) {
+                    let message = 'Erro ao alterar senha.';
+                    if (error.code === 'auth/wrong-password') {
+                        message = 'Senha atual incorreta.';
+                    } else if (error.code === 'auth/weak-password') {
+                        message = 'Nova senha muito fraca.';
+                    }
+                    alert(message);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
