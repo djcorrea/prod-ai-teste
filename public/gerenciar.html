@@ -1307,7 +1307,7 @@
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
+                <button class="btn btn-primary btn-full" id="btnAlterarSenha">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1637,46 +1637,6 @@
                 });
         }
 
-        // Alterar senha com validação robusta
-        function changePassword() {
-            const currentPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(1)').value;
-            const newPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(2)').value;
-            const confirmPassword = document.querySelector('#securityCard input[type="password"]:nth-of-type(3)').value;
-            
-            // Validações
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                showNotification('⚠️ Preencha todos os campos de senha', 'warning');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                showNotification('⚠️ Nova senha e confirmação não coincidem', 'error');
-                return;
-            }
-            
-            if (newPassword.length < 8) {
-                showNotification('⚠️ Nova senha deve ter pelo menos 8 caracteres', 'error');
-                return;
-            }
-
-            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
-                showNotification('⚠️ Senha deve conter maiúscula, minúscula e número', 'error');
-                return;
-            }
-            
-            apiRequest('/api/user/change-password', {
-                method: 'POST',
-                body: { currentPassword, newPassword }
-            })
-                .then(() => {
-                    document.querySelectorAll('#securityCard input[type="password"]').forEach(input => input.value = '');
-                    showNotification('✅ Senha alterada com sucesso!', 'success');
-                    playSound('success');
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao alterar senha. Verifique a senha atual.', 'error');
-                });
-        }
 
         // Cancelar assinatura com redirecionamento real
         function confirmCancel() {
@@ -2646,23 +2606,6 @@
             window.location.href = 'index.html';
         }
 
-        function alterarSenha() {
-            const atual = document.getElementById('senhaAtual').value;
-            const nova = document.getElementById('novaSenha').value;
-            const confirmar = document.getElementById('confirmarSenha').value;
-
-            if (nova !== confirmar) {
-                alert('As senhas não coincidem.');
-                return;
-            }
-            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
-                alert('Senha fraca.');
-                return;
-            }
-
-            localStorage.setItem('userPassword', nova);
-            alert('Senha alterada com sucesso!');
-        }
 
         function alterarEmail() {
             const emailInput = document.getElementById('emailInput');
