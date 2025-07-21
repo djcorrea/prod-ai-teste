@@ -1342,7 +1342,7 @@
                 <div class="form-group">
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
+                        <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="inputEmail" autocomplete="email">
                         <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
                     </div>
                 </div>
@@ -1694,14 +1694,14 @@
 
         // Salvar informações pessoais com validação completa
         function savePersonalInfo() {
-            const email = document.getElementById('emailInput').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
             const phone = document.querySelector('#personalCard input[type="tel"]').value.trim();
             const avatar = document.querySelector('#personalCard input[type="file"]').files[0];
             
             // Validação de e-mail
             if (!email || !validateEmail(email)) {
                 showNotification('⚠️ Digite um e-mail válido', 'error');
-                document.getElementById('emailInput').focus();
+                document.getElementById('inputEmail').focus();
                 return;
             }
 
@@ -1790,7 +1790,7 @@
 
         // Alterar e-mail com validação
         function changeEmail() {
-            const emailInput = document.getElementById('emailInput');
+            const emailInput = document.getElementById('inputEmail');
             const currentEmail = emailInput.value;
             
             const newEmail = prompt('💌 Digite o novo e-mail:', currentEmail);
@@ -2484,7 +2484,7 @@
         // Função para atualizar interface com dados do usuário
         function updateUIWithUserData() {
             // Atualizar e-mail
-            const emailInput = document.getElementById('emailInput');
+            const emailInput = document.getElementById('inputEmail');
             if (emailInput && userData.personalInfo.email) {
                 emailInput.value = userData.personalInfo.email;
             }
@@ -2607,7 +2607,7 @@
                 }
                 
                 // Salvar informações pessoais
-                const email = document.getElementById('emailInput').value;
+                const email = document.getElementById('inputEmail').value;
                 if (email && validateEmail(email)) {
                     userData.personalInfo.email = email;
                 }
@@ -2665,7 +2665,7 @@
         }
 
         function alterarEmail() {
-            const emailInput = document.getElementById('emailInput');
+            const emailInput = document.getElementById('inputEmail');
             const novoEmail = prompt('Novo e-mail:', emailInput.value);
             if (novoEmail) {
                 emailInput.value = novoEmail;
