@@ -1342,13 +1342,13 @@
                 <div class="form-group">
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
+                        <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="inputEmail" autocomplete="email">
                         <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Telefone (Opcional)</label>
-                    <input type="tel" class="form-input" placeholder="+55 (11) 99999-9999" autocomplete="tel">
+                    <input type="tel" class="form-input" id="inputTelefone" placeholder="+55 (11) 99999-9999" autocomplete="tel">
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem;">
                         💡 Formato: +55 (11) 99999-9999 ou apenas 11999999999
                     </div>
@@ -1360,7 +1360,7 @@
                         📸 Máximo 5MB - JPG, PNG ou GIF
                     </div>
                 </div>
-                <button class="btn btn-primary btn-full" onclick="savePersonalInfo()">
+                <button class="btn btn-primary btn-full" id="btnSalvarInformacoes">
                     💾 Salvar Alterações
                 </button>
             </div>
@@ -2739,5 +2739,57 @@
     });
   }
 </script>
+    <script type="module">
+      import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+      const emailInput = document.getElementById('inputEmail');
+      const phoneInput = document.getElementById('inputTelefone');
+      const saveBtn = document.getElementById('btnSalvarInformacoes');
+
+      function validarEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function validarTelefone(tel) {
+        const digits = tel.replace(/\D/g, '');
+        return digits.length === 0 || digits.length >= 8;
+      }
+
+      saveBtn?.addEventListener('click', async () => {
+        const email = emailInput?.value.trim() || '';
+        const telefone = phoneInput?.value.trim() || '';
+
+        if (!validarEmail(email)) {
+          alert('E-mail inválido');
+          return;
+        }
+
+        if (!validarTelefone(telefone)) {
+          alert('Telefone inválido');
+          return;
+        }
+
+        try {
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (!user) throw new Error('Usuário não autenticado');
+
+          const idToken = await user.getIdToken();
+
+          const res = await fetch('/api/atualizarDados', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken, email, telefone })
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'Erro ao atualizar dados');
+
+          alert(data.message || 'Dados atualizados com sucesso');
+        } catch (err) {
+          alert(err.message || 'Erro ao atualizar dados');
+        }
+      });
+    </script>
 </body>
 </html>
