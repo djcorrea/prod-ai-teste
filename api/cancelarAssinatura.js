@@ -1,6 +1,7 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import axios from 'axios';
 
 if (!getApps().length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -31,6 +32,27 @@ export default async function handler(req, res) {
 
   if ((data.plano || 'gratis') === 'gratis') {
     return res.status(403).json({ error: 'Usuário sem assinatura ativa' });
+  }
+
+  const preapprovalId = data.preapproval_id || data.preapprovalId;
+  if (!preapprovalId) {
+    return res.status(500).json({ error: 'preapproval_id ausente' });
+  }
+
+  try {
+    await axios.put(
+      `https://api.mercadopago.com/preapproval/${preapprovalId}`,
+      { status: 'cancelled' },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+  } catch (err) {
+    console.error('Mercado Pago error:', err.response?.data || err.message);
+    return res.status(500).json({ error: 'Erro ao cancelar no Mercado Pago' });
   }
 
   await userRef.set(
