@@ -1328,7 +1328,7 @@
                     <p>✓ Respostas prioritárias</p>
                     <p>✓ Recursos avançados</p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="cancelarAssinatura()">
+                <button id="btnCancelarAssinatura" class="btn btn-danger btn-full">
                     Cancelar Assinatura
                 </button>
             </div>
@@ -1471,8 +1471,8 @@
                 </p>
             </div>
             <div class="modal-buttons">
-                <button class="btn btn-secondary" onclick="closeModal('cancelModal')">Manter Assinatura</button>
-                <button class="btn btn-danger" onclick="confirmCancel()">Cancelar</button>
+                <button id="cancelarCancelamento" class="btn btn-secondary" onclick="closeModal('cancelModal')">Manter Assinatura</button>
+                <button id="confirmarCancelamento" class="btn btn-danger" onclick="confirmCancel()">Cancelar</button>
             </div>
         </div>
     </div>
@@ -2705,6 +2705,10 @@
     </script>
     <script type="module">
   import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  const auth = getAuth();
+  const db = getFirestore();
 
   const btn = document.getElementById('btnAlterarSenha');
   if (btn) {
@@ -2735,6 +2739,42 @@
       } catch (err) {
         console.error(err);
         alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
+      }
+    });
+  }
+
+  const btnCancelar = document.getElementById('btnCancelarAssinatura');
+  if (btnCancelar) {
+    btnCancelar.addEventListener('click', async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const snap = await getDoc(doc(db, 'usuarios', user.uid));
+        const plano = snap.exists() ? (snap.data().plano || 'gratis') : 'gratis';
+        if (plano !== 'plus') {
+          alert('Você não possui uma assinatura ativa.');
+          return;
+        }
+
+        const confirm = window.confirm('Tem certeza que deseja cancelar?');
+        if (!confirm) return;
+
+        const idToken = await user.getIdToken();
+        const resp = await fetch('/api/cancelarAssinatura', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        const data = await resp.json();
+        if (resp.ok) {
+          alert(data.message || 'Assinatura cancelada com sucesso');
+        } else {
+          throw new Error(data.error || 'Erro ao cancelar assinatura');
+        }
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'Erro ao cancelar assinatura');
       }
     });
   }
