@@ -1278,10 +1278,10 @@
                     </div>
                 </div>
 
-                <button class="btn btn-secondary btn-full" onclick="refazerEntrevista()">
+                <button class="btn btn-secondary btn-full" onclick="retakeInterview()">
                     🔄 Refazer Entrevista Completa
                 </button>
-                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="salvarPreferencias()">
+                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="savePersonalization()">
                     💾 Salvar Alterações
                 </button>
             </div>
@@ -1307,7 +1307,7 @@
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
+                <button class="btn btn-primary btn-full" onclick="changePassword()">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1328,7 +1328,7 @@
                     <p>✓ Respostas prioritárias</p>
                     <p>✓ Recursos avançados</p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="cancelarAssinatura()">
+                <button class="btn btn-danger btn-full" onclick="cancelSubscription()">
                     Cancelar Assinatura
                 </button>
             </div>
@@ -1343,7 +1343,7 @@
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
-                        <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
+                        <button class="btn btn-secondary" onclick="changeEmail()">✏️ Alterar</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -1400,7 +1400,7 @@
                         Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
                     </p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="excluirConta()">
+                <button class="btn btn-danger btn-full" onclick="deleteAccount()">
                     Excluir Conta Permanentemente
                 </button>
             </div>
@@ -1692,6 +1692,15 @@
                 });
         }
 
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('fail'));
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Salvar informações pessoais com validação completa
         function savePersonalInfo() {
             const email = document.getElementById('emailInput').value.trim();
@@ -1713,12 +1722,22 @@
             
             const body = { email, phone };
             apiRequest('/api/user/profile', { method: 'PUT', body })
-                .then(() => {
+                .then(async () => {
                     userData.personalInfo.email = email;
                     userData.personalInfo.phone = phone;
 
                     if (avatar) {
-                        userData.personalInfo.avatar = avatar.name;
+                        const base64 = await fileToBase64(avatar);
+                        const upload = await apiRequest('/api/user/profile-picture', {
+                            method: 'POST',
+                            body: { image: base64 }
+                        });
+                        userData.personalInfo.avatar = upload.url;
+                        const avatarDiv = document.querySelector('.user-avatar');
+                        if (avatarDiv) {
+                            avatarDiv.style.backgroundImage = `url(${upload.url})`;
+                            avatarDiv.textContent = '';
+                        }
                     }
 
                     showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
@@ -1947,13 +1966,15 @@
 
         // Excluir conta
         function deleteAccount() {
-            // Primeiro, simular envio de código de verificação
             showNotification('📧 Enviando código de verificação para seu e-mail...', 'info');
-            
-            setTimeout(() => {
-                openModal('deleteModal');
-                showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
-            }, 1500);
+            apiRequest('/api/user/send-delete-code', { method: 'POST' })
+                .then(() => {
+                    openModal('deleteModal');
+                    showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao enviar código de verificação', 'error');
+                });
         }
 
         // Upgrade da conta
@@ -2647,60 +2668,27 @@
         }
 
         function alterarSenha() {
-            const atual = document.getElementById('senhaAtual').value;
-            const nova = document.getElementById('novaSenha').value;
-            const confirmar = document.getElementById('confirmarSenha').value;
-
-            if (nova !== confirmar) {
-                alert('As senhas não coincidem.');
-                return;
-            }
-            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
-                alert('Senha fraca.');
-                return;
-            }
-
-            localStorage.setItem('userPassword', nova);
-            alert('Senha alterada com sucesso!');
+            changePassword();
         }
 
         function alterarEmail() {
-            const emailInput = document.getElementById('emailInput');
-            const novoEmail = prompt('Novo e-mail:', emailInput.value);
-            if (novoEmail) {
-                emailInput.value = novoEmail;
-                localStorage.setItem('userEmail', novoEmail);
-                alert('E-mail atualizado!');
-            }
+            changeEmail();
         }
 
         function refazerEntrevista() {
-            window.location.href = 'entrevista.html';
+            retakeInterview();
         }
 
         function salvarPreferencias() {
-            const nomeArtistico = document.getElementById('nomeArtistico').textContent;
-            const estilo = document.getElementById('estiloMusical').textContent;
-            const dificuldade = document.getElementById('dificuldade').textContent;
-            const daw = document.getElementById('dawUtilizada').textContent;
-
-            const perfil = { nomeArtistico, estilo, dificuldade, daw };
-            localStorage.setItem('perfilMusical', JSON.stringify(perfil));
-            alert('Preferências salvas!');
+            savePersonalization();
         }
 
         function cancelarAssinatura() {
-            if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
-                alert('Assinatura cancelada.');
-            }
+            cancelSubscription();
         }
 
         function excluirConta() {
-            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
-                localStorage.clear();
-                alert('Conta excluída.');
-                window.location.href = 'index.html';
-            }
+            deleteAccount();
         }
     </script>
 </body>
