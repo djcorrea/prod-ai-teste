@@ -1712,7 +1712,7 @@
             }
             
             const body = { email, phone };
-            apiRequest('/api/user/profile', { method: 'PUT', body })
+            apiRequest('/api/atualizarDados', { method: 'PUT', body })
                 .then(() => {
                     userData.personalInfo.email = email;
                     userData.personalInfo.phone = phone;
