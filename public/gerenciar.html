@@ -1693,11 +1693,12 @@
         }
 
         // Salvar informações pessoais com validação completa
-        function savePersonalInfo() {
+        async function savePersonalInfo() {
             const email = document.getElementById('emailInput').value.trim();
-            const phone = document.querySelector('#personalCard input[type="tel"]').value.trim();
-            const avatar = document.querySelector('#personalCard input[type="file"]').files[0];
-            
+            const phoneInput = document.querySelector('#personalCard input[type="tel"]');
+            const phone = phoneInput.value.trim();
+            const avatarFile = document.querySelector('#personalCard input[type="file"]').files[0];
+
             // Validação de e-mail
             if (!email || !validateEmail(email)) {
                 showNotification('⚠️ Digite um e-mail válido', 'error');
@@ -1710,23 +1711,48 @@
                 showNotification('⚠️ Formato de telefone inválido', 'error');
                 return;
             }
-            
-            const body = { email, phone };
+
+            let avatarData = null;
+            if (avatarFile) {
+                const allowed = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!allowed.includes(avatarFile.type)) {
+                    showNotification('⚠️ Tipo de imagem inválido', 'error');
+                    return;
+                }
+                if (avatarFile.size > 5 * 1024 * 1024) {
+                    showNotification('⚠️ Imagem excede 5MB', 'error');
+                    return;
+                }
+                avatarData = await fileToDataURL(avatarFile);
+            }
+
+            const body = { email };
+            if (phone) body.phone = phone;
+            if (avatarData) body.avatar = avatarData;
+
             apiRequest('/api/user/profile', { method: 'PUT', body })
-                .then(() => {
+                .then(res => {
                     userData.personalInfo.email = email;
-                    userData.personalInfo.phone = phone;
-
-                    if (avatar) {
-                        userData.personalInfo.avatar = avatar.name;
+                    if (phone) userData.personalInfo.phone = phone;
+                    if (res.avatar) {
+                        userData.personalInfo.avatar = res.avatar;
                     }
-
+                    updateUIWithUserData();
                     showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
                     playSound('success');
                 })
                 .catch(() => {
                     showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
                 });
+        }
+
+        function fileToDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject();
+                reader.readAsDataURL(file);
+            });
         }
 
         // Validação de telefone
@@ -2450,6 +2476,7 @@
                 if (profile) {
                     userData.personalInfo.email = profile.email || '';
                     userData.personalInfo.phone = profile.phone || '';
+                    userData.personalInfo.avatar = profile.avatar || '';
                 }
                 if (interview) {
                     Object.assign(userData.interviewData, interview);
@@ -2483,13 +2510,23 @@
 
         // Função para atualizar interface com dados do usuário
         function updateUIWithUserData() {
-            // Atualizar e-mail
             const emailInput = document.getElementById('emailInput');
             if (emailInput && userData.personalInfo.email) {
                 emailInput.value = userData.personalInfo.email;
             }
-            
-            // Atualizar dados da entrevista
+
+            const phoneInput = document.querySelector('#personalCard input[type="tel"]');
+            if (phoneInput) {
+                phoneInput.value = userData.personalInfo.phone || '';
+            }
+
+            const avatarEl = document.querySelector('.user-avatar');
+            if (avatarEl && userData.personalInfo.avatar) {
+                avatarEl.style.backgroundImage = `url('${userData.personalInfo.avatar}')`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.textContent = '';
+            }
+
             Object.keys(userData.interviewData).forEach(key => {
                 const element = document.querySelector(`[data-field="${key}"]`);
                 if (element) {
@@ -2669,8 +2706,7 @@
             const novoEmail = prompt('Novo e-mail:', emailInput.value);
             if (novoEmail) {
                 emailInput.value = novoEmail;
-                localStorage.setItem('userEmail', novoEmail);
-                alert('E-mail atualizado!');
+                showNotification('📧 Novo e-mail aplicado. Clique em Salvar para confirmar.', 'info');
             }
         }
 
