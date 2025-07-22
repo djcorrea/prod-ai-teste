@@ -1191,12 +1191,8 @@
             }
         }
     </style>
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+    <!-- Firebase Modular loaded in scripts below -->
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
-    <script src="auth.js" defer></script>
 </head>
 <body>
     <!-- Fundo animado -->
@@ -1517,7 +1513,7 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
-                <button class="btn btn-danger" onclick="confirmDelete()">EXCLUIR PERMANENTEMENTE</button>
+                <button class="btn btn-danger">EXCLUIR PERMANENTEMENTE</button>
             </div>
         </div>
     </div>
@@ -1525,7 +1521,22 @@
     <!-- Loading -->
     <div class="loading" id="loading"></div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+            authDomain: "prodai-58436.firebaseapp.com",
+            projectId: "prodai-58436",
+            storageBucket: "prodai-58436.appspot.com",
+            messagingSenderId: "801631191322",
+            appId: "1:801631322:web:80e3d29cf7468331652ca3",
+            measurementId: "G-MBDHDYN6Z0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        getAuth(app);
         const userData = {
             userType: 'FREE',
             interviewData: {
@@ -1736,36 +1747,11 @@
             return phoneRegex.test(phone);
         }
 
-        // Excluir conta com processo de segurança
+        <!--
         function confirmDelete() {
-            const password = document.querySelector('#deleteModal input[type="password"]').value;
-            const code = document.querySelector('#deleteModal input[type="text"]').value;
-            
-            if (!password) {
-                showNotification('⚠️ Digite sua senha para confirmar', 'error');
-                document.querySelector('#deleteModal input[type="password"]').focus();
-                return;
-            }
-            
-            if (code.length !== 6) {
-                showNotification('⚠️ Digite o código de verificação de 6 dígitos', 'error');
-                document.querySelector('#deleteModal input[type="text"]').focus();
-                return;
-            }
-            
-            closeModal('deleteModal');
-            apiRequest('/api/user/account', {
-                method: 'DELETE',
-                body: { password, code }
-            })
-                .then(() => {
-                    showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                    setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
-                });
+            // Fluxo antigo mantido apenas para referência
         }
+        -->
 
         // Refazer entrevista com verificação PLUS
         function retakeInterview() {
@@ -1856,8 +1842,7 @@
         async function apiRequest(url, options = {}) {
             showLoading();
             try {
-                await waitForFirebase();
-                const user = firebase.auth().currentUser;
+                const user = getAuth().currentUser;
                 if (!user) throw new Error('not-auth');
                 const idToken = await user.getIdToken();
                 const opts = { headers: {}, ...options };
@@ -1945,16 +1930,11 @@
             }
         }
 
-        // Excluir conta
+        <!--
         function deleteAccount() {
-            // Primeiro, simular envio de código de verificação
-            showNotification('📧 Enviando código de verificação para seu e-mail...', 'info');
-            
-            setTimeout(() => {
-                openModal('deleteModal');
-                showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
-            }, 1500);
+            // Fluxo antigo mantido apenas para referência
         }
+        -->
 
         // Upgrade da conta
         function upgradeAccount() {
@@ -2175,24 +2155,11 @@
             showNotification('🔌 Você ficou offline', 'warning');
         });
 
+        <!--
         function confirmDelete() {
-            const password = document.querySelector('#deleteModal input[type="password"]').value;
-            const code = document.querySelector('#deleteModal input[type="text"]').value;
-
-            if (password.length > 0 && code.length === 6) {
-                closeModal('deleteModal');
-                apiRequest('/api/user/account', { method: 'DELETE', body: { password, code } })
-                    .then(() => {
-                        showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                        setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
-                    })
-                    .catch(() => {
-                        showNotification('❌ Erro ao excluir conta', 'error');
-                    });
-            } else {
-                alert('⚠️ Preencha todos os campos corretamente');
-            }
+            // Fluxo antigo mantido apenas para referência
         }
+        -->
 
         // Validação em tempo real dos formulários
         function setupFormValidation() {
@@ -2755,7 +2722,7 @@
           throw new Error(data.error || 'Falha ao excluir conta');
         }
 
-        await auth.signOut();
+        await user.delete();
         window.location.href = '/login';
       } catch (err) {
         console.error(err);

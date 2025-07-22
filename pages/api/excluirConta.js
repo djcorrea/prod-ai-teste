@@ -24,10 +24,14 @@ export default async function handler(req, res) {
     const decoded = await auth.verifyIdToken(idToken);
     const uid = decoded.uid;
 
-    await auth.deleteUser(uid);
-    await db.collection('usuarios').doc(uid).delete();
+    try {
+      await db.collection('usuarios').doc(uid).delete();
+    } catch (err) {
+      console.error('Erro ao remover dados do Firestore:', err);
+      return res.status(500).json({ error: 'Erro ao remover dados do Firestore' });
+    }
 
-    return res.status(200).json({ message: 'Conta excluída com sucesso' });
+    return res.status(200).json({ message: 'Dados removidos com sucesso' });
   } catch (error) {
     console.error('Erro ao excluir conta:', error);
     return res.status(500).json({ error: 'Falha ao excluir conta' });
