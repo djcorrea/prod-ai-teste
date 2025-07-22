@@ -1307,7 +1307,7 @@
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
+                <button class="btn btn-primary btn-full" id="btnAlterarSenha" onclick="changePassword()">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1408,7 +1408,7 @@
 
         <!-- Botão de retorno ao chat -->
         <div class="back-to-chat-container">
-            <button class="btn-back-to-chat" onclick="voltarAoChat()">
+            <button class="btn-back-to-chat" onclick="backToChat()">
                 <div class="chat-icon">💬</div>
                 <div class="chat-text">
                     <span class="chat-main">Voltar ao Chat</span>
@@ -2641,103 +2641,5 @@
         optimizePerformance();
     </script>
 
-    <script>
-        function voltarAoChat() {
-            window.location.href = 'index.html';
-        }
-
-        function alterarSenha() {
-            const atual = document.getElementById('senhaAtual').value;
-            const nova = document.getElementById('novaSenha').value;
-            const confirmar = document.getElementById('confirmarSenha').value;
-
-            if (nova !== confirmar) {
-                alert('As senhas não coincidem.');
-                return;
-            }
-            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
-                alert('Senha fraca.');
-                return;
-            }
-
-            localStorage.setItem('userPassword', nova);
-            alert('Senha alterada com sucesso!');
-        }
-
-        function alterarEmail() {
-            const emailInput = document.getElementById('emailInput');
-            const novoEmail = prompt('Novo e-mail:', emailInput.value);
-            if (novoEmail) {
-                emailInput.value = novoEmail;
-                localStorage.setItem('userEmail', novoEmail);
-                alert('E-mail atualizado!');
-            }
-        }
-
-        function refazerEntrevista() {
-            window.location.href = 'entrevista.html';
-        }
-
-        function salvarPreferencias() {
-            const nomeArtistico = document.getElementById('nomeArtistico').textContent;
-            const estilo = document.getElementById('estiloMusical').textContent;
-            const dificuldade = document.getElementById('dificuldade').textContent;
-            const daw = document.getElementById('dawUtilizada').textContent;
-
-            const perfil = { nomeArtistico, estilo, dificuldade, daw };
-            localStorage.setItem('perfilMusical', JSON.stringify(perfil));
-            alert('Preferências salvas!');
-        }
-
-        function cancelarAssinatura() {
-            if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
-                alert('Assinatura cancelada.');
-            }
-        }
-
-        function excluirConta() {
-            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
-                localStorage.clear();
-                alert('Conta excluída.');
-                window.location.href = 'index.html';
-            }
-        }
-    </script>
-    <script type="module">
-  import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-
-  const btn = document.getElementById('btnAlterarSenha');
-  if (btn) {
-    btn.addEventListener('click', async () => {
-      const senhaAtual = document.getElementById('senhaAtual')?.value;
-      const novaSenha = document.getElementById('novaSenha')?.value;
-      const confirmarSenha = document.getElementById('confirmarSenha')?.value;
-
-      if (!senhaAtual || !novaSenha || !confirmarSenha) {
-        return alert('Preencha todos os campos.');
-      }
-
-      if (novaSenha !== confirmarSenha) {
-        return alert('A nova senha e a confirmação não coincidem.');
-      }
-
-      try {
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (!user) throw new Error('Usuário não autenticado');
-
-        const credential = EmailAuthProvider.credential(user.email, senhaAtual);
-
-        await reauthenticateWithCredential(user, credential);
-        await updatePassword(user, novaSenha);
-
-        alert('Senha alterada com sucesso!');
-      } catch (err) {
-        console.error(err);
-        alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
-      }
-    });
-  }
-</script>
 </body>
 </html>
