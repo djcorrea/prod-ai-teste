@@ -1400,7 +1400,7 @@
                         Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
                     </p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="excluirConta()">
+                <button id="btnExcluirConta" class="btn btn-danger btn-full" onclick="deleteAccount()">
                     Excluir Conta Permanentemente
                 </button>
             </div>
@@ -1754,17 +1754,24 @@
             }
             
             closeModal('deleteModal');
-            apiRequest('/api/user/account', {
-                method: 'DELETE',
-                body: { password, code }
-            })
-                .then(() => {
+            waitForFirebase().then(async () => {
+                try {
+                    const user = firebase.auth().currentUser;
+                    if (!user) throw new Error('not-auth');
+                    const idToken = await user.getIdToken();
+                    const res = await fetch('/api/user/delete-account.js', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken })
+                    });
+                    if (!res.ok) throw new Error('api-error');
+                    localStorage.clear();
                     showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                    setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
-                })
-                .catch(() => {
+                    setTimeout(() => { window.location.href = '/login'; }, 2000);
+                } catch (err) {
                     showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
-                });
+                }
+            });
         }
 
         // Refazer entrevista com verificação PLUS
@@ -1947,13 +1954,15 @@
 
         // Excluir conta
         function deleteAccount() {
-            // Primeiro, simular envio de código de verificação
-            showNotification('📧 Enviando código de verificação para seu e-mail...', 'info');
-            
-            setTimeout(() => {
-                openModal('deleteModal');
-                showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
-            }, 1500);
+            showNotification('📧 Enviando código de verificação...', 'info');
+            apiRequest('/api/user/send-delete-code', { method: 'POST' })
+                .then(() => {
+                    openModal('deleteModal');
+                    showNotification('✅ Código enviado! Verifique seu e-mail.', 'success');
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao enviar código de verificação', 'error');
+                });
         }
 
         // Upgrade da conta
@@ -2175,24 +2184,7 @@
             showNotification('🔌 Você ficou offline', 'warning');
         });
 
-        function confirmDelete() {
-            const password = document.querySelector('#deleteModal input[type="password"]').value;
-            const code = document.querySelector('#deleteModal input[type="text"]').value;
-
-            if (password.length > 0 && code.length === 6) {
-                closeModal('deleteModal');
-                apiRequest('/api/user/account', { method: 'DELETE', body: { password, code } })
-                    .then(() => {
-                        showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                        setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
-                    })
-                    .catch(() => {
-                        showNotification('❌ Erro ao excluir conta', 'error');
-                    });
-            } else {
-                alert('⚠️ Preencha todos os campos corretamente');
-            }
-        }
+        /* função confirmDelete duplicada removida */
 
         // Validação em tempo real dos formulários
         function setupFormValidation() {
@@ -2695,13 +2687,7 @@
             }
         }
 
-        function excluirConta() {
-            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
-                localStorage.clear();
-                alert('Conta excluída.');
-                window.location.href = 'index.html';
-            }
-        }
+        /* função excluirConta antiga removida */
     </script>
     <script type="module">
   import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
