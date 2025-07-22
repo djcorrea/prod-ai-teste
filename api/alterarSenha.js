@@ -1,27 +1,31 @@
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { initializeFirebase } from '../../lib/firebase-admin'; // ajuste conforme seu caminho
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') {
+    return res.status(405).end();
+  }
 
   try {
-    await initializeFirebase();
-    const { idToken, senhaAtual, novaSenha } = req.body;
+    if (!getApps().length) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      initializeApp({ credential: cert(serviceAccount) });
+    }
 
-    if (!idToken || !senhaAtual || !novaSenha) {
-      return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+    const { idToken, timestamp } = req.body || {};
+
+    if (!idToken) {
+      return res.status(400).json({ message: 'Token ausente.' });
     }
 
     const auth = getAuth();
     const decoded = await auth.verifyIdToken(idToken);
-    const user = await auth.getUser(decoded.uid);
 
-    // Aqui você teria que autenticar com Firebase Client SDK no frontend.
-    // O backend não tem acesso à senha atual do usuário.
+    console.log(`🔐 Senha alterada para uid ${decoded.uid} em ${timestamp || new Date().toISOString()}`);
 
-    return res.status(400).json({ message: 'A alteração de senha deve ser feita no frontend com reautenticação.' });
+    return res.status(200).json({ message: 'Senha alterada com sucesso' });
   } catch (error) {
-    console.error('Erro ao alterar senha:', error);
-    return res.status(500).json({ message: 'Erro interno ao tentar alterar senha.' });
+    console.error('Erro ao registrar troca de senha:', error);
+    return res.status(500).json({ message: 'Erro ao registrar troca de senha' });
   }
 }

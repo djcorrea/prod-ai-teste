@@ -2684,6 +2684,17 @@
             await reauthenticateWithCredential(user, credential);
             await updatePassword(user, novaSenha);
 
+            try {
+              const idToken = await user.getIdToken();
+              await fetch('/api/alterarSenha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken, timestamp: new Date().toISOString() })
+              });
+            } catch (logErr) {
+              console.error('Erro ao registrar troca de senha:', logErr);
+            }
+
             document.getElementById('senhaAtual').value = '';
             document.getElementById('novaSenha').value = '';
             document.getElementById('confirmarSenha').value = '';
