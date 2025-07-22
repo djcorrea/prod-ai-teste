@@ -1400,7 +1400,7 @@
                         Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
                     </p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="excluirConta()">
+                <button id="btnExcluirConta" class="btn btn-danger btn-full">
                     Excluir Conta Permanentemente
                 </button>
             </div>
@@ -2695,13 +2695,6 @@
             }
         }
 
-        function excluirConta() {
-            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
-                localStorage.clear();
-                alert('Conta excluída.');
-                window.location.href = 'index.html';
-            }
-        }
     </script>
     <script type="module">
   import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -2735,6 +2728,38 @@
       } catch (err) {
         console.error(err);
         alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
+      }
+    });
+  }
+
+  const btnDelete = document.getElementById('btnExcluirConta');
+  if (btnDelete) {
+    btnDelete.addEventListener('click', async () => {
+      const confirmDelete = window.confirm('Tem certeza que deseja excluir sua conta permanentemente?');
+      if (!confirmDelete) return;
+
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const idToken = await user.getIdToken();
+        const res = await fetch('/api/excluirConta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Falha ao excluir conta');
+        }
+
+        await auth.signOut();
+        window.location.href = '/login';
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao excluir conta: ' + (err.message || 'Tente novamente.'));
       }
     });
   }
