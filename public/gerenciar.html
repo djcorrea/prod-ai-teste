@@ -1259,13 +1259,13 @@
                     
                     <div class="interview-item">
                         <label class="form-label">Nível Técnico</label>
-                        <div class="data-display" data-field="technicalLevel">Intermediário</div>
+                        <div class="data-display" data-field="technicalLevel" id="inputNivelTecnico">Intermediário</div>
                         <button class="btn-edit" onclick="editField('technicalLevel')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Sobre Você</label>
-                        <div class="data-display" data-field="aboutYou">Produtor há 3 anos, focado em música eletrônica para festas</div>
+                        <div class="data-display" data-field="aboutYou" id="inputSobreVoce">Produtor há 3 anos, focado em música eletrônica para festas</div>
                         <button class="btn-edit" onclick="editField('aboutYou')">✏️</button>
                     </div>
                 </div>
@@ -1278,10 +1278,10 @@
                     </div>
                 </div>
 
-                <button class="btn btn-secondary btn-full" onclick="refazerEntrevista()">
+                <button id="btnRefazerEntrevista" class="btn btn-secondary btn-full">
                     🔄 Refazer Entrevista Completa
                 </button>
-                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="salvarPreferencias()">
+                <button id="btnSalvarPerfil" class="btn btn-primary btn-full" style="margin-top: 0.5rem;">
                     💾 Salvar Alterações
                 </button>
             </div>
@@ -2731,10 +2731,71 @@
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, novaSenha);
 
-        alert('Senha alterada com sucesso!');
+      alert('Senha alterada com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
+    }
+  });
+  }
+
+  function getFieldValue(id) {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    return 'value' in el ? el.value : el.textContent.trim();
+  }
+
+  const btnSalvarPerfil = document.getElementById('btnSalvarPerfil');
+  if (btnSalvarPerfil) {
+    btnSalvarPerfil.addEventListener('click', async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const idToken = await user.getIdToken();
+        const body = {
+          idToken,
+          nomeArtistico: getFieldValue('inputNomeArtistico') || getFieldValue('nomeArtistico'),
+          estilo: getFieldValue('inputEstiloMusical') || getFieldValue('estiloMusical'),
+          dificuldade: getFieldValue('inputMaiorDificuldade') || getFieldValue('dificuldade'),
+          daw: getFieldValue('inputDawUtilizada') || getFieldValue('dawUtilizada'),
+          nivelTecnico: getFieldValue('inputNivelTecnico'),
+          sobre: getFieldValue('inputSobreVoce')
+        };
+
+        const res = await fetch('/api/atualizarPerfil', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) throw new Error('Erro ao salvar');
+        alert('Perfil atualizado com sucesso!');
       } catch (err) {
         console.error(err);
-        alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
+        alert('Erro ao salvar alterações.');
+      }
+    });
+  }
+
+  const btnRefazerEntrevista = document.getElementById('btnRefazerEntrevista');
+  if (btnRefazerEntrevista) {
+    btnRefazerEntrevista.addEventListener('click', async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const idToken = await user.getIdToken();
+        await fetch('/api/user/retake-interview', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${idToken}` }
+        });
+        window.location.href = 'entrevista.html';
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao reiniciar entrevista.');
       }
     });
   }
