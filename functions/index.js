@@ -41,3 +41,24 @@ export const registerAccount = functions.https.onCall(async (data, context) => {
   await phoneRef.set({ uid: context.auth.uid, fingerprint, createdAt: now });
   return { success: true };
 });
+
+export const downgradeExpiredSubscriptions = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(async () => {
+    const now = admin.firestore.Timestamp.now();
+    const snap = await db
+      .collection('usuarios')
+      .where('status', '==', 'cancelled')
+      .where('expiresAt', '<=', now)
+      .get();
+
+    const batch = db.batch();
+    snap.forEach((doc) => {
+      batch.update(doc.ref, {
+        plano: 'gratis',
+        status: 'ended',
+        mensagensRestantes: 10,
+      });
+    });
+    await batch.commit();
+  });
