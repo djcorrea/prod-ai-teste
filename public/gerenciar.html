@@ -1328,7 +1328,7 @@
                     <p>✓ Respostas prioritárias</p>
                     <p>✓ Recursos avançados</p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="cancelarAssinatura()">
+                <button id="cancelSubscriptionBtn" class="btn btn-danger btn-full" onclick="cancelSubscription()">
                     Cancelar Assinatura
                 </button>
             </div>
@@ -1528,6 +1528,11 @@
     <script>
         const userData = {
             userType: 'FREE',
+            subscription: {
+                plan: 'gratis',
+                status: 'active',
+                expiresAt: null
+            },
             interviewData: {
                 artistName: '',
                 musicStyle: '',
@@ -1684,8 +1689,7 @@
             apiRequest('/api/user/cancel-subscription', { method: 'POST' })
                 .then(() => {
                     showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
+                    refreshSubscription();
                 })
                 .catch(() => {
                     showNotification('❌ Erro ao cancelar assinatura', 'error');
@@ -1915,9 +1919,7 @@
             apiRequest('/api/user/cancel-subscription', { method: 'POST' })
                 .then(() => {
                     showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
+                    refreshSubscription();
                 })
                 .catch(() => {
                     showNotification('❌ Erro ao cancelar assinatura', 'error');
@@ -2456,6 +2458,7 @@
                 }
                 if (sub) {
                     userData.userType = sub.plan === 'plus' ? 'PLUS' : 'FREE';
+                    userData.subscription = sub;
                 }
                 updateUIWithUserData();
             } catch (err) {
@@ -2488,7 +2491,7 @@
             if (emailInput && userData.personalInfo.email) {
                 emailInput.value = userData.personalInfo.email;
             }
-            
+
             // Atualizar dados da entrevista
             Object.keys(userData.interviewData).forEach(key => {
                 const element = document.querySelector(`[data-field="${key}"]`);
@@ -2496,6 +2499,62 @@
                     element.textContent = userData.interviewData[key];
                 }
             });
+
+            if (userData.subscription) {
+                updateSubscriptionUI(userData.subscription);
+            }
+        }
+
+        function updateSubscriptionUI(sub) {
+            const badge = document.querySelector('.plan-badge');
+            const statusSpan = document.querySelector('.status-indicator span');
+            const cancelBtn = document.getElementById('cancelSubscriptionBtn');
+
+            const now = Date.now();
+            const active = sub.plan === 'plus' && (!sub.expiresAt || new Date(sub.expiresAt).getTime() > now) && sub.status !== 'ended';
+
+            if (badge) {
+                if (active) {
+                    badge.textContent = 'PRO MEMBER';
+                    badge.classList.add('plan-pro');
+                } else {
+                    badge.textContent = 'FREE MEMBER';
+                    badge.classList.remove('plan-pro');
+                }
+            }
+
+            if (statusSpan) {
+                if (sub.expiresAt) {
+                    const date = new Date(sub.expiresAt);
+                    const formatted = date.toLocaleDateString('pt-BR');
+                    statusSpan.textContent = `${active ? 'Ativa até' : 'Expirou em'} ${formatted}`;
+                } else {
+                    statusSpan.textContent = 'Sem assinatura ativa';
+                }
+            }
+
+            if (cancelBtn) {
+                if (sub.status === 'cancelled' || sub.status === 'ended') {
+                    cancelBtn.disabled = true;
+                    cancelBtn.style.display = 'none';
+                } else {
+                    cancelBtn.disabled = false;
+                    cancelBtn.style.display = '';
+                }
+            }
+        }
+
+        async function refreshSubscription() {
+            try {
+                const sub = await apiRequest('/api/user/subscription');
+                if (sub) {
+                    userData.userType = sub.plan === 'plus' ? 'PLUS' : 'FREE';
+                    userData.subscription = sub;
+                    updateSubscriptionUI(sub);
+                }
+            } catch (err) {
+                console.error('Erro ao atualizar assinatura', err);
+            }
         }
 
         // Auto-save funcionalidade
