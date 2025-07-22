@@ -1191,6 +1191,12 @@
             }
         }
     </style>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <script src="auth.js" defer></script>
 </head>
 <body>
     <!-- Fundo animado -->
@@ -1229,25 +1235,25 @@
                 <div id="interviewData" class="interview-data">
                     <div class="interview-item">
                         <label class="form-label">Nome Artístico</label>
-                        <div class="data-display" data-field="artistName">DJ Phoenix</div>
+                        <div class="data-display" data-field="artistName" id="nomeArtistico">DJ Phoenix</div>
                         <button class="btn-edit" onclick="editField('artistName')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Estilo Musical</label>
-                        <div class="data-display" data-field="musicStyle">Progressive House, Deep House</div>
+                        <div class="data-display" data-field="musicStyle" id="estiloMusical">Progressive House, Deep House</div>
                         <button class="btn-edit" onclick="editField('musicStyle')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Maior Dificuldade</label>
-                        <div class="data-display" data-field="difficulty">Criar transições suaves entre faixas</div>
+                        <div class="data-display" data-field="difficulty" id="dificuldade">Criar transições suaves entre faixas</div>
                         <button class="btn-edit" onclick="editField('difficulty')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">DAW Utilizada</label>
-                        <div class="data-display" data-field="daw">Ableton Live 11</div>
+                        <div class="data-display" data-field="daw" id="dawUtilizada">Ableton Live 11</div>
                         <button class="btn-edit" onclick="editField('daw')">✏️</button>
                     </div>
                     
@@ -1272,10 +1278,10 @@
                     </div>
                 </div>
 
-                <button class="btn btn-secondary btn-full" onclick="retakeInterview()">
+                <button class="btn btn-secondary btn-full" onclick="refazerEntrevista()">
                     🔄 Refazer Entrevista Completa
                 </button>
-                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="savePersonalization()">
+                <button class="btn btn-primary btn-full" style="margin-top: 0.5rem;" onclick="salvarPreferencias()">
                     💾 Salvar Alterações
                 </button>
             </div>
@@ -1288,20 +1294,20 @@
                 </h2>
                 <div class="form-group">
                     <label class="form-label">Senha Atual</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+                    <input type="password" class="form-input" id="senhaAtual" placeholder="••••••••" autocomplete="current-password">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Nova Senha</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                    <input type="password" class="form-input" id="novaSenha" placeholder="••••••••" autocomplete="new-password">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirmar Nova Senha</label>
-                    <input type="password" class="form-input" placeholder="••••••••" autocomplete="new-password">
+                    <input type="password" class="form-input" id="confirmarSenha" placeholder="••••••••" autocomplete="new-password">
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="changePassword()">
+                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1322,7 +1328,7 @@
                     <p>✓ Respostas prioritárias</p>
                     <p>✓ Recursos avançados</p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="cancelSubscription()">
+                <button class="btn btn-danger btn-full" onclick="cancelarAssinatura()">
                     Cancelar Assinatura
                 </button>
             </div>
@@ -1337,7 +1343,7 @@
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
-                        <button class="btn btn-secondary" onclick="changeEmail()">✏️ Alterar</button>
+                        <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -1394,7 +1400,7 @@
                         Esta ação é irreversível. Todos os seus dados serão permanentemente deletados.
                     </p>
                 </div>
-                <button class="btn btn-danger btn-full" onclick="deleteAccount()">
+                <button class="btn btn-danger btn-full" onclick="excluirConta()">
                     Excluir Conta Permanentemente
                 </button>
             </div>
@@ -1402,7 +1408,7 @@
 
         <!-- Botão de retorno ao chat -->
         <div class="back-to-chat-container">
-            <button class="btn-back-to-chat" onclick="backToChat()">
+            <button class="btn-back-to-chat" onclick="voltarAoChat()">
                 <div class="chat-icon">💬</div>
                 <div class="chat-text">
                     <span class="chat-main">Voltar ao Chat</span>
@@ -1520,19 +1526,18 @@
     <div class="loading" id="loading"></div>
 
     <script>
-        // Dados simulados do usuário
         const userData = {
-            userType: 'PLUS', // 'FREE' ou 'PLUS'
+            userType: 'FREE',
             interviewData: {
-                artistName: 'DJ Phoenix',
-                musicStyle: 'Progressive House, Deep House',
-                difficulty: 'Criar transições suaves entre faixas',
-                daw: 'Ableton Live 11',
-                technicalLevel: 'Intermediário',
-                aboutYou: 'Produtor há 3 anos, focado em música eletrônica para festas'
+                artistName: '',
+                musicStyle: '',
+                difficulty: '',
+                daw: '',
+                technicalLevel: '',
+                aboutYou: ''
             },
             personalInfo: {
-                email: 'john.doe@email.com',
+                email: '',
                 phone: '',
                 avatar: null
             }
@@ -1565,20 +1570,19 @@
             const newValue = input.value.trim();
             
             if (newValue) {
-                // Atualizar dados locais
                 userData.interviewData[fieldName] = newValue;
-                
-                // Simular salvamento no backend
-                simulateAsync(() => {
-                    dataDisplay.innerHTML = newValue;
-                    dataDisplay.classList.remove('editing');
-                    showNotification('✅ Campo atualizado com sucesso!', 'success');
-                    
-                    // Se for usuário PLUS, atualizar personalização do chat
-                    if (userData.userType === 'PLUS') {
-                        updateChatPersonalization();
-                    }
-                }, 1000);
+                apiRequest('/api/user/interview-data', { method: 'PUT', body: { [fieldName]: newValue } })
+                    .then(() => {
+                        dataDisplay.innerHTML = newValue;
+                        dataDisplay.classList.remove('editing');
+                        showNotification('✅ Campo atualizado com sucesso!', 'success');
+                        if (userData.userType === 'PLUS') {
+                            updateChatPersonalization();
+                        }
+                    })
+                    .catch(() => {
+                        showNotification('❌ Erro ao salvar campo', 'error');
+                    });
             } else {
                 showNotification('⚠️ Campo não pode estar vazio', 'error');
             }
@@ -1606,10 +1610,14 @@
 
         function confirmRetake() {
             closeModal('retakeModal');
-            simulateAsync(() => {
-                // Redirecionar para entrevista.html
-                window.location.href = 'entrevista.html';
-            }, 500);
+            apiRequest('/api/user/retake-interview', { method: 'POST' })
+                .then(() => {
+                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
+                    window.location.href = 'entrevista.html?retake=true';
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao acessar entrevista', 'error');
+                });
         }
 
         // Salvar personalização com validação completa
@@ -1619,22 +1627,14 @@
                 return;
             }
 
-            showLoading();
-            
-            // Simular envio para backend
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/save-personalization', { method: 'POST', body: JSON.stringify(userData.interviewData) });
-                    
+            apiRequest('/api/user/interview-data', { method: 'PUT', body: userData.interviewData })
+                .then(() => {
                     showNotification('✅ Personalização salva com sucesso!', 'success');
                     updateChatPersonalization();
-                    
-                } catch (error) {
+                })
+                .catch(() => {
                     showNotification('❌ Erro ao salvar personalização. Tente novamente.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1500);
+                });
         }
 
         // Alterar senha com validação robusta
@@ -1664,48 +1664,32 @@
                 return;
             }
             
-            showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/change-password', { method: 'POST', body: JSON.stringify({currentPassword, newPassword}) });
-                    
-                    // Limpar campos após sucesso
+            apiRequest('/api/user/change-password', {
+                method: 'POST',
+                body: { currentPassword, newPassword }
+            })
+                .then(() => {
                     document.querySelectorAll('#securityCard input[type="password"]').forEach(input => input.value = '');
-                    
                     showNotification('✅ Senha alterada com sucesso!', 'success');
                     playSound('success');
-                    
-                } catch (error) {
+                })
+                .catch(() => {
                     showNotification('❌ Erro ao alterar senha. Verifique a senha atual.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 2000);
+                });
         }
 
         // Cancelar assinatura com redirecionamento real
         function confirmCancel() {
             closeModal('cancelModal');
-            
-            showNotification('🔗 Redirecionando para cancelamento...', 'info');
-            
-            // Aguardar um momento antes do redirecionamento
-            setTimeout(() => {
-                try {
-                    // Redirecionar para Mercado Pago
-                    window.open('https://www.mercadopago.com.br/subscriptions', '_blank');
-                    
-                    // Atualizar status local após redirecionamento
-                    setTimeout(() => {
-                        showNotification('📋 Siga as instruções no Mercado Pago para cancelar', 'info');
-                    }, 1000);
-                    
-                } catch (error) {
-                    showNotification('❌ Erro ao abrir página de cancelamento', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1000);
+            apiRequest('/api/user/cancel-subscription', { method: 'POST' })
+                .then(() => {
+                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
+                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
+                    document.querySelector('.plan-badge').className = 'plan-badge';
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao cancelar assinatura', 'error');
+                });
         }
 
         // Salvar informações pessoais com validação completa
@@ -1727,30 +1711,22 @@
                 return;
             }
             
-            showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/update-personal-info', { method: 'POST', body: formData });
-                    
-                    // Atualizar dados locais
+            const body = { email, phone };
+            apiRequest('/api/user/profile', { method: 'PUT', body })
+                .then(() => {
                     userData.personalInfo.email = email;
                     userData.personalInfo.phone = phone;
-                    
+
                     if (avatar) {
                         userData.personalInfo.avatar = avatar.name;
-                        // Aqui seria o upload da imagem
                     }
-                    
+
                     showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
                     playSound('success');
-                    
-                } catch (error) {
+                })
+                .catch(() => {
                     showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 1500);
+                });
         }
 
         // Validação de telefone
@@ -1778,27 +1754,17 @@
             }
             
             closeModal('deleteModal');
-            showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Aqui seria a chamada real para o backend
-                    // await fetch('/api/delete-account', { method: 'DELETE', body: JSON.stringify({password, code}) });
-                    
+            apiRequest('/api/user/account', {
+                method: 'DELETE',
+                body: { password, code }
+            })
+                .then(() => {
                     showNotification('⚠️ Conta excluída permanentemente!', 'error');
-                    
-                    // Simular limpeza de dados e logout
-                    setTimeout(() => {
-                        localStorage.clear();
-                        sessionStorage.clear();
-                        window.location.href = '/login?deleted=true';
-                    }, 2000);
-                    
-                } catch (error) {
+                    setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
+                })
+                .catch(() => {
                     showNotification('❌ Erro ao excluir conta. Verifique os dados.', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 3000);
+                });
         }
 
         // Refazer entrevista com verificação PLUS
@@ -1812,19 +1778,14 @@
 
         function confirmRetake() {
             closeModal('retakeModal');
-            showLoading();
-            
-            simulateAsync(() => {
-                try {
-                    // Redirecionar para entrevista.html
+            apiRequest('/api/user/retake-interview', { method: 'POST' })
+                .then(() => {
                     showNotification('🚀 Redirecionando para nova entrevista...', 'info');
                     window.location.href = 'entrevista.html?retake=true';
-                    
-                } catch (error) {
+                })
+                .catch(() => {
                     showNotification('❌ Erro ao acessar entrevista', 'error');
-                    console.error('Erro:', error);
-                }
-            }, 800);
+                });
         }
 
         // Alterar e-mail com validação
@@ -1892,7 +1853,28 @@
             document.getElementById('loading').style.display = 'none';
         }
 
-        // Simular operações assíncronas
+        async function apiRequest(url, options = {}) {
+            showLoading();
+            try {
+                await waitForFirebase();
+                const user = firebase.auth().currentUser;
+                if (!user) throw new Error('not-auth');
+                const idToken = await user.getIdToken();
+                const opts = { headers: {}, ...options };
+                opts.headers['Authorization'] = `Bearer ${idToken}`;
+                if (opts.body && typeof opts.body !== 'string') {
+                    opts.headers['Content-Type'] = 'application/json';
+                    opts.body = JSON.stringify(opts.body);
+                }
+                const res = await fetch(url, opts);
+                if (!res.ok) throw new Error('api-error');
+                return await res.json();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Simular operações assíncronas (legado)
         function simulateAsync(callback, delay = 2000) {
             showLoading();
             setTimeout(() => {
@@ -1908,10 +1890,14 @@
 
         function confirmRetake() {
             closeModal('retakeModal');
-            simulateAsync(() => {
-                alert('🚀 Entrevista iniciada! Redirecionando...');
-                // Aqui seria o redirect para a página de entrevista
-            });
+            apiRequest('/api/user/retake-interview', { method: 'POST' })
+                .then(() => {
+                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
+                    window.location.href = 'entrevista.html?retake=true';
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao acessar entrevista', 'error');
+                });
         }
 
         function validateEmail(email) {
@@ -1926,13 +1912,16 @@
 
         function confirmCancel() {
             closeModal('cancelModal');
-            simulateAsync(() => {
-                alert('✅ Assinatura cancelada com sucesso!');
-                // Atualizar UI para refletir o cancelamento
-                document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                document.querySelector('.plan-badge').className = 'plan-badge';
-                document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
-            });
+            apiRequest('/api/user/cancel-subscription', { method: 'POST' })
+                .then(() => {
+                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
+                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
+                    document.querySelector('.plan-badge').className = 'plan-badge';
+                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
+                })
+                .catch(() => {
+                    showNotification('❌ Erro ao cancelar assinatura', 'error');
+                });
         }
 
         // Verificar e-mail
@@ -2189,13 +2178,17 @@
         function confirmDelete() {
             const password = document.querySelector('#deleteModal input[type="password"]').value;
             const code = document.querySelector('#deleteModal input[type="text"]').value;
-            
+
             if (password.length > 0 && code.length === 6) {
                 closeModal('deleteModal');
-                simulateAsync(() => {
-                    alert('⚠️ Conta excluída permanentemente!');
-                    // Aqui seria o redirect para página de logout
-                }, 3000);
+                apiRequest('/api/user/account', { method: 'DELETE', body: { password, code } })
+                    .then(() => {
+                        showNotification('⚠️ Conta excluída permanentemente!', 'error');
+                        setTimeout(() => { window.location.href = '/login?account_deleted=true'; }, 2000);
+                    })
+                    .catch(() => {
+                        showNotification('❌ Erro ao excluir conta', 'error');
+                    });
             } else {
                 alert('⚠️ Preencha todos os campos corretamente');
             }
@@ -2411,8 +2404,8 @@
             updatePersonalizationStatus();
             trackUnsavedChanges();
             
-            // Verificar se há dados salvos localmente
-            loadUserDataFromStorage();
+            // Carregar dados do usuário
+            loadUserData();
             
             // Pequeno delay para efeitos visuais
             setTimeout(() => {
@@ -2448,7 +2441,30 @@
             setInterval(autoSave, 30000);
         });
 
-        // Função para carregar dados do usuário
+        async function loadUserData() {
+            try {
+                const profile = await apiRequest('/api/user/profile');
+                const interview = await apiRequest('/api/user/interview-data');
+                const sub = await apiRequest('/api/user/subscription');
+
+                if (profile) {
+                    userData.personalInfo.email = profile.email || '';
+                    userData.personalInfo.phone = profile.phone || '';
+                }
+                if (interview) {
+                    Object.assign(userData.interviewData, interview);
+                }
+                if (sub) {
+                    userData.userType = sub.plan === 'plus' ? 'PLUS' : 'FREE';
+                }
+                updateUIWithUserData();
+            } catch (err) {
+                console.error('Erro ao carregar dados', err);
+                loadUserDataFromStorage();
+            }
+        }
+
+        // Função para carregar dados do usuário salvos localmente
         function loadUserDataFromStorage() {
             try {
                 const savedData = localStorage.getItem('prodai_user_data');
@@ -2624,5 +2640,104 @@
         // Verificar performance na inicialização
         optimizePerformance();
     </script>
+
+    <script>
+        function voltarAoChat() {
+            window.location.href = 'index.html';
+        }
+
+        function alterarSenha() {
+            const atual = document.getElementById('senhaAtual').value;
+            const nova = document.getElementById('novaSenha').value;
+            const confirmar = document.getElementById('confirmarSenha').value;
+
+            if (nova !== confirmar) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
+                alert('Senha fraca.');
+                return;
+            }
+
+            localStorage.setItem('userPassword', nova);
+            alert('Senha alterada com sucesso!');
+        }
+
+        function alterarEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const novoEmail = prompt('Novo e-mail:', emailInput.value);
+            if (novoEmail) {
+                emailInput.value = novoEmail;
+                localStorage.setItem('userEmail', novoEmail);
+                alert('E-mail atualizado!');
+            }
+        }
+
+        function refazerEntrevista() {
+            window.location.href = 'entrevista.html';
+        }
+
+        function salvarPreferencias() {
+            const nomeArtistico = document.getElementById('nomeArtistico').textContent;
+            const estilo = document.getElementById('estiloMusical').textContent;
+            const dificuldade = document.getElementById('dificuldade').textContent;
+            const daw = document.getElementById('dawUtilizada').textContent;
+
+            const perfil = { nomeArtistico, estilo, dificuldade, daw };
+            localStorage.setItem('perfilMusical', JSON.stringify(perfil));
+            alert('Preferências salvas!');
+        }
+
+        function cancelarAssinatura() {
+            if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
+                alert('Assinatura cancelada.');
+            }
+        }
+
+        function excluirConta() {
+            if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {
+                localStorage.clear();
+                alert('Conta excluída.');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+    <script type="module">
+  import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+  const btn = document.getElementById('btnAlterarSenha');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const senhaAtual = document.getElementById('senhaAtual')?.value;
+      const novaSenha = document.getElementById('novaSenha')?.value;
+      const confirmarSenha = document.getElementById('confirmarSenha')?.value;
+
+      if (!senhaAtual || !novaSenha || !confirmarSenha) {
+        return alert('Preencha todos os campos.');
+      }
+
+      if (novaSenha !== confirmarSenha) {
+        return alert('A nova senha e a confirmação não coincidem.');
+      }
+
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) throw new Error('Usuário não autenticado');
+
+        const credential = EmailAuthProvider.credential(user.email, senhaAtual);
+
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, novaSenha);
+
+        alert('Senha alterada com sucesso!');
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
+      }
+    });
+  }
+</script>
 </body>
 </html>
