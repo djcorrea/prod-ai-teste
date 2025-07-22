@@ -7,6 +7,9 @@ function testCancelButton() {
   assert(/function cancelarAssinatura\(\)/.test(html), 'cancelarAssinatura function missing');
   assert(/function cancelSubscription\(\)/.test(html), 'cancelSubscription function missing');
   assert(/apiRequest\('\/api\/user\/cancel-subscription'/.test(html), 'API call missing');
+  const defs = html.match(/function confirmCancel\(/g) || [];
+  assert(defs.length === 1, 'confirmCancel duplicated');
+  assert(!/FREE MEMBER/.test(html), 'premature badge update');
 }
 
 function testApiFile() {

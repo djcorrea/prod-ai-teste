@@ -1678,20 +1678,6 @@
                 });
         }
 
-        // Cancelar assinatura com redirecionamento real
-        function confirmCancel() {
-            closeModal('cancelModal');
-            apiRequest('/api/user/cancel-subscription', { method: 'POST' })
-                .then(() => {
-                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao cancelar assinatura', 'error');
-                });
-        }
 
         // Salvar informações pessoais com validação completa
         function savePersonalInfo() {
@@ -1916,9 +1902,6 @@
             apiRequest('/api/user/cancel-subscription', { method: 'POST' })
                 .then(() => {
                     showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
                 })
                 .catch(() => {
                     showNotification('❌ Erro ao cancelar assinatura', 'error');
