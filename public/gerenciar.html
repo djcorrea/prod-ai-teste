@@ -1472,7 +1472,7 @@
             </div>
             <div class="modal-buttons">
                 <button id="cancelarCancelamento" class="btn btn-secondary" onclick="closeModal('cancelModal')">Manter Assinatura</button>
-                <button id="confirmarCancelamento" class="btn btn-danger" onclick="confirmCancel()">Cancelar</button>
+                <button id="confirmarCancelamento" class="btn btn-danger">Cancelar</button>
             </div>
         </div>
     </div>
@@ -1678,19 +1678,6 @@
                 });
         }
 
-        // Cancelar assinatura com redirecionamento real
-        function confirmCancel() {
-            closeModal('cancelModal');
-            apiRequest('/api/user/cancel-subscription', { method: 'POST' })
-                .then(() => {
-                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao cancelar assinatura', 'error');
-                });
-        }
 
         // Salvar informações pessoais com validação completa
         function savePersonalInfo() {
@@ -1905,24 +1892,7 @@
             return re.test(email.toLowerCase());
         }
 
-        // Cancelar assinatura
-        function cancelSubscription() {
-            openModal('cancelModal');
-        }
 
-        function confirmCancel() {
-            closeModal('cancelModal');
-            apiRequest('/api/user/cancel-subscription', { method: 'POST' })
-                .then(() => {
-                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao cancelar assinatura', 'error');
-                });
-        }
 
         // Verificar e-mail
         function verifyEmail() {
@@ -2689,11 +2659,6 @@
             alert('Preferências salvas!');
         }
 
-        function cancelarAssinatura() {
-            if (confirm('Tem certeza que deseja cancelar sua assinatura?')) {
-                alert('Assinatura cancelada.');
-            }
-        }
 
         function excluirConta() {
             if (confirm('Tem certeza que deseja excluir sua conta permanentemente?')) {

@@ -241,4 +241,30 @@
     </div>
   </div>
 </body>
+<script type="module">
+  import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+  const auth = getAuth();
+  (async () => {
+    const params = new URLSearchParams(window.location.search);
+    const preId = params.get('preapproval_id');
+    if (preId && auth.currentUser) {
+      try {
+        const idToken = await auth.currentUser.getIdToken();
+        await fetch('/api/salvar-preapproval', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken, preapproval_id: preId })
+        });
+        alert('Assinatura ativada com sucesso!');
+        const url = new URL(window.location);
+        url.searchParams.delete('preapproval_id');
+        window.history.replaceState({}, '', url);
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao registrar assinatura.');
+      }
+    }
+  })();
+</script>
 </html>
