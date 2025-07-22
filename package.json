@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node api/chat.js"
+    "start": "node api/chat.js",
+    "test": "node tests/run-tests.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
