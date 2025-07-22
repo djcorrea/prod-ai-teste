@@ -1307,7 +1307,7 @@
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
                     💡 A senha deve ter pelo menos 8 caracteres, incluindo maiúscula, minúscula e número
                 </div>
-                <button class="btn btn-primary btn-full" onclick="alterarSenha()">
+                <button class="btn btn-primary btn-full" id="btnChangePassword" onclick="changePassword()">
                     🔐 Alterar Senha
                 </button>
             </div>
@@ -1767,27 +1767,6 @@
                 });
         }
 
-        // Refazer entrevista com verificação PLUS
-        function retakeInterview() {
-            if (userData.userType === 'FREE') {
-                openModal('upgradeModal');
-                return;
-            }
-            openModal('retakeModal');
-        }
-
-        function confirmRetake() {
-            closeModal('retakeModal');
-            apiRequest('/api/user/retake-interview', { method: 'POST' })
-                .then(() => {
-                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
-                    window.location.href = 'entrevista.html?retake=true';
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao acessar entrevista', 'error');
-                });
-        }
-
         // Alterar e-mail com validação
         function changeEmail() {
             const emailInput = document.getElementById('emailInput');
@@ -1881,23 +1860,6 @@
                 hideLoading();
                 callback();
             }, delay);
-        }
-
-        // Refazer entrevista
-        function retakeInterview() {
-            openModal('retakeModal');
-        }
-
-        function confirmRetake() {
-            closeModal('retakeModal');
-            apiRequest('/api/user/retake-interview', { method: 'POST' })
-                .then(() => {
-                    showNotification('🚀 Redirecionando para nova entrevista...', 'info');
-                    window.location.href = 'entrevista.html?retake=true';
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao acessar entrevista', 'error');
-                });
         }
 
         function validateEmail(email) {
@@ -2646,24 +2608,6 @@
             window.location.href = 'index.html';
         }
 
-        function alterarSenha() {
-            const atual = document.getElementById('senhaAtual').value;
-            const nova = document.getElementById('novaSenha').value;
-            const confirmar = document.getElementById('confirmarSenha').value;
-
-            if (nova !== confirmar) {
-                alert('As senhas não coincidem.');
-                return;
-            }
-            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(nova)) {
-                alert('Senha fraca.');
-                return;
-            }
-
-            localStorage.setItem('userPassword', nova);
-            alert('Senha alterada com sucesso!');
-        }
-
         function alterarEmail() {
             const emailInput = document.getElementById('emailInput');
             const novoEmail = prompt('Novo e-mail:', emailInput.value);
@@ -2703,41 +2647,6 @@
             }
         }
     </script>
-    <script type="module">
-  import { getAuth, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 
-  const btn = document.getElementById('btnAlterarSenha');
-  if (btn) {
-    btn.addEventListener('click', async () => {
-      const senhaAtual = document.getElementById('senhaAtual')?.value;
-      const novaSenha = document.getElementById('novaSenha')?.value;
-      const confirmarSenha = document.getElementById('confirmarSenha')?.value;
-
-      if (!senhaAtual || !novaSenha || !confirmarSenha) {
-        return alert('Preencha todos os campos.');
-      }
-
-      if (novaSenha !== confirmarSenha) {
-        return alert('A nova senha e a confirmação não coincidem.');
-      }
-
-      try {
-        const auth = getAuth();
-        const user = auth.currentUser;
-        if (!user) throw new Error('Usuário não autenticado');
-
-        const credential = EmailAuthProvider.credential(user.email, senhaAtual);
-
-        await reauthenticateWithCredential(user, credential);
-        await updatePassword(user, novaSenha);
-
-        alert('Senha alterada com sucesso!');
-      } catch (err) {
-        console.error(err);
-        alert('Erro ao alterar senha: ' + (err.message || 'Tente novamente.'));
-      }
-    });
-  }
-</script>
 </body>
 </html>
