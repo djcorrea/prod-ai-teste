@@ -57,6 +57,17 @@ export default async function handler(req, res) {
       }
       const ext = match[2] === 'jpeg' ? 'jpg' : match[2];
       const bucket = getStorage().bucket();
+
+      // Remove avatar antigo com extensão diferente, se existir
+      const existing = await userRef.get();
+      if (existing.exists && existing.data().avatar) {
+        const oldMatch = existing.data().avatar.match(/\.([a-zA-Z0-9]+)$/);
+        const oldExt = oldMatch ? oldMatch[1] : null;
+        if (oldExt && oldExt !== ext) {
+          await bucket.file(`avatars/${decoded.uid}.${oldExt}`).delete().catch(() => {});
+        }
+      }
+
       const fileName = `avatars/${decoded.uid}.${ext}`;
       await bucket.file(fileName).save(buffer, {
         metadata: { contentType: match[1], cacheControl: 'public,max-age=3600' },
