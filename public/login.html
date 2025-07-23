@@ -135,15 +135,6 @@
 
 
   <!-- Scripts do Firebase e app -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
-    import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js';
-    // FingerprintJS
-    import * as FingerprintJS from 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
-
-    // Seu código auth.js modularizado será inserido aqui automaticamente
-  </script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>
