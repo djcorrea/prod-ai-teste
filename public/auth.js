@@ -409,12 +409,19 @@ waitForFirebase(() => {
   checkAuthState();
 });
 
+
+// Garante que os botões chamem as funções certas após os scripts carregarem
 document.addEventListener("DOMContentLoaded", function () {
-  const forgot = document.getElementById("forgotPasswordLink");
-  if (forgot) {
-    forgot.addEventListener("click", function (e) {
-      e.preventDefault();
-      window.forgotPassword();
-    });
-  }
+  const loginBtn = document.getElementById("loginBtn");
+  const signUpBtn = document.getElementById("signUpBtn");
+  const confirmBtn = document.getElementById("confirmCodeBtn");
+  const forgotLink = document.getElementById("forgotPasswordLink");
+
+  if (loginBtn) loginBtn.addEventListener("click", () => window.login?.());
+  if (signUpBtn) signUpBtn.addEventListener("click", () => window.signUp?.());
+  if (confirmBtn) confirmBtn.addEventListener("click", () => window.confirmSMSCode?.());
+  if (forgotLink) forgotLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.forgotPassword?.();
+  });
 });
