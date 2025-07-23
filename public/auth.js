@@ -11,7 +11,6 @@ const firebaseConfig = {
   measurementId: "G-MBDHDYN6Z0"
 };
 
-const db = firebase.firestore();
 
 if (!window.firebase) {
   alert("Firebase SDK não carregado!");
@@ -19,6 +18,8 @@ if (!window.firebase) {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+
+const db = firebase.firestore();
 const auth = firebase.auth();
 
 // Aguarde o Firebase carregar antes de usar
