@@ -1745,12 +1745,13 @@
             }
 
             const sendRequest = (avatarData) => {
-                const body = { email, phone };
+                const body = { email };
+                if (phone) body.phone = phone;
                 if (avatarData) body.avatar = avatarData;
                 apiRequest('/api/user/profile', { method: 'PUT', body })
                     .then(res => {
                         userData.personalInfo.email = email;
-                        userData.personalInfo.phone = phone;
+                        if (phone) userData.personalInfo.phone = phone;
                         if (res.avatar) {
                             userData.personalInfo.avatar = res.avatar;
                             updateAvatar(res.avatar);
@@ -1758,8 +1759,12 @@
                         showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
                         playSound('success');
                     })
-                    .catch(() => {
-                        showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
+                    .catch(err => {
+                        if (err.message === 'EMAIL_EXISTS') {
+                            showNotification('❌ Este e-mail já está em uso por outro usuário.', 'error');
+                        } else {
+                            showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
+                        }
                     });
             };
 
@@ -1923,8 +1928,12 @@
                     opts.body = JSON.stringify(opts.body);
                 }
                 const res = await fetch(url, opts);
-                if (!res.ok) throw new Error('api-error');
-                return await res.json();
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const err = new Error(data.error || 'api-error');
+                    throw err;
+                }
+                return data;
             } finally {
                 hideLoading();
             }
