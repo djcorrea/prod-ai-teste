@@ -33,7 +33,11 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'PUT') {
-    await userRef.set({ perfil: req.body || {} }, { merge: true });
+    const updates = {};
+    for (const [key, val] of Object.entries(req.body || {})) {
+      updates[`perfil.${key}`] = val;
+    }
+    await userRef.set(updates, { merge: true });
     return res.status(200).json({ success: true });
   }
 
