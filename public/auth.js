@@ -1,4 +1,25 @@
-// Função necessária para aguardar o Firebase carregar corretamente
+
+// === Firebase Auth com login por telefone e reCAPTCHA invisível ===
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+  authDomain: "prodai-58436.firebaseapp.com",
+  projectId: "prodai-58436",
+  storageBucket: "prodai-58436.appspot.com",
+  messagingSenderId: "801631191322",
+  appId: "1:801631322:web:80e3d29cf7468331652ca3",
+  measurementId: "G-MBDHDYN6Z0"
+};
+
+if (!window.firebase) {
+  alert("Firebase SDK não carregado!");
+}
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+
+// Aguarde o Firebase carregar antes de usar
 function waitForFirebase() {
   return new Promise((resolve) => {
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -14,22 +35,123 @@ function waitForFirebase() {
   });
 }
 
-const firebaseConfig = {
-  apiKey:            "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
-  authDomain:        "prodai-58436.firebaseapp.com",
-  projectId:         "prodai-58436",
-  storageBucket:     "prodai-58436.appspot.com",
-  messagingSenderId: "801631191322",
-  appId:             "1:801631322:web:80e3d29cf7468331652ca3",
-  measurementId:     "G-MBDHDYN6Z0"
-};
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+// Garante que a div do reCAPTCHA existe no HTML
+function ensureRecaptchaDiv() {
+  let recaptchaDiv = document.getElementById('recaptcha-container');
+  if (!recaptchaDiv) {
+    recaptchaDiv = document.createElement('div');
+    recaptchaDiv.id = 'recaptcha-container';
+    recaptchaDiv.style.display = 'none'; // invisível
+    document.body.appendChild(recaptchaDiv);
+  }
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Inicializa o RecaptchaVerifier (apenas 1 vez por fluxo)
+let recaptchaVerifier = null;
+function getRecaptchaVerifier() {
+  if (recaptchaVerifier) {
+    try { recaptchaVerifier.clear(); } catch (e) {}
+    recaptchaVerifier = null;
+  }
+  ensureRecaptchaDiv();
+  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+    size: 'invisible',
+    callback: (response) => {
+      // reCAPTCHA resolvido automaticamente
+    },
+    'expired-callback': () => {
+      showMessage("O reCAPTCHA expirou. Tente novamente.", "error");
+    }
+  });
+  return recaptchaVerifier;
+}
+
+// Função para mostrar mensagens de erro/sucesso
+function showMessage(msg, type = "error") {
+  let el = document.getElementById("error-message");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "error-message";
+    el.style.position = "fixed";
+    el.style.top = "10px";
+    el.style.left = "50%";
+    el.style.transform = "translateX(-50%)";
+    el.style.zIndex = "9999";
+    el.style.background = type === "success" ? "#4caf50" : "#f44336";
+    el.style.color = "#fff";
+    el.style.padding = "10px 20px";
+    el.style.borderRadius = "4px";
+    document.body.appendChild(el);
+  }
+  el.innerText = msg;
+  el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; }, 5000);
+}
+
+// Função para enviar SMS
+async function sendSMS(rawPhone) {
+  await waitForFirebase();
+  ensureRecaptchaDiv();
+
+  // Formata o número para +55DDDXXXXXXXXX
+  const clean = rawPhone.replace(/\D/g, '');
+  const phone = '+55' + clean.replace(/^55/, '');
+
+  if (!phone.match(/^\+55\d{10,11}$/)) {
+    showMessage("Formato inválido. Use DDD + número, ex: 34987654321");
+    return;
+  }
+
+  const verifier = getRecaptchaVerifier();
+  try {
+    await verifier.render();
+    await verifier.verify();
+
+    const confirmationResult = await auth.signInWithPhoneNumber(phone, verifier);
+    window.confirmationResult = confirmationResult;
+    showMessage("Código SMS enviado! Digite o código recebido.", "success");
+    // Aqui você pode exibir o campo para o usuário digitar o código
+  } catch (error) {
+    let msg = error.message || "Erro ao enviar SMS.";
+    if (error.code === "auth/too-many-requests") {
+      msg = "Muitas tentativas. Tente novamente mais tarde.";
+    } else if (error.code === "auth/quota-exceeded") {
+      msg = "Limite de SMS excedido. Tente novamente mais tarde.";
+    } else if (error.code === "auth/invalid-phone-number") {
+      msg = "Número de telefone inválido.";
+    } else if (error.code === "auth/app-not-authorized") {
+      msg = "App não autorizado. Verifique as configurações do Firebase.";
+    }
+    showMessage(msg);
+    if (recaptchaVerifier) {
+      try { recaptchaVerifier.clear(); } catch (e) {}
+      recaptchaVerifier = null;
+    }
+  }
+}
+
+// Função para confirmar o código SMS
+async function confirmSMSCode(code) {
+  if (!window.confirmationResult) {
+    showMessage("Envie o SMS primeiro.");
+    return;
+  }
+  try {
+    const result = await window.confirmationResult.confirm(code);
+    showMessage("Telefone autenticado com sucesso!", "success");
+    // Aqui você pode redirecionar ou salvar o usuário
+  } catch (error) {
+    let msg = error.message || "Erro ao confirmar código.";
+    if (error.code === "auth/invalid-verification-code") {
+      msg = "Código de verificação inválido.";
+    }
+    showMessage(msg);
+  }
+}
+
+// Exemplo de uso (adicione seus próprios campos/input):
+// sendSMS(document.getElementById('phone').value);
+// confirmSMSCode(document.getElementById('smsCode').value);
 
 const firebaseErrorsPt = {
   'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato +55 DDD + número.',
