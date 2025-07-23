@@ -1,3 +1,4 @@
+console.log('auth.js iniciado');
 // Função para aguardar o carregamento do Firebase antes de executar código dependente
 function waitForFirebase(callback) {
   const check = () => {
@@ -256,6 +257,13 @@ async function sendSMS(rawPhone) {
 }
 
 window.signUp = async function () {
+  console.log('window.signUp chamada');
+// Expor explicitamente as funções no window para garantir acesso global
+window.signUp = window.signUp;
+window.login = window.login;
+window.confirmSMSCode = window.confirmSMSCode;
+window.forgotPassword = window.forgotPassword;
+console.log('auth.js finalizado');
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const rawPhone = document.getElementById("phone").value.trim();
