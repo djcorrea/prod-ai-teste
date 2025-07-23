@@ -92,6 +92,17 @@ async function handleUserLimits(db, uid, email) {
         userData = snap.data();
         const lastReset = userData.dataUltimoReset?.toDate().toDateString();
 
+        // Se assinatura cancelada e expirada, rebaixar para plano gratuito
+        if (
+          userData.status === 'cancelled' &&
+          userData.expiresAt &&
+          userData.expiresAt.toDate() <= now.toDate()
+        ) {
+          userData.plano = 'gratis';
+          userData.status = 'inactive';
+          tx.update(userRef, { plano: 'gratis', status: 'inactive', expiresAt: FieldValue.delete() });
+        }
+
         // Reset diário se necessário
         if (lastReset !== today) {
           userData.mensagensRestantes = 10;
