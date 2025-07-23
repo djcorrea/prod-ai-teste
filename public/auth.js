@@ -218,7 +218,6 @@ async function sendSMS(rawPhone) {
   if (!recaptchaDiv) {
     recaptchaDiv = document.createElement('div');
     recaptchaDiv.id = 'recaptcha-container';
-    // Adiciona no final do body para evitar conflitos de layout
     document.body.appendChild(recaptchaDiv);
   }
 
@@ -228,8 +227,8 @@ async function sendSMS(rawPhone) {
     window.recaptchaVerifier = null;
   }
 
-  // Cria novo reCAPTCHA invisível
-  window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+  // Cria novo reCAPTCHA invisível usando o SDK modular
+  window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
     size: 'invisible',
     callback: (response) => {
       console.log("✅ reCAPTCHA resolvido:", response);
@@ -237,13 +236,13 @@ async function sendSMS(rawPhone) {
     'expired-callback': () => {
       console.warn("⚠️ reCAPTCHA expirado.");
     }
-  });
+  }, auth);
 
   try {
     await window.recaptchaVerifier.render();
     await window.recaptchaVerifier.verify();
 
-    confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
+    confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
     lastPhone = phone;
     showMessage("Código SMS enviado! Digite o código recebido.", "success");
     window.showSMSSection();
@@ -290,17 +289,16 @@ window.confirmSMSCode = async function() {
   }
 
   try {
-    const phoneCred = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, code);
-    const phoneUser = await auth.signInWithCredential(phoneCred);
+    const phoneCred = PhoneAuthProvider.credential(confirmationResult.verificationId, code);
+    const phoneUser = await signInWithCredential(auth, phoneCred);
 
-    const emailCred = firebase.auth.EmailAuthProvider.credential(email, password);
-    await phoneUser.user.linkWithCredential(emailCred);
+    const emailCred = EmailAuthProvider.credential(email, password);
+    await linkWithCredential(phoneUser.user, emailCred);
 
     const fingerprint = await getFingerprint();
     if (fingerprint) {
-      const functions = firebase.app().functions();
       try {
-        await functions.httpsCallable('registerAccount')({ fingerprint, phone });
+        await httpsCallable(functions, 'registerAccount')({ fingerprint, phone });
       } catch (e) {
         showMessage(e.message || 'Erro ao registrar dados', 'error');
         return;
@@ -322,7 +320,7 @@ window.confirmSMSCode = async function() {
     setTimeout(() => {
       auth.onAuthStateChanged = currentListener;
     }, 5000);
-    
+
     // Expor funções no window para uso nos botões do HTML
     window.signUp = signUp;
     window.login = login;
