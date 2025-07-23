@@ -1235,20 +1235,20 @@
                 <div id="interviewData" class="interview-data">
                     <div class="interview-item">
                         <label class="form-label">Nome Artístico</label>
-                        <div class="data-display" data-field="artistName" id="nomeArtistico">DJ Phoenix</div>
-                        <button class="btn-edit" onclick="editField('artistName')">✏️</button>
+                        <div class="data-display" data-field="nomeArtistico" id="nomeArtistico">DJ Phoenix</div>
+                        <button class="btn-edit" onclick="editField('nomeArtistico')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Estilo Musical</label>
-                        <div class="data-display" data-field="musicStyle" id="estiloMusical">Progressive House, Deep House</div>
-                        <button class="btn-edit" onclick="editField('musicStyle')">✏️</button>
+                        <div class="data-display" data-field="estilo" id="estiloMusical">Progressive House, Deep House</div>
+                        <button class="btn-edit" onclick="editField('estilo')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Maior Dificuldade</label>
-                        <div class="data-display" data-field="difficulty" id="dificuldade">Criar transições suaves entre faixas</div>
-                        <button class="btn-edit" onclick="editField('difficulty')">✏️</button>
+                        <div class="data-display" data-field="dificuldade" id="dificuldade">Criar transições suaves entre faixas</div>
+                        <button class="btn-edit" onclick="editField('dificuldade')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
@@ -1259,14 +1259,14 @@
                     
                     <div class="interview-item">
                         <label class="form-label">Nível Técnico</label>
-                        <div class="data-display" data-field="technicalLevel">Intermediário</div>
-                        <button class="btn-edit" onclick="editField('technicalLevel')">✏️</button>
+                        <div class="data-display" data-field="nivelTecnico">Intermediário</div>
+                        <button class="btn-edit" onclick="editField('nivelTecnico')">✏️</button>
                     </div>
                     
                     <div class="interview-item">
                         <label class="form-label">Sobre Você</label>
-                        <div class="data-display" data-field="aboutYou">Produtor há 3 anos, focado em música eletrônica para festas</div>
-                        <button class="btn-edit" onclick="editField('aboutYou')">✏️</button>
+                        <div class="data-display" data-field="sobre">Produtor há 3 anos, focado em música eletrônica para festas</div>
+                        <button class="btn-edit" onclick="editField('sobre')">✏️</button>
                     </div>
                 </div>
 
@@ -1531,12 +1531,12 @@
             subscriptionStatus: 'active',
             expiresAt: null,
             interviewData: {
-                artistName: '',
-                musicStyle: '',
-                difficulty: '',
+                nomeArtistico: '',
+                estilo: '',
+                dificuldade: '',
                 daw: '',
-                technicalLevel: '',
-                aboutYou: ''
+                nivelTecnico: '',
+                sobre: ''
             },
             personalInfo: {
                 email: '',
@@ -1583,7 +1583,7 @@
         function editField(fieldName) {
             const dataDisplay = document.querySelector(`[data-field="${fieldName}"]`);
             const currentValue = dataDisplay.textContent;
-            const isTextarea = fieldName === 'aboutYou' || fieldName === 'difficulty';
+            const isTextarea = fieldName === 'sobre' || fieldName === 'dificuldade';
             
             const inputElement = isTextarea ? 
                 `<textarea class="edit-field-input" rows="2">${currentValue}</textarea>` :
@@ -1660,6 +1660,13 @@
         function savePersonalization() {
             if (userData.userType === 'FREE') {
                 showNotification('⚠️ Personalização limitada na versão FREE', 'warning');
+                return;
+            }
+
+            const values = Object.values(userData.interviewData || {});
+            const hasEmpty = values.some(v => !v || !v.toString().trim());
+            if (hasEmpty) {
+                showNotification('⚠️ Preencha todos os campos de personalização', 'error');
                 return;
             }
 
@@ -2739,18 +2746,11 @@
         }
 
         function refazerEntrevista() {
-            window.location.href = 'entrevista.html';
+            retakeInterview();
         }
 
         function salvarPreferencias() {
-            const nomeArtistico = document.getElementById('nomeArtistico').textContent;
-            const estilo = document.getElementById('estiloMusical').textContent;
-            const dificuldade = document.getElementById('dificuldade').textContent;
-            const daw = document.getElementById('dawUtilizada').textContent;
-
-            const perfil = { nomeArtistico, estilo, dificuldade, daw };
-            localStorage.setItem('perfilMusical', JSON.stringify(perfil));
-            alert('Preferências salvas!');
+            savePersonalization();
         }
 
         function cancelarAssinatura() {
