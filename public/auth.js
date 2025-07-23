@@ -19,9 +19,9 @@ import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/
 // Importação correta do FingerprintJS para uso em módulos ES6
 let FingerprintJS;
 try {
-  FingerprintJS = (await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js')).default || (await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js'));
+  const mod = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
+  FingerprintJS = mod.default || mod;
 } catch (e) {
-  // fallback para window.FingerprintJS se já estiver carregado globalmente
   FingerprintJS = window.FingerprintJS;
 }
 
