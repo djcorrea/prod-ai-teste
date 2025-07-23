@@ -5,7 +5,14 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js';
-import FingerprintJS from 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
+// Importação correta do FingerprintJS para uso em módulos ES6
+let FingerprintJS;
+try {
+  FingerprintJS = (await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js')).default || (await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js'));
+} catch (e) {
+  // fallback para window.FingerprintJS se já estiver carregado globalmente
+  FingerprintJS = window.FingerprintJS;
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
@@ -112,7 +119,7 @@ function showMessage(messageOrError, type = "error") {
 }
 
 async function getFingerprint() {
-  if (window.FingerprintJS) {
+  if (FingerprintJS && typeof FingerprintJS.load === 'function') {
     const fpPromise = FingerprintJS.load();
     const fp = await fpPromise;
     const result = await fp.get();
