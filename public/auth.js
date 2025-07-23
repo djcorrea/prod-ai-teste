@@ -150,6 +150,16 @@ async function sendSMS(rawPhone) {
     return false;
   }
 
+
+  // Garante que o container do reCAPTCHA existe no DOM
+  let recaptchaDiv = document.getElementById('recaptcha-container');
+  if (!recaptchaDiv) {
+    recaptchaDiv = document.createElement('div');
+    recaptchaDiv.id = 'recaptcha-container';
+    // Adiciona no final do body para evitar conflitos de layout
+    document.body.appendChild(recaptchaDiv);
+  }
+
   // Limpa reCAPTCHA anterior, se houver
   if (window.recaptchaVerifier) {
     try { window.recaptchaVerifier.clear(); } catch (e) {}
