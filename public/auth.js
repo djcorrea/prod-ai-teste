@@ -21,6 +21,7 @@ import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/
 let FingerprintJS;
 try {
   const mod = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
+(async () => {
   FingerprintJS = mod.default || mod;
 } catch (e) {
   FingerprintJS = window.FingerprintJS;
