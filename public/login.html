@@ -135,31 +135,15 @@
 
 
   <!-- Scripts do Firebase e app -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-functions-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+    import { getFirestore, doc, getDoc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+    import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js';
+    // FingerprintJS
+    import FingerprintJS from 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
 
-  <script src="auth.js"></script>
-
-  <script>
-    // Garante que os botões chamem as funções certas após os scripts carregarem
-    document.addEventListener("DOMContentLoaded", function () {
-      const loginBtn = document.getElementById("loginBtn");
-      const signUpBtn = document.getElementById("signUpBtn");
-      const confirmBtn = document.getElementById("confirmCodeBtn");
-      const forgotLink = document.getElementById("forgotPasswordLink");
-
-      if (loginBtn) loginBtn.addEventListener("click", () => window.login?.());
-      if (signUpBtn) signUpBtn.addEventListener("click", () => window.signUp?.());
-      if (confirmBtn) confirmBtn.addEventListener("click", () => window.confirmSMSCode?.());
-      if (forgotLink) forgotLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        window.forgotPassword?.();
-      });
-    });
-    
+    // Seu código auth.js modularizado será inserido aqui automaticamente
   </script>
 </body>
 </html>

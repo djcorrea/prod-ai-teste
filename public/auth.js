@@ -1,5 +1,11 @@
 
-// === Firebase Auth com login por telefone e reCAPTCHA invisível ===
+// === Firebase Auth modular com login por telefone e reCAPTCHA invisível/Enterprise ===
+
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js';
+import FingerprintJS from 'https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
@@ -11,45 +17,21 @@ const firebaseConfig = {
   measurementId: "G-MBDHDYN6Z0"
 };
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const functions = getFunctions(app);
 
-if (!window.firebase) {
-  alert("Firebase SDK não carregado!");
-}
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-// Aguarde o Firebase carregar antes de usar
-function waitForFirebase() {
-  return new Promise((resolve) => {
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      resolve();
-    } else {
-      const checkFirebase = setInterval(() => {
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          clearInterval(checkFirebase);
-          resolve();
-        }
-      }, 100);
-    }
-  });
-}
-
-// Garante que a div do reCAPTCHA existe no HTML
 function ensureRecaptchaDiv() {
   let recaptchaDiv = document.getElementById('recaptcha-container');
   if (!recaptchaDiv) {
     recaptchaDiv = document.createElement('div');
     recaptchaDiv.id = 'recaptcha-container';
-    recaptchaDiv.style.display = 'none'; // invisível
+    recaptchaDiv.style.display = 'none';
     document.body.appendChild(recaptchaDiv);
   }
 }
 
-// Inicializa o RecaptchaVerifier (apenas 1 vez por fluxo)
 let recaptchaVerifier = null;
 function getRecaptchaVerifier() {
   if (recaptchaVerifier) {
@@ -57,15 +39,13 @@ function getRecaptchaVerifier() {
     recaptchaVerifier = null;
   }
   ensureRecaptchaDiv();
-  recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+  recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
     size: 'invisible',
-    callback: (response) => {
-      // reCAPTCHA resolvido automaticamente
-    },
+    callback: (response) => {},
     'expired-callback': () => {
       showMessage("O reCAPTCHA expirou. Tente novamente.", "error");
     }
-  });
+  }, auth);
   return recaptchaVerifier;
 }
 
