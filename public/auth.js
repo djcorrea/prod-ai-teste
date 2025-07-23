@@ -325,6 +325,12 @@ window.confirmSMSCode = async function() {
     setTimeout(() => {
       auth.onAuthStateChanged = currentListener;
     }, 5000);
+    
+    // Expor funções no window para uso nos botões do HTML
+    window.signUp = signUp;
+    window.login = login;
+    window.confirmSMSCode = confirmSMSCode;
+    window.forgotPassword = forgotPassword;
 
   } catch (error) {
     console.error("Erro no cadastro:", error);
