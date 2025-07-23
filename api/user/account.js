@@ -1,6 +1,8 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+import fetch from 'node-fetch';
 
 if (!getApps().length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -35,6 +37,55 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Dados inválidos' });
   }
 
+  // Verifica a senha do usuário
+  try {
+    const verify = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: decoded.email,
+          password,
+          returnSecureToken: false,
+        }),
+      }
+    );
+    if (!verify.ok) {
+      return res.status(400).json({ error: 'SENHA_INVALIDA' });
+    }
+  } catch {
+    return res.status(400).json({ error: 'SENHA_INVALIDA' });
+  }
+
+  // Remove dados adicionais (fingerprints, phones, avatar)
+  const deletes = [];
+
+  deletes.push(
+    db
+      .collection('fingerprints')
+      .where('uid', '==', decoded.uid)
+      .get()
+      .then((snap) => Promise.all(snap.docs.map((d) => d.ref.delete())))
+  );
+
+  deletes.push(
+    db
+      .collection('phones')
+      .where('uid', '==', decoded.uid)
+      .get()
+      .then((snap) => Promise.all(snap.docs.map((d) => d.ref.delete())))
+  );
+
+  if (data.avatar) {
+    const match = data.avatar.match(/avatars\/([^?]+)/);
+    if (match) {
+      const bucket = getStorage().bucket();
+      deletes.push(bucket.file(`avatars/${match[1]}`).delete().catch(() => {}));
+    }
+  }
+
+  await Promise.all(deletes);
   await auth.deleteUser(decoded.uid);
   await userRef.delete();
   return res.status(200).json({ success: true });
