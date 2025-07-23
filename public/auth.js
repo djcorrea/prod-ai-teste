@@ -2,14 +2,16 @@
 // === Firebase Auth com login por telefone e reCAPTCHA invisível ===
 
 const firebaseConfig = {
-  apiKey : "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw" , 
-  authDomain:"prodai-58436.firebaseapp.com", 
-  projectId : "prodai-58436" , 
-  storageBucket : "prodai-58436.firebasestorage.app" , 
-  messagingSenderId : "801631191322" , 
-  appId : "1:801631191322:web:80e3d29cf7468331652ca3" , 
-  measurementId : "G-MBDHDYN6Z0" 
+  apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+  authDomain: "prodai-58436.firebaseapp.com",
+  projectId: "prodai-58436",
+  storageBucket: "prodai-58436.appspot.com",
+  messagingSenderId: "801631191322",
+  appId: "1:801631322:web:80e3d29cf7468331652ca3",
+  measurementId: "G-MBDHDYN6Z0"
 };
+
+const db = firebase.firestore();
 
 if (!window.firebase) {
   alert("Firebase SDK não carregado!");
@@ -88,47 +90,7 @@ function showMessage(msg, type = "error") {
   setTimeout(() => { el.style.display = "none"; }, 5000);
 }
 
-// Função para enviar SMS
-async function sendSMS(rawPhone) {
-  await waitForFirebase();
-  ensureRecaptchaDiv();
-
-  // Formata o número para +55DDDXXXXXXXXX
-  const clean = rawPhone.replace(/\D/g, '');
-  const phone = '+55' + clean.replace(/^55/, '');
-
-  if (!phone.match(/^\+55\d{10,11}$/)) {
-    showMessage("Formato inválido. Use DDD + número, ex: 34987654321");
-    return;
-  }
-
-  const verifier = getRecaptchaVerifier();
-  try {
-    await verifier.render();
-    await verifier.verify();
-
-    const confirmationResult = await auth.signInWithPhoneNumber(phone, verifier);
-    window.confirmationResult = confirmationResult;
-    showMessage("Código SMS enviado! Digite o código recebido.", "success");
-    // Aqui você pode exibir o campo para o usuário digitar o código
-  } catch (error) {
-    let msg = error.message || "Erro ao enviar SMS.";
-    if (error.code === "auth/too-many-requests") {
-      msg = "Muitas tentativas. Tente novamente mais tarde.";
-    } else if (error.code === "auth/quota-exceeded") {
-      msg = "Limite de SMS excedido. Tente novamente mais tarde.";
-    } else if (error.code === "auth/invalid-phone-number") {
-      msg = "Número de telefone inválido.";
-    } else if (error.code === "auth/app-not-authorized") {
-      msg = "App não autorizado. Verifique as configurações do Firebase.";
-    }
-    showMessage(msg);
-    if (recaptchaVerifier) {
-      try { recaptchaVerifier.clear(); } catch (e) {}
-      recaptchaVerifier = null;
-    }
-  }
-}
+// ...função sendSMS robusta já está presente mais abaixo...
 
 // Função para confirmar o código SMS
 async function confirmSMSCode(code) {
