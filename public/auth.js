@@ -1,3 +1,14 @@
+// Função para aguardar o carregamento do Firebase antes de executar código dependente
+function waitForFirebase(callback) {
+  const check = () => {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      callback();
+    } else {
+      setTimeout(check, 100);
+    }
+  };
+  check();
+}
 
 // === Firebase Auth modular com login por telefone e reCAPTCHA invisível/Enterprise ===
 
@@ -393,7 +404,8 @@ function checkAuthState() {
   });
 }
 
-waitForFirebase().then(() => {
+
+waitForFirebase(() => {
   checkAuthState();
 });
 
