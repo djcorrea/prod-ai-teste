@@ -1528,6 +1528,8 @@
     <script>
         const userData = {
             userType: 'FREE',
+            subscriptionStatus: 'active',
+            expiresAt: null,
             interviewData: {
                 artistName: '',
                 musicStyle: '',
@@ -1542,6 +1544,40 @@
                 avatar: null
             }
         };
+
+        function parseTimestamp(ts) {
+            if (!ts) return null;
+            if (typeof ts === 'object') {
+                if ('_seconds' in ts) return new Date(ts._seconds * 1000);
+                if ('seconds' in ts) return new Date(ts.seconds * 1000);
+            }
+            return new Date(ts);
+        }
+
+        function updateSubscriptionUI() {
+            const planBadge = document.querySelector('.plan-badge');
+            if (planBadge) {
+                if (userData.userType === 'PLUS') {
+                    planBadge.textContent = 'PRO MEMBER';
+                    planBadge.className = 'plan-badge plan-pro';
+                } else {
+                    planBadge.textContent = 'FREE MEMBER';
+                    planBadge.className = 'plan-badge';
+                }
+            }
+
+            const statusSpans = document.querySelectorAll('.status-indicator span');
+            if (statusSpans.length > 1 && userData.expiresAt) {
+                const dateStr = new Date(userData.expiresAt).toLocaleDateString('pt-BR');
+                statusSpans[1].textContent = `Ativa até ${dateStr}`;
+            }
+
+            const cancelInfo = document.querySelector('#cancelModal div p');
+            if (cancelInfo && userData.expiresAt) {
+                const dateStr = new Date(userData.expiresAt).toLocaleDateString('pt-BR');
+                cancelInfo.innerHTML = `• Acesso até ${dateStr}<br>• Sem cobrança futura<br>• Pode reativar a qualquer momento`;
+            }
+        }
 
         // Função para editar campos individuais
         function editField(fieldName) {
@@ -1682,11 +1718,10 @@
         function confirmCancel() {
             closeModal('cancelModal');
             apiRequest('/api/user/cancel-subscription', { method: 'POST' })
-                .then(() => {
-                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                })
+                .then(() => loadUserData().then(() => {
+                    const dateStr = userData.expiresAt ? new Date(userData.expiresAt).toLocaleDateString('pt-BR') : '';
+                    showNotification(`✅ Assinatura cancelada com sucesso. Seu plano continua ativo até ${dateStr}`, 'success');
+                }))
                 .catch(() => {
                     showNotification('❌ Erro ao cancelar assinatura', 'error');
                 });
@@ -1907,18 +1942,17 @@
 
         // Cancelar assinatura
         function cancelSubscription() {
+            updateSubscriptionUI();
             openModal('cancelModal');
         }
 
         function confirmCancel() {
             closeModal('cancelModal');
             apiRequest('/api/user/cancel-subscription', { method: 'POST' })
-                .then(() => {
-                    showNotification('✅ Assinatura cancelada com sucesso!', 'success');
-                    document.querySelector('.plan-badge').textContent = 'FREE MEMBER';
-                    document.querySelector('.plan-badge').className = 'plan-badge';
-                    document.querySelector('.plan-badge').style.background = 'linear-gradient(45deg, var(--bg-tertiary), var(--silver))';
-                })
+                .then(() => loadUserData().then(() => {
+                    const dateStr = userData.expiresAt ? new Date(userData.expiresAt).toLocaleDateString('pt-BR') : '';
+                    showNotification(`✅ Assinatura cancelada com sucesso. Seu plano continua ativo até ${dateStr}`, 'success');
+                }))
                 .catch(() => {
                     showNotification('❌ Erro ao cancelar assinatura', 'error');
                 });
@@ -2456,6 +2490,8 @@
                 }
                 if (sub) {
                     userData.userType = sub.plan === 'plus' ? 'PLUS' : 'FREE';
+                    userData.subscriptionStatus = sub.status || 'active';
+                    userData.expiresAt = parseTimestamp(sub.expiresAt);
                 }
                 updateUIWithUserData();
             } catch (err) {
@@ -2472,7 +2508,11 @@
                     const parsedData = JSON.parse(savedData);
                     // Mesclar com dados padrão
                     Object.assign(userData, parsedData);
-                    
+
+                    if (userData.expiresAt) {
+                        userData.expiresAt = parseTimestamp(userData.expiresAt);
+                    }
+
                     // Atualizar interface com dados carregados
                     updateUIWithUserData();
                 }
@@ -2488,7 +2528,7 @@
             if (emailInput && userData.personalInfo.email) {
                 emailInput.value = userData.personalInfo.email;
             }
-            
+
             // Atualizar dados da entrevista
             Object.keys(userData.interviewData).forEach(key => {
                 const element = document.querySelector(`[data-field="${key}"]`);
@@ -2496,6 +2536,8 @@
                     element.textContent = userData.interviewData[key];
                 }
             });
+
+            updateSubscriptionUI();
         }
 
         // Auto-save funcionalidade
