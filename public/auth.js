@@ -49,27 +49,6 @@ function getRecaptchaVerifier() {
   return recaptchaVerifier;
 }
 
-// Função para mostrar mensagens de erro/sucesso
-function showMessage(msg, type = "error") {
-  let el = document.getElementById("error-message");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "error-message";
-    el.style.position = "fixed";
-    el.style.top = "10px";
-    el.style.left = "50%";
-    el.style.transform = "translateX(-50%)";
-    el.style.zIndex = "9999";
-    el.style.background = type === "success" ? "#4caf50" : "#f44336";
-    el.style.color = "#fff";
-    el.style.padding = "10px 20px";
-    el.style.borderRadius = "4px";
-    document.body.appendChild(el);
-  }
-  el.innerText = msg;
-  el.style.display = "block";
-  setTimeout(() => { el.style.display = "none"; }, 5000);
-}
 
 // ...função sendSMS robusta já está presente mais abaixo...
 
