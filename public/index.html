@@ -11,13 +11,422 @@
     body.loading {
       visibility: hidden;
     }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12101c;
+            --purple-primary: #9945ff;
+            --purple-dark: #6b2fb5;
+            --purple-light: #b565ff;
+            --cyan-accent: #00d4ff;
+            --magenta-accent: #ff00ff;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8b3;
+            --border-color: rgba(153, 69, 255, 0.2);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* Canvas Background */
+        #waveCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* Container Principal */
+        .main-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Logo e Header */
+        .header-section {
+            text-align: center;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            margin-bottom: 3rem;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5.5rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+            position: relative;
+            background: linear-gradient(135deg, var(--cyan-accent) 0%, var(--purple-primary) 50%, var(--magenta-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+        }
+        
+        .logo::before {
+            content: 'PROD.AI';
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            filter: blur(25px);
+            opacity: 0.5;
+            background: linear-gradient(135deg, var(--cyan-accent) 0%, var(--purple-primary) 50%, var(--magenta-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.125rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            max-width: 420px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        
+        /* Chat Container */
+        .chat-container {
+            width: 90%;
+            max-width: 480px;
+            background: rgba(18, 16, 28, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 20px 60px rgba(153, 69, 255, 0.1);
+        }
+        
+        .chat-container.expanded {
+            max-width: 800px;
+            height: 75vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem;
+        }
+        
+        /* Messages Area */
+        .messages-area {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+            padding-right: 0.5rem;
+        }
+        
+        .messages-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .messages-area::-webkit-scrollbar-track {
+            background: rgba(153, 69, 255, 0.05);
+            border-radius: 2px;
+        }
+        
+        .messages-area::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--purple-primary), var(--purple-dark));
+            border-radius: 2px;
+        }
+        
+        .message {
+            margin-bottom: 1.25rem;
+            animation: messageSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        @keyframes messageSlide {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.95);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            max-width: 75%;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.925rem;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .message.user .message-bubble {
+            background: rgba(25, 25, 35, 0.8);
+            border: 1px solid rgba(153, 69, 255, 0.1);
+            color: var(--text-primary);
+        }
+        
+        .message.bot .message-bubble {
+            background: linear-gradient(135deg, rgba(153, 69, 255, 0.1), rgba(107, 47, 181, 0.1));
+            border: 1px solid rgba(153, 69, 255, 0.2);
+            color: var(--text-primary);
+        }
+        
+        /* Input Area */
+        .input-area {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            color: var(--text-primary);
+            font-size: 0.925rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--purple-primary);
+            background: rgba(10, 10, 15, 0.9);
+            box-shadow: 0 0 20px rgba(153, 69, 255, 0.2);
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, var(--purple-primary), var(--purple-dark));
+            border: none;
+            border-radius: 16px;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%) scale(0);
+            border-radius: 50%;
+            transition: transform 0.5s ease;
+        }
+        
+        .send-button:hover::before {
+            transform: translate(-50%, -50%) scale(2);
+        }
+        
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(153, 69, 255, 0.4);
+        }
+        
+        .send-button svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Footer Actions */
+        .footer-actions {
+            position: fixed;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 1.25rem;
+            z-index: 20;
+        }
+        
+        .action-button {
+            background: rgba(18, 16, 28, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 0.875rem 2rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-button:hover {
+            border-color: var(--purple-primary);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(153, 69, 255, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        /* Estados */
+        body.chat-active .main-container {
+            justify-content: flex-start;
+            padding-top: 3rem;
+        }
+        
+        body.chat-active .header-section {
+            margin-bottom: 2rem;
+        }
+        
+        body.chat-active .logo {
+            font-size: 3rem;
+        }
+        
+        body.chat-active .subtitle {
+            display: block;
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+        
+        body.chat-active .description {
+            display: none;
+        }
+        
+        body.chat-active .messages-area {
+            display: block;
+        }
+        
+        body.chat-active .footer-actions {
+            display: flex;
+        }
+        
+        /* Typing Indicator */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 6px;
+            padding: 1rem 1.5rem;
+            align-items: center;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--purple-primary);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes pulse {
+            0%, 60%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3.5rem;
+            }
+            
+            body.chat-active .logo {
+                font-size: 2.25rem;
+            }
+            
+            .chat-container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            .chat-container.expanded {
+                height: 70vh;
+                padding: 1.75rem;
+            }
+            
+            .footer-actions {
+                flex-direction: column;
+                width: 90%;
+                gap: 0.75rem;
+            }
+            
+            .action-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
   </style>
- <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("loading");
-    document.body.classList.remove("loading");
-  });
-</script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.add("loading");
+      document.body.classList.remove("loading");
+    });
+  </script>
 
   <!-- Firebase e dependências -->
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
@@ -29,82 +438,64 @@
   <script src="auth.js" defer></script>
   <script src="script.js" defer></script>
 </head>
-
 <body>
-  <div class="particles"></div>
-
-  <div class="container fade-in">
-    <!-- TELA INICIAL -->
+  <canvas id="waveCanvas"></canvas>
+  <div class="main-container fade-in">
     <div class="start-screen" id="startScreen">
-      <div class="start-header" id="startHeader">
-        <h1 class="logo" id="mainLogo">Prod.AI</h1>
+      <div class="header-section" id="startHeader">
+        <h1 class="logo" id="mainLogo">PROD.AI</h1>
         <p class="subtitle" id="mainSubtitle">Seu mentor virtual inteligente</p>
-        <p class="motivational-text" id="motivationalText">
-          <span class="motivational-line-2">Estou aqui para resolver qualquer problema sobre Produção Musical!</span>
+        <p class="description motivational-text" id="motivationalText">
+          Estou aqui para resolver qualquer problema relacionado à produção musical.
         </p>
       </div>
-      
-      <div class="start-input-container" id="startInputContainer">
-        <div class="start-input-wrapper">
-          <input type="text" id="start-input" placeholder="Digite aqui..." autocomplete="off" />
-          <button onclick="sendFirstMessage()" id="startSendBtn" class="start-send-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m22 2-7 20-4-9-9-4Z"/>
-              <path d="M22 2 11 13"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- HEADER APÓS ANIMAÇÃO -->
-    <header class="header" id="mainHeader" style="display: none;">
-      <h1 class="logo">Prod.AI</h1>
-      <p class="subtitle">Seu mentor virtual inteligente</p>
-    </header>
-
-    <!-- CHAT PRINCIPAL -->
-    <div class="chat-container" id="chatContainer" style="display: none;">
-      <div class="chatbox" id="chatbox">
-        <div style="height: 1px; visibility: hidden;"></div>
-      </div>
-
-      <div class="typing-indicator" id="typingIndicator">
-        <div class="typing-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <span class="typing-text">Assistente está digitando...</span>
-      </div>
-
-      <div class="input-container">
-        <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" />
-        <button onclick="sendMessage()" id="sendBtn" class="btn-plus">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m22 2-7 20-4-9-9-4Z"/>
-            <path d="M22 2 11 13"/>
+      <div class="input-area" id="startInputContainer">
+        <input type="text" id="start-input" class="chat-input" placeholder="Digite aqui..." autocomplete="off" />
+        <button onclick="sendFirstMessage()" id="startSendBtn" class="send-button">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
           </svg>
-          Enviar
         </button>
       </div>
     </div>
 
-    <!-- FOOTER - APÓS CHAT EXPANDIR -->
-    <footer class="footer" id="mainFooter" style="display: none;">
-      <div class="footer-content-grid">
-        <div class="footer-left">
-ouih-codex/substituir-botao-assinar-versao
-          <a href="gerenciar.html"><button class="btn-plus">Gerenciar minha conta</button></a>
-        </div>
-        <div class="footer-center">
-          <p class="instagram-text">Siga no Instagram: <a href="https://instagram.com/djcorreaoriginal" target="_blank">@djcorreaoriginal</a></p>
-        </div>
-        <div class="footer-right">
-          <button class="btn-logout" id="logoutBtn">Sair</button>
-        </div>
+    <header class="header-section" id="mainHeader" style="display: none;">
+      <h1 class="logo">PROD.AI</h1>
+      <p class="subtitle">Seu mentor virtual</p>
+    </header>
+
+    <div class="chat-container" id="chatContainer" style="display: none;">
+      <div class="messages-area chatbox" id="chatbox">
+        <div style="height:1px; visibility:hidden;"></div>
       </div>
-    </footer>
+
+      <div class="typing-indicator" id="typingIndicator" style="display:none;">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+
+      <div class="input-area">
+        <input type="text" class="chat-input" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" />
+        <button onclick="sendMessage()" id="sendBtn" class="send-button">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="footer-actions" id="mainFooter" style="display: none;">
+      <a href="gerenciar.html" class="action-button">
+        <span class="action-icon">⚙</span> Gerenciar Conta
+      </a>
+      <a href="planos.html" class="action-button">
+        <span class="action-icon">🎧</span> Assinar Versão Plus
+      </a>
+      <button class="action-button" id="logoutBtn">
+        <span class="action-icon">⚡</span> Sair
+      </button>
+    </div>
   </div>
 
   <!-- Script para evitar erro de logout indefinido -->
@@ -121,6 +512,119 @@ ouih-codex/substituir-botao-assinar-versao
         });
       }
     });
+  </script>
+
+  <script>
+        // Sound Wave Animation - More Realistic
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let time = 0;
+        const waves = [];
+        const numberOfWaves = 5;
+        
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        
+        class SoundWave {
+            constructor(index) {
+                this.index = index;
+                this.amplitude = 30 + Math.random() * 20;
+                this.frequency = 0.002 + Math.random() * 0.003;
+                this.speed = 0.001 + Math.random() * 0.002;
+                this.offset = (Math.PI * 2 * index) / numberOfWaves;
+            }
+            
+            draw(ctx, time) {
+                ctx.beginPath();
+                
+                const centerY = height * 0.6;
+                const waveHeight = this.amplitude * (0.8 + Math.sin(time * this.speed) * 0.2);
+                
+                for (let x = 0; x <= width; x++) {
+                    const angle = (x * this.frequency) + (time * this.speed * 50) + this.offset;
+                    const y = centerY + Math.sin(angle) * waveHeight;
+                    
+                    // Add some noise for realism
+                    const noise = Math.sin(x * 0.01 + time) * 5;
+                    
+                    if (x === 0) {
+                        ctx.moveTo(x, y + noise);
+                    } else {
+                        ctx.lineTo(x, y + noise);
+                    }
+                }
+                
+                // Create gradient based on wave position
+                const gradient = ctx.createLinearGradient(0, centerY - 100, 0, centerY + 100);
+                const opacity = 0.3 - (this.index * 0.05);
+                
+                if (this.index % 2 === 0) {
+                    gradient.addColorStop(0, `rgba(153, 69, 255, 0)`);
+                    gradient.addColorStop(0.5, `rgba(153, 69, 255, ${opacity})`);
+                    gradient.addColorStop(1, `rgba(153, 69, 255, 0)`);
+                } else {
+                    gradient.addColorStop(0, `rgba(107, 47, 181, 0)`);
+                    gradient.addColorStop(0.5, `rgba(107, 47, 181, ${opacity * 0.8})`);
+                    gradient.addColorStop(1, `rgba(107, 47, 181, 0)`);
+                }
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2 - (this.index * 0.2);
+                ctx.stroke();
+                
+                // Add glow effect
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(153, 69, 255, 0.5)';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function initWaves() {
+            for (let i = 0; i < numberOfWaves; i++) {
+                waves.push(new SoundWave(i));
+            }
+        }
+        
+        function drawBackground() {
+            // Dark gradient background
+            const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+            bgGradient.addColorStop(0, '#0a0a0f');
+            bgGradient.addColorStop(0.5, '#12101c');
+            bgGradient.addColorStop(1, '#0a0a0f');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            // Add subtle purple gradient overlay
+            const overlayGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
+            overlayGradient.addColorStop(0, 'rgba(153, 69, 255, 0.05)');
+            overlayGradient.addColorStop(1, 'rgba(153, 69, 255, 0)');
+            ctx.fillStyle = overlayGradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+        
+        function animate() {
+            drawBackground();
+            
+            // Draw waves
+            waves.forEach(wave => {
+                wave.draw(ctx, time);
+            });
+            
+            time += 0.01;
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        resizeCanvas();
+        initWaves();
+        animate();
+        
+        window.addEventListener('resize', resizeCanvas);
   </script>
 </body>
 </html>
