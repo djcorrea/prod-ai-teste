@@ -1,6 +1,6 @@
 const chatbox = document.getElementById('chatbox');
-const input = document.getElementById('user-input');
-const sendBtn = document.getElementById('sendBtn');
+const input = document.getElementById('chatInput');
+const sendButton = document.getElementById('sendButton');
 const typingIndicator = document.getElementById('typingIndicator');
 let isFirstMessage = true;
 let conversationHistory = [];
@@ -105,7 +105,7 @@ async function animateToChat() {
       if (mainHeader) mainHeader.classList.add('header-visible');
       if (mainFooter) mainFooter.classList.add('footer-visible');
 
-      const mainInput = document.getElementById('user-input');
+      const mainInput = document.getElementById('chatInput');
       if (mainInput) mainInput.focus();
     }, 50);
   }, 500);
@@ -149,7 +149,7 @@ function hideTypingIndicator() {
 }
 
 async function processMessage(message) {
-  const mainSendBtn = document.getElementById('sendBtn');
+  const mainSendBtn = document.getElementById('sendButton');
   if (mainSendBtn && chatStarted) {
     mainSendBtn.disabled = true;
     mainSendBtn.innerHTML = 'Enviando...';
@@ -221,7 +221,7 @@ async function processMessage(message) {
 
 async function sendMessage() {
   const message = input?.value?.trim();
-  if (!message || (sendBtn && sendBtn.disabled)) return;
+  if (!message || (sendButton && sendButton.disabled)) return;
 
   if (!chatStarted) {
     await animateToChat();
@@ -267,8 +267,8 @@ function setupEventListeners() {
     });
   }
 
-  if (sendBtn) {
-    sendBtn.addEventListener('click', (e) => {
+  if (sendButton) {
+    sendButton.addEventListener('click', (e) => {
       e.preventDefault();
       sendMessage();
     });
@@ -327,8 +327,8 @@ function debugVercel() {
   console.log('Auth available:', typeof firebase !== 'undefined' && firebase.auth);
   console.log('Start input:', document.getElementById('start-input'));
   console.log('Start button:', document.getElementById('startSendBtn'));
-  console.log('User input:', document.getElementById('user-input'));
-  console.log('Send button:', document.getElementById('sendBtn'));
+  console.log('User input:', document.getElementById('chatInput'));
+  console.log('Send button:', document.getElementById('sendButton'));
   console.log('Chatbox:', document.getElementById('chatbox'));
   console.log('=================');
 }
