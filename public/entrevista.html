@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROD.AI - Configuração do Perfil</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-purple: #ff00ff;
+            --electric-blue: #0080ff;
+            --plasma-pink: #ff0080;
+            --dark-bg: #0a0a0f;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0ff;
+            --input-bg: rgba(255, 255, 255, 0.03);
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Animated Background */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
+        }
+        
+        .grid-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: grid-slide 20s linear infinite;
+            transform: perspective(1200px) rotateX(45deg) translateZ(-100px);
+        }
+        
+        @keyframes grid-slide {
+            0% { transform: perspective(1200px) rotateX(45deg) translateZ(-100px) translateY(0); }
+            100% { transform: perspective(1200px) rotateX(45deg) translateZ(-100px) translateY(60px); }
+        }
+        
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            opacity: 0.7;
+            box-shadow: 0 0 15px var(--neon-cyan);
+            animation: particle-float 15s linear infinite;
+        }
+        
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+                transform: translateY(90vh) translateX(10px) scale(1);
+            }
+            90% {
+                opacity: 0.7;
+                transform: translateY(10vh) translateX(-10px) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Main Container */
+        .interview-container {
+            width: 90%;
+            max-width: 800px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 60px 50px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 0 50px rgba(0, 255, 255, 0.05),
+                0 0 100px rgba(0, 255, 255, 0.1);
+            animation: container-entrance 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes container-entrance {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .interview-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(0, 255, 255, 0.05),
+                transparent,
+                rgba(255, 0, 255, 0.05),
+                transparent
+            );
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        /* Typography */
+        .main-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 50px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--electric-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
+            animation: title-pulse 3s ease-in-out infinite;
+            line-height: 1.2;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes title-pulse {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 50px rgba(255, 0, 255, 0.7)); }
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-label {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--neon-cyan);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 18px 25px;
+            background: var(--input-bg);
+            border: 2px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+            box-shadow: 
+                inset 0 5px 15px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 255, 255, 0.1);
+        }
+        
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--neon-cyan);
+            background: rgba(0, 255, 255, 0.05);
+            box-shadow: 
+                inset 0 5px 20px rgba(0, 255, 255, 0.1),
+                0 0 30px rgba(0, 255, 255, 0.3),
+                0 0 60px rgba(0, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path fill="%2300ffff" d="M6 8L0 0h12z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            padding-right: 50px;
+        }
+        
+        .form-select option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+        }
+        
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Submit Button */
+        .submit-button {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 50px auto 0;
+            padding: 20px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+            color: var(--dark-bg);
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            animation: button-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes button-glow {
+            0%, 100% {
+                box-shadow: 
+                    0 10px 30px rgba(0, 255, 255, 0.5),
+                    inset 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 
+                    0 10px 40px rgba(255, 0, 255, 0.6),
+                    inset 0 0 30px rgba(255, 255, 255, 0.3);
+            }
+        }
+        
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .submit-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 15px 40px rgba(0, 255, 255, 0.7),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        .submit-button:hover::before {
+            left: 100%;
+        }
+        
+        .submit-button:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .interview-container {
+                padding: 40px 30px;
+                width: 95%;
+            }
+            
+            .main-title {
+                font-size: 1.5rem;
+                margin-bottom: 40px;
+            }
+            
+            .form-input,
+            .form-select,
+            .form-textarea {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="background-container">
+        <div class="grid-overlay"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="interview-container">
+        <h1 class="main-title">Antes de começar, queremos te conhecer melhor para personalizar suas respostas</h1>
+        
+        <form id="interviewForm" action="entrevista-final.html">
+            <div class="form-group">
+                <label class="form-label">Nome Artístico</label>
+                <input type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Nível Técnico</label>
+                <select class="form-select" required>
+                    <option value="">Selecione seu nível</option>
+                    <option value="iniciante">Iniciante</option>
+                    <option value="intermediario">Intermediário</option>
+                    <option value="avancado">Avançado</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">DAW Usada</label>
+                <select class="form-select" required>
+                    <option value="">Selecione sua DAW</option>
+                    <option value="fl-studio">FL Studio</option>
+                    <option value="ableton">Ableton</option>
+                    <option value="logic">Logic</option>
+                    <option value="reaper">Reaper</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Maior Dificuldade na Produção</label>
+                <input type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Estilo Musical</label>
+                <input type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Me conte mais sobre você</label>
+                <textarea class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
+            </div>
+            
+            <button type="submit" class="submit-button">Enviar Respostas</button>
+        </form>
+    </div>
+    
+    <script>
+        // Generate particles
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 30;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Form animation on focus
+        const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
