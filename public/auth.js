@@ -99,7 +99,7 @@ async function sendSMS(rawPhone) {
 
   if (!phone.match(/^\+55\d{10,11}$/)) {
     showMessage("Formato inválido. Use DDD + número, ex: 34987654321");
-    return;
+    return false;
   }
 
   const verifier = getRecaptchaVerifier();
@@ -107,10 +107,12 @@ async function sendSMS(rawPhone) {
     await verifier.render();
     await verifier.verify();
 
-    const confirmationResult = await auth.signInWithPhoneNumber(phone, verifier);
-    window.confirmationResult = confirmationResult;
+    const result = await auth.signInWithPhoneNumber(phone, verifier);
+    window.confirmationResult = result;
     showMessage("Código SMS enviado! Digite o código recebido.", "success");
-    // Aqui você pode exibir o campo para o usuário digitar o código
+    window.showSMSSection && window.showSMSSection();
+    lastPhone = phone;
+    return true;
   } catch (error) {
     let msg = error.message || "Erro ao enviar SMS.";
     if (error.code === "auth/too-many-requests") {
@@ -121,12 +123,15 @@ async function sendSMS(rawPhone) {
       msg = "Número de telefone inválido.";
     } else if (error.code === "auth/app-not-authorized") {
       msg = "App não autorizado. Verifique as configurações do Firebase.";
+    } else if (error.code === "auth/internal-error") {
+      msg = "Erro interno do Firebase. Verifique se o domínio está autorizado no console do Firebase.";
     }
     showMessage(msg);
     if (recaptchaVerifier) {
       try { recaptchaVerifier.clear(); } catch (e) {}
       recaptchaVerifier = null;
     }
+    return false;
   }
 }
 
@@ -304,14 +309,19 @@ window.signUp = async function () {
 
   const formattedPhone = '+55' + rawPhone.replace(/\D/g, '').replace(/^55/, '');
 
-  if (!confirmationResult || lastPhone !== formattedPhone) {
-    isNewUserRegistering = true; // Marca que é um novo usuário
+  // Se não há confirmationResult ou o telefone mudou, envia SMS
+  if (!window.confirmationResult || lastPhone !== formattedPhone) {
+    isNewUserRegistering = true;
     const sent = await sendSMS(rawPhone);
-    if (!sent) return;
+    if (!sent) {
+      showMessage("Não foi possível enviar o SMS. Corrija os dados e tente novamente.", "error");
+      return;
+    }
     return;
   }
 
   showMessage("Código SMS enviado! Digite o código recebido no campo abaixo.", "success");
+  window.showSMSSection && window.showSMSSection();
 };
 
 window.confirmSMSCode = async function() {
