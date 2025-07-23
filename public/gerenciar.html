@@ -1343,7 +1343,7 @@
                     <label class="form-label">E-mail</label>
                     <div style="display: flex; gap: 0.5rem;">
                         <input type="email" class="form-input" value="john.doe@email.com" style="flex: 1;" id="emailInput" autocomplete="email">
-                        <button class="btn btn-secondary" onclick="alterarEmail()">✏️ Alterar</button>
+                        <button class="btn btn-secondary" onclick="changeEmail()">✏️ Alterar</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -1731,37 +1731,58 @@
         function savePersonalInfo() {
             const email = document.getElementById('emailInput').value.trim();
             const phone = document.querySelector('#personalCard input[type="tel"]').value.trim();
-            const avatar = document.querySelector('#personalCard input[type="file"]').files[0];
-            
-            // Validação de e-mail
+            const avatarFile = document.querySelector('#personalCard input[type="file"]').files[0];
+
             if (!email || !validateEmail(email)) {
                 showNotification('⚠️ Digite um e-mail válido', 'error');
                 document.getElementById('emailInput').focus();
                 return;
             }
 
-            // Validação de telefone (se preenchido)
             if (phone && !validatePhone(phone)) {
                 showNotification('⚠️ Formato de telefone inválido', 'error');
                 return;
             }
-            
-            const body = { email, phone };
-            apiRequest('/api/user/profile', { method: 'PUT', body })
-                .then(() => {
-                    userData.personalInfo.email = email;
-                    userData.personalInfo.phone = phone;
 
-                    if (avatar) {
-                        userData.personalInfo.avatar = avatar.name;
-                    }
+            const sendRequest = (avatarData) => {
+                const body = { email, phone };
+                if (avatarData) body.avatar = avatarData;
+                apiRequest('/api/user/profile', { method: 'PUT', body })
+                    .then(res => {
+                        userData.personalInfo.email = email;
+                        userData.personalInfo.phone = phone;
+                        if (res.avatar) {
+                            userData.personalInfo.avatar = res.avatar;
+                            updateAvatar(res.avatar);
+                        }
+                        showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
+                        playSound('success');
+                    })
+                    .catch(() => {
+                        showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
+                    });
+            };
 
-                    showNotification('✅ Informações pessoais atualizadas com sucesso!', 'success');
-                    playSound('success');
-                })
-                .catch(() => {
-                    showNotification('❌ Erro ao salvar informações. Tente novamente.', 'error');
-                });
+            if (avatarFile) {
+                if (!['image/png','image/jpeg','image/gif'].includes(avatarFile.type) || avatarFile.size > 5 * 1024 * 1024) {
+                    showNotification('⚠️ Imagem inválida ou muito grande', 'error');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = e => sendRequest(e.target.result);
+                reader.readAsDataURL(avatarFile);
+            } else {
+                sendRequest();
+            }
+        }
+
+        function updateAvatar(url) {
+            const avatarDiv = document.querySelector('.user-avatar');
+            if (avatarDiv && url) {
+                avatarDiv.style.backgroundImage = `url('${url}')`;
+                avatarDiv.style.backgroundSize = 'cover';
+                avatarDiv.textContent = '';
+            }
         }
 
         // Validação de telefone
@@ -2484,6 +2505,7 @@
                 if (profile) {
                     userData.personalInfo.email = profile.email || '';
                     userData.personalInfo.phone = profile.phone || '';
+                    userData.personalInfo.avatar = profile.avatar || '';
                 }
                 if (interview) {
                     Object.assign(userData.interviewData, interview);
@@ -2527,6 +2549,15 @@
             const emailInput = document.getElementById('emailInput');
             if (emailInput && userData.personalInfo.email) {
                 emailInput.value = userData.personalInfo.email;
+            }
+
+            const phoneInput = document.querySelector('#personalCard input[type="tel"]');
+            if (phoneInput) {
+                phoneInput.value = userData.personalInfo.phone || '';
+            }
+
+            if (userData.personalInfo.avatar) {
+                updateAvatar(userData.personalInfo.avatar);
             }
 
             // Atualizar dados da entrevista
@@ -2690,13 +2721,7 @@
 
 
         function alterarEmail() {
-            const emailInput = document.getElementById('emailInput');
-            const novoEmail = prompt('Novo e-mail:', emailInput.value);
-            if (novoEmail) {
-                emailInput.value = novoEmail;
-                localStorage.setItem('userEmail', novoEmail);
-                alert('E-mail atualizado!');
-            }
+            changeEmail();
         }
 
         function refazerEntrevista() {
