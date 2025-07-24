@@ -1,6 +1,5 @@
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { auth, db } from './firebaseAdmin';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import cors from 'cors';
 
 // Middleware CORS dinâmico
@@ -30,24 +29,7 @@ function runMiddleware(req, res, fn) {
   });
 }
 
-// Função melhorada para inicializar Firebase
-async function initializeFirebase() {
-  // Verifica se já existe uma instância ativa
-  if (getApps().length > 0) {
-    return getApps()[0];
-  }
 
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    
-    return initializeApp({
-      credential: cert(serviceAccount),
-    });
-  } catch (error) {
-    console.error('❌ Erro ao inicializar Firebase:', error);
-    throw new Error('Falha na inicialização do Firebase');
-  }
-}
 
 // Função para validar e sanitizar dados de entrada
 function validateAndSanitizeInput(req) {
@@ -313,10 +295,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Inicializar Firebase
-    await initializeFirebase();
-    const db = getFirestore();
-    const auth = getAuth();
+    // 1. Firebase já inicializado via firebaseAdmin.js
 
     // 2. Validar e sanitizar dados de entrada
     let validatedData;

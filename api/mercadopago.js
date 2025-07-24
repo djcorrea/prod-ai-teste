@@ -1,6 +1,6 @@
 import express from 'express';
 import * as mercadopago from 'mercadopago';
-import admin from 'firebase-admin';
+import { auth, db } from './firebaseAdmin';
 import cors from 'cors';
 
 // ─── 1) CONFIGURAÇÃO DO EXPRESS ────────────────────────────
@@ -25,16 +25,7 @@ app.use(express.json());
 // Usa o método recomendado para ESM
 mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
-// ─── 3) INICIALIZAÇÃO DO FIREBASE ADMIN ────────────────────
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+
 
 // ─── 4) MIDDLEWARE: VALIDAÇÃO DO ID TOKEN FIREBASE ────────
 async function validateFirebaseIdToken(req, res, next) {
@@ -44,7 +35,7 @@ async function validateFirebaseIdToken(req, res, next) {
   }
   const idToken = authHeader.split('Bearer ')[1];
   try {
-    const decoded = await admin.auth().verifyIdToken(idToken);
+    const decoded = await auth.verifyIdToken(idToken);
     req.user = decoded;
     return next();
   } catch (err) {
@@ -97,15 +88,14 @@ app.post('/api/webhook', async (req, res) => {
     const payment = data;
     const uid     = payment.external_reference;
     if (payment.status === 'approved') {
-      await admin
-        .firestore()
+      await db
         .collection('usuarios')
         .doc(uid)
         .set(
           {
             isPlus:     true,
             plano:      'plus',
-            upgradedAt: admin.firestore.FieldValue.serverTimestamp(),
+            upgradedAt: new Date(),
           },
           { merge: true }
         );

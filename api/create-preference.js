@@ -1,19 +1,10 @@
 import * as mercadopago from 'mercadopago';
-import admin from 'firebase-admin';
+import { auth, db } from './firebaseAdmin';
 
 // configura Mercado Pago
 mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
-// inicializa Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId:   process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey:  process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+
 
 export default async function handler(req, res) {
   if (req.method !== 'POST')
@@ -27,7 +18,7 @@ export default async function handler(req, res) {
 
   let decoded;
   try {
-    decoded = await admin.auth().verifyIdToken(idToken);
+    decoded = await auth.verifyIdToken(idToken);
   } catch {
     return res.status(401).json({ error: 'Unauthorized' });
   }
