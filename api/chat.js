@@ -9,7 +9,7 @@ const corsMiddleware = cors({
     const fixedOrigin = 'https://prod-ai-teste.vercel.app';
     const vercelPreviewRegex = /^https:\/\/prod-ai-teste-[a-z0-9\-]+\.vercel\.app$/;
 
-    if (!origin || origin === fixedOrigin || vercelPreviewRegex.test(origin)) {
+    if (!origin || origin.includes(fixedOrigin) || vercelPreviewRegex.test(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS: ' + origin));
