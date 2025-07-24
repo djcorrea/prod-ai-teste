@@ -207,16 +207,17 @@ console.log('🚀 Carregando auth.js...');
 
         await recaptchaVerifier.render();
         // Tenta enviar SMS
+        let smsSent = false;
         try {
           confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
           lastPhone = phone;
           showMessage("Código SMS enviado! Verifique seu celular.", "success");
           showSMSSection();
-          return true;
+          smsSent = true;
         } catch (error) {
           showMessage(error, "error");
-          return false;
         }
+        return smsSent;
     }
 
     // Função de cadastro
