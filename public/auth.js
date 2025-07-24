@@ -216,10 +216,20 @@ console.log('🚀 Carregando auth.js...');
         return true;
 
       } catch (error) {
-        showMessage(error, "error");
-        return false;
-      }
-    }
+  // Verifica se o erro foi causado pelo fallback do reCAPTCHA Enterprise
+  const isEnterpriseFallback = error?.message?.includes("recaptcha enterprise") || error?.message?.includes("400");
+
+  if (confirmationResult) {
+    // SMS foi enviado mesmo com erro aparente
+    console.warn("⚠️ Aviso: erro retornado, mas SMS foi enviado com sucesso.");
+    return true;
+  }
+
+  // Caso contrário, erro real
+  showMessage(error, "error");
+  return false;
+}
+
 
     // Função de cadastro
     async function signUp() {
