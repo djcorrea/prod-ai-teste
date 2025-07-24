@@ -263,6 +263,12 @@ export default async function handler(req, res) {
     hasBody: !!req.body
   });
 
+  // Configura cabecalhos de CORS
+  const allowedOrigin = 'https://prod-ai-teste.vercel.app';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
   // Tratamento de CORS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
