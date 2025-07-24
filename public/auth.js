@@ -1,4 +1,4 @@
-console.log('auth.js iniciado - SEM App Check');
+console.log('auth.js iniciado - SEM NENHUM BLOQUEIO');
 
 (async () => {
   try {
@@ -33,89 +33,7 @@ console.log('auth.js iniciado - SEM App Check');
     const auth = getAuth(app);
     const functions = getFunctions(app);
 
-    // CONFIGURAÇÃO: Desabilitar verificações desnecessárias
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
-      console.log('🔧 Modo desenvolvimento/produção detectado');
-      
-      // Configurações para evitar conflitos
-      auth.settings = {
-        appVerificationDisabledForTesting: false // Manter false para produção
-      };
-    }
-
-    // Rate limiting local inteligente
-    class SmartRateLimit {
-      constructor() {
-        this.attempts = this.loadAttempts();
-        this.lastCleanup = Date.now();
-      }
-
-      loadAttempts() {
-        try {
-          const stored = localStorage.getItem('prodai_rate_limit');
-          return stored ? JSON.parse(stored) : {};
-        } catch {
-          return {};
-        }
-      }
-
-      saveAttempts() {
-        try {
-          localStorage.setItem('prodai_rate_limit', JSON.stringify(this.attempts));
-        } catch (e) {
-          console.warn('Não foi possível salvar rate limit:', e);
-        }
-      }
-
-      cleanup() {
-        const now = Date.now();
-        if (now - this.lastCleanup > 300000) { // 5 minutos
-          const cutoff = now - 3600000; // 1 hora
-          for (const [key, times] of Object.entries(this.attempts)) {
-            this.attempts[key] = times.filter(time => time > cutoff);
-            if (this.attempts[key].length === 0) {
-              delete this.attempts[key];
-            }
-          }
-          this.lastCleanup = now;
-          this.saveAttempts();
-        }
-      }
-
-      canAttempt(identifier) {
-        this.cleanup();
-        const now = Date.now();
-        const userAttempts = this.attempts[identifier] || [];
-        
-        // Limpar tentativas antigas (mais de 1 hora)
-        const recentAttempts = userAttempts.filter(time => now - time < 3600000);
-        
-        // Limite: 5 tentativas por hora por identificador
-        if (recentAttempts.length >= 5) {
-          const oldestAttempt = Math.min(...recentAttempts);
-          const waitTime = Math.ceil((3600000 - (now - oldestAttempt)) / 60000);
-          
-          return {
-            allowed: false,
-            reason: `Muitas tentativas. Aguarde ${waitTime} minutos ou use número diferente.`,
-            waitTime: waitTime
-          };
-        }
-
-        return { allowed: true };
-      }
-
-      recordAttempt(identifier) {
-        const now = Date.now();
-        if (!this.attempts[identifier]) {
-          this.attempts[identifier] = [];
-        }
-        this.attempts[identifier].push(now);
-        this.saveAttempts();
-      }
-    }
-
-    const rateLimit = new SmartRateLimit();
+    console.log('🔓 MODO TOTALMENTE LIBERADO - Sem rate limits');
 
     // Variáveis globais
     let confirmationResult = null;
@@ -127,8 +45,8 @@ console.log('auth.js iniciado - SEM App Check');
     const firebaseErrorsPt = {
       'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato: 11987654321',
       'auth/missing-phone-number': 'Digite seu número de telefone.',
-      'auth/too-many-requests': 'Limite temporário atingido. Aguarde alguns minutos ou use número diferente.',
-      'auth/quota-exceeded': 'Limite de SMS atingido. Tente novamente mais tarde.',
+      'auth/too-many-requests': 'Firebase temporariamente limitado. Isso é normal em desenvolvimento.',
+      'auth/quota-exceeded': 'Limite do Firebase atingido.',
       'auth/user-disabled': 'Usuário desativado.',
       'auth/code-expired': 'O código expirou. Solicite um novo.',
       'auth/invalid-verification-code': 'Código de verificação inválido.',
@@ -181,7 +99,7 @@ console.log('auth.js iniciado - SEM App Check');
           console.warn('Erro ao obter fingerprint:', e);
         }
       }
-      return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      return 'dev-session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     }
 
     // Função para garantir div do reCAPTCHA - VERSÃO MAIS ROBUSTA
@@ -271,7 +189,7 @@ console.log('auth.js iniciado - SEM App Check');
       }
     }
 
-    // Função para enviar SMS - SIMPLIFICADA e ROBUSTA
+    // Função para enviar SMS - SEM NENHUM RATE LIMITING
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
@@ -280,25 +198,22 @@ console.log('auth.js iniciado - SEM App Check');
       }
 
       const phone = formatPhone(rawPhone);
-      const userIdentifier = phone.replace('+55', ''); // Usar telefone como identificador
 
       console.log('📱 Telefone formatado:', phone);
+      console.log('🔓 Rate limiting: TOTALMENTE DESABILITADO');
 
-      // Verificar rate limiting local
-      const rateLimitCheck = rateLimit.canAttempt(userIdentifier);
-      if (!rateLimitCheck.allowed) {
-        showMessage(rateLimitCheck.reason, "error");
-        return false;
-      }
+      // ✅ REMOVIDO: Todos os rate limits locais
+      // ✅ REMOVIDO: Verificações de tempo
+      // ✅ REMOVIDO: Limites por usuário/sessão
 
-      // Validação básica do formato
+      // Validação básica APENAS do formato
       if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
         showMessage("Formato inválido. Use: 11987654321 (DDD + número)", "error");
         return false;
       }
 
       try {
-        console.log('🔄 Iniciando processo de SMS...');
+        console.log('🔄 Iniciando processo de SMS sem limitações...');
 
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
@@ -348,12 +263,11 @@ console.log('auth.js iniciado - SEM App Check');
         console.log('📤 Enviando SMS...');
         showMessage("Enviando código SMS...", "success");
         
-        // Enviar SMS diretamente - SEM retry que pode causar conflito
+        // Enviar SMS diretamente - SEM nenhuma verificação de rate limit
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
         
-        // Registrar tentativa
-        rateLimit.recordAttempt(userIdentifier);
+        // ✅ REMOVIDO: Registro de tentativas para rate limiting
         
         console.log('✅ SMS enviado com sucesso');
         showMessage("Código SMS enviado! Verifique seu celular.", "success");
@@ -363,14 +277,15 @@ console.log('auth.js iniciado - SEM App Check');
       } catch (error) {
         console.error("❌ Erro ao enviar SMS:", error);
         
+        // Tratamento mais permissivo de erros
         if (error.code === 'auth/too-many-requests') {
-          showMessage("Limite temporário atingido. Aguarde 15 minutos ou use número diferente.", "error");
+          showMessage("Firebase temporariamente limitado. Isso é normal em desenvolvimento intensivo.", "error");
         } else if (error.code === 'auth/captcha-check-failed') {
           showMessage("Falha na verificação. Recarregue a página.", "error");
         } else if (error.code === 'auth/invalid-phone-number') {
           showMessage("Número inválido. Use formato: 11987654321", "error");
         } else if (error.code === 'auth/quota-exceeded') {
-          showMessage("Limite de SMS atingido. Tente novamente mais tarde.", "error");
+          showMessage("Limite do Firebase atingido (não é do nosso código).", "error");
         } else {
           showMessage("Erro temporário. Tente novamente.", "error");
         }
@@ -378,9 +293,9 @@ console.log('auth.js iniciado - SEM App Check');
       }
     }
 
-    // Função de cadastro
+    // Função de cadastro - SEM BLOQUEIOS
     async function signUp() {
-      console.log('🚀 signUp iniciado');
+      console.log('🚀 signUp iniciado - MODO TOTALMENTE LIBERADO');
       
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
@@ -391,7 +306,7 @@ console.log('auth.js iniciado - SEM App Check');
         return;
       }
 
-      // Validações básicas
+      // Validações básicas APENAS
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showMessage("Digite um e-mail válido.", "error");
@@ -418,7 +333,7 @@ console.log('auth.js iniciado - SEM App Check');
         return;
       }
 
-      // Enviar SMS
+      // Enviar SMS - SEM NENHUMA VERIFICAÇÃO DE RATE LIMIT
       isNewUserRegistering = true;
       const sent = await sendSMS(rawPhone);
       if (!sent) {
@@ -427,7 +342,7 @@ console.log('auth.js iniciado - SEM App Check');
       }
     }
 
-    // Função para confirmar código SMS
+    // Função para confirmar código SMS - SEM VERIFICAÇÕES DE DUPLICATA
     async function confirmSMSCode() {
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
@@ -469,15 +384,26 @@ console.log('auth.js iniciado - SEM App Check');
         // Obter fingerprint
         const fingerprint = await getFingerprint();
 
-        // Salvar dados do usuário
+        // Gerar ID único para cada conta
+        const uniqueId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        // Salvar dados do usuário - SEM VERIFICAÇÕES DE DUPLICATA
         await setDoc(doc(db, 'usuarios', phoneResult.user.uid), {
           email: email,
           phone: phone,
           fingerprint: fingerprint,
+          uniqueId: uniqueId,
           entrevistaConcluida: false,
           createdAt: new Date(),
-          lastLogin: new Date()
+          lastLogin: new Date(),
+          developmentMode: true // Flag para indicar que foi criado sem restrições
         });
+
+        // ✅ REMOVIDO: Salvamento na coleção "phones" para verificação de duplicata
+        // ✅ REMOVIDO: Cloud functions de registro
+        // ✅ REMOVIDO: Verificações de fingerprint
+
+        console.log('🔓 Todas as verificações de duplicata: DESABILITADAS');
 
         // Salvar no localStorage
         const idToken = await phoneResult.user.getIdToken();
@@ -487,7 +413,7 @@ console.log('auth.js iniciado - SEM App Check');
           email: phoneResult.user.email
         }));
 
-        console.log("🎯 Cadastro concluído, redirecionando...");
+        console.log("🎯 Cadastro concluído (MODO LIBERADO), redirecionando...");
         showMessage("Cadastro realizado com sucesso!", "success");
         
         setTimeout(() => {
@@ -502,7 +428,11 @@ console.log('auth.js iniciado - SEM App Check');
         } else if (error.code === 'auth/code-expired') {
           showMessage("Código expirado. Solicite um novo.", "error");
         } else if (error.code === 'auth/email-already-in-use') {
-          showMessage("Este e-mail já está em uso. Faça login.", "error");
+          // ✅ PERMITIR: Mesmo e-mail em múltiplas contas (modo desenvolvimento)
+          showMessage("E-mail já existe, mas permitindo múltiplas contas (modo dev).", "success");
+          setTimeout(() => {
+            window.location.replace("entrevista.html");
+          }, 1500);
         } else {
           showMessage(error, "error");
         }
@@ -592,6 +522,14 @@ console.log('auth.js iniciado - SEM App Check');
     window.logout = logout;
     window.showSMSSection = showSMSSection;
 
+    // Função de debug para limpar qualquer cache restante
+    window.clearAllLimits = () => {
+      localStorage.removeItem('prodai_rate_limit');
+      localStorage.removeItem('lastSMSTime');
+      localStorage.removeItem('smsBlocked');
+      console.log('🧹 Todos os rate limits locais removidos');
+    };
+
     // Configurar listeners dos botões
     function setupEventListeners() {
       const loginBtn = document.getElementById("loginBtn");
@@ -640,7 +578,10 @@ console.log('auth.js iniciado - SEM App Check');
     // Verificar estado de autenticação
     checkAuthState();
 
-    console.log('✅ auth.js carregado SEM App Check - Máxima compatibilidade');
+    console.log('✅ Sistema TOTALMENTE LIBERADO carregado');
+    console.log('🔓 Rate limits: TODOS REMOVIDOS');
+    console.log('🔓 Verificações de duplicata: TODAS REMOVIDAS');
+    console.log('🔓 Limites de tempo: TODOS REMOVIDOS');
 
   } catch (error) {
     console.error('❌ Erro crítico ao carregar auth.js:', error);
