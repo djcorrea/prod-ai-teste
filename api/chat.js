@@ -284,6 +284,14 @@ Seu foco é: melhorar o som do usuário, aprofundar sua visão técnica e ajudá
 }
 
 export default async function handler(req, res) {
+  
+  // CORS Headers
+res.setHeader('Access-Control-Allow-Credentials', 'true');
+res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+
   // Log da requisição para debug
   console.log('🔄 Nova requisição recebida:', {
     method: req.method,
