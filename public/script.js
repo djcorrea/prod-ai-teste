@@ -19,17 +19,15 @@ const API_CONFIG = {
   })(),
 
   get chatEndpoint() {
-    return `${this.baseURL}/chat`; // ✅ CORRIGIDO AQUI
+    return `${this.baseURL}/chat`;
   }
 };
 
 console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
 
-// ✅ AGUARDAR FIREBASE MODULAR (v11) CARREGAR
 function waitForFirebase() {
   return new Promise((resolve) => {
     const checkFirebase = () => {
-      // Verificar se window.auth (do auth.js) está disponível
       if (window.auth && window.firebaseReady) {
         resolve();
       } else {
@@ -44,18 +42,13 @@ async function sendFirstMessage() {
   const startInput = document.getElementById('start-input');
   const startSendBtn = document.getElementById('startSendBtn');
 
-  if (!startInput) {
-    console.error('Input inicial não encontrado');
-    return;
-  }
+  if (!startInput) return;
 
   const message = startInput.value.trim();
   if (!message) {
     startInput.focus();
     return;
   }
-
-  console.log('Enviando primeira mensagem:', message);
 
   if (startSendBtn) {
     startSendBtn.disabled = true;
@@ -75,7 +68,6 @@ async function sendFirstMessage() {
     await sendMessage();
 
   } catch (error) {
-    console.error('Erro ao enviar primeira mensagem:', error);
     appendMessage(`<strong>Assistente:</strong> ❌ Erro ao enviar mensagem. Tente novamente.`, 'bot');
   } finally {
     if (startSendBtn) {
@@ -99,12 +91,7 @@ async function animateToChat() {
   const chatContainer = document.getElementById('chatContainer');
   const mainFooter = document.getElementById('mainFooter');
 
-  if (!startScreen) {
-    console.log('StartScreen não encontrado');
-    return;
-  }
-
-  console.log('Iniciando animação para chat');
+  if (!startScreen) return;
 
   if (motivationalText) motivationalText.classList.add('fade-out');
   if (startInputContainer) startInputContainer.classList.add('fade-out');
@@ -130,19 +117,9 @@ async function animateToChat() {
   }, 500);
 }
 
-function animateStart() {
-  const header = document.getElementById('prodaiHeader');
-  const container = document.getElementById('chatContainer');
-  if (header) header.classList.add('moved-to-top');
-  if (container) container.classList.add('expanded');
-}
-
 function appendMessage(content, className) {
   const chatboxEl = document.getElementById('chatbox');
-  if (!chatboxEl) {
-    console.error('Chatbox não encontrado');
-    return;
-  }
+  if (!chatboxEl) return;
 
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${className}`;
@@ -167,7 +144,6 @@ function hideTypingIndicator() {
   }
 }
 
-// ✅ FUNÇÃO PROCESSAMENTO DE MENSAGEM - CORRIGIDA
 async function processMessage(message) {
   const mainSendBtn = document.getElementById('sendBtn');
   if (mainSendBtn && chatStarted) {
@@ -179,8 +155,6 @@ async function processMessage(message) {
 
   try {
     await waitForFirebase();
-    
-    // ✅ USAR AUTH MODULAR DO auth.js
     const currentUser = window.auth.currentUser;
     if (!currentUser) {
       appendMessage(`<strong>Assistente:</strong> Você precisa estar logado para usar o chat.`, 'bot');
@@ -194,9 +168,6 @@ async function processMessage(message) {
 
     const idToken = await currentUser.getIdToken();
 
-    console.log('🔗 Enviando para:', API_CONFIG.chatEndpoint);
-
-    // ✅ REQUISIÇÃO CORRIGIDA COM URL ABSOLUTA
     const response = await fetch(API_CONFIG.chatEndpoint, {
       method: 'POST',
       headers: { 
@@ -210,22 +181,16 @@ async function processMessage(message) {
       })
     });
 
-    console.log('📡 Response status:', response.status);
-
     let data;
     if (response.ok) {
       const rawText = await response.text();
-      console.log('📄 Raw response:', rawText.substring(0, 200) + '...');
       try {
         data = JSON.parse(rawText);
       } catch (parseError) {
-        console.error('❌ Erro ao parsear JSON:', parseError);
         data = { error: 'Erro ao processar resposta do servidor' };
       }
     } else {
       const errorText = await response.text();
-      console.error('❌ Erro HTTP:', response.status, errorText);
-      
       if (response.status === 403) {
         data = { error: 'limite diário' };
       } else if (response.status === 401) {
@@ -265,9 +230,7 @@ async function processMessage(message) {
       );
     }
   } catch (err) {
-    console.error('💥 Erro na requisição:', err);
     hideTypingIndicator();
-    
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
       appendMessage(
         `<strong>Assistente:</strong> 🌐 Erro de conexão. Verifique sua internet e tente novamente.`,
@@ -347,21 +310,14 @@ function setupEventListeners() {
   }
 }
 
-// ✅ TESTE DE CONECTIVIDADE DA API
 async function testAPIConnection() {
   try {
-    console.log('🧪 Testando conexão com API...');
     const response = await fetch(API_CONFIG.chatEndpoint, {
       method: 'OPTIONS'
     });
-    console.log('✅ API acessível:', response.status);
-  } catch (error) {
-    console.error('❌ API inacessível:', error.message);
-    console.log('💡 Verifique se a URL da API está correta em API_CONFIG.baseURL');
-  }
+  } catch (error) {}
 }
 
-// ✅ FUNÇÃO DE DEBUG MELHORADA
 function debugVercel() {
   console.log('=== DEBUG VERCEL ===');
   console.log('🌐 Location:', window.location.href);
@@ -395,7 +351,6 @@ if (document.readyState === 'loading') {
   initializeApp();
 }
 
-// Expor funções globalmente
 window.sendFirstMessage = sendFirstMessage;
 window.sendMessage = sendMessage;
 window.testAPIConnection = testAPIConnection;
@@ -423,7 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Debug automático
 setTimeout(() => {
   debugVercel();
   testAPIConnection();

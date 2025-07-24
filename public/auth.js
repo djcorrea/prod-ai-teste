@@ -56,7 +56,11 @@ console.log('🚀 Carregando auth.js...');
         ? (firebaseErrorsPt[messageOrError.code] || messageOrError.message || 'Erro desconhecido.')
         : messageOrError;
 
-      console.log(`${type.toUpperCase()}: ${msg}`);
+      if (type === "error") {
+        console.error(`${type.toUpperCase()}: ${msg}`);
+      } else {
+        console.log(`${type.toUpperCase()}: ${msg}`);
+      }
 
       const el = document.getElementById("error-message");
       if (el) {
@@ -136,11 +140,9 @@ console.log('🚀 Carregando auth.js...');
             window.location.href = "index.html";
           }
         } catch (e) {
-          console.warn('Erro ao verificar entrevista:', e);
           window.location.href = "entrevista.html";
         }
       } catch (error) {
-        console.error('Erro no login:', error);
         showMessage(error, "error");
       }
     }
@@ -156,7 +158,6 @@ console.log('🚀 Carregando auth.js...');
         await sendPasswordResetEmail(auth, email);
         showMessage("Link de redefinição enviado para seu e-mail!", "success");
       } catch (error) {
-        console.error('Erro na recuperação de senha:', error);
         showMessage(error, "error");
       }
     }
@@ -170,7 +171,6 @@ console.log('🚀 Carregando auth.js...');
       }
 
       const phone = formatPhone(rawPhone);
-      console.log('📱 Telefone formatado:', phone);
 
       // Validação básica do formato
       if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
@@ -179,8 +179,6 @@ console.log('🚀 Carregando auth.js...');
       }
 
       try {
-        console.log('🔄 Iniciando processo de SMS...');
-
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
 
@@ -188,9 +186,7 @@ console.log('🚀 Carregando auth.js...');
         if (recaptchaVerifier) {
           try { 
             recaptchaVerifier.clear(); 
-          } catch (e) {
-            console.warn('Limpeza do reCAPTCHA anterior:', e);
-          }
+          } catch (e) {}
           recaptchaVerifier = null;
         }
 
@@ -199,38 +195,27 @@ console.log('🚀 Carregando auth.js...');
         if (container) {
           container.innerHTML = '';
         }
-
-        console.log('🎯 Criando reCAPTCHA...');
         
         // Criar reCAPTCHA
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
-          callback: (response) => {
-            console.log("✅ reCAPTCHA resolvido");
-          },
+          callback: () => {},
           'expired-callback': () => {
-            console.warn("⚠️ reCAPTCHA expirado");
             showMessage("Verificação expirou. Tente novamente.", "error");
           }
         });
 
-        console.log('🔄 Renderizando reCAPTCHA...');
         await recaptchaVerifier.render();
-        
-        console.log('📤 Enviando SMS...');
         showMessage("Enviando código SMS...", "success");
         
         // Enviar SMS
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
-        
-        console.log('✅ SMS enviado com sucesso');
         showMessage("Código SMS enviado! Verifique seu celular.", "success");
         showSMSSection();
         return true;
 
       } catch (error) {
-        console.error("❌ Erro ao enviar SMS:", error);
         showMessage(error, "error");
         return false;
       }
@@ -238,8 +223,6 @@ console.log('🚀 Carregando auth.js...');
 
     // Função de cadastro
     async function signUp() {
-      console.log('🚀 Iniciando cadastro...');
-      
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
       const rawPhone = document.getElementById("phone")?.value?.trim();
@@ -308,7 +291,6 @@ console.log('🚀 Carregando auth.js...');
       }
 
       try {
-        console.log('🔍 Verificando código SMS...');
         showMessage("Verificando código...", "success");
 
         // Confirmar código SMS
@@ -317,8 +299,6 @@ console.log('🚀 Carregando auth.js...');
           code
         );
         const phoneResult = await signInWithCredential(auth, phoneCredential);
-
-        console.log('✅ Telefone verificado, criando conta...');
 
         // Vincular e-mail à conta
         const emailCredential = EmailAuthProvider.credential(email, password);
@@ -341,7 +321,6 @@ console.log('🚀 Carregando auth.js...');
           email: phoneResult.user.email
         }));
 
-        console.log("🎯 Cadastro concluído, redirecionando...");
         showMessage("Cadastro realizado com sucesso!", "success");
         
         setTimeout(() => {
@@ -349,7 +328,6 @@ console.log('🚀 Carregando auth.js...');
         }, 1500);
 
       } catch (error) {
-        console.error("❌ Erro na confirmação do código:", error);
         showMessage(error, "error");
       }
     }
@@ -358,9 +336,7 @@ console.log('🚀 Carregando auth.js...');
     async function logout() {
       try { 
         await auth.signOut(); 
-      } catch (e) {
-        console.warn('Erro no logout:', e);
-      }
+      } catch (e) {}
       localStorage.removeItem("user");
       localStorage.removeItem("idToken");
       window.location.href = "login.html";
@@ -399,7 +375,6 @@ console.log('🚀 Carregando auth.js...');
                 window.location.href = "entrevista.html";
               }
             } catch (e) {
-              console.warn('Erro ao verificar usuário:', e);
               window.location.href = "entrevista.html";
             }
           }
