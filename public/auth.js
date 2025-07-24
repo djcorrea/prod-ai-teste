@@ -17,7 +17,7 @@ console.log('auth.js iniciado');
       console.warn('FingerprintJS não carregado:', e);
     }
 
-    // Configuração Firebase CORRIGIDA
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
       authDomain: "prodai-58436.firebaseapp.com",
@@ -33,11 +33,10 @@ console.log('auth.js iniciado');
     const auth = getAuth(app);
     const functions = getFunctions(app);
 
-    // CONFIGURAÇÃO IMPORTANTE: Desabilitar App Check para desenvolvimento
+    // CONFIGURAÇÃO: Desabilitar App Check para desenvolvimento
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
       console.log('🔧 Modo desenvolvimento detectado');
       
-      // Configurar auth para desenvolvimento
       auth.settings = {
         appVerificationDisabledForTesting: true
       };
@@ -96,7 +95,7 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função para obter fingerprint
+    // Função para obter fingerprint (REMOVIDO CLOUD FUNCTION)
     async function getFingerprint() {
       if (FingerprintJS && typeof FingerprintJS.load === 'function') {
         try {
@@ -193,32 +192,27 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função para enviar SMS com reCAPTCHA v2
+    // Função para enviar SMS - SEM VERIFICAÇÕES DE DUPLICATA
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
-        // Se começar com 55, remover
         const withoutCountry = clean.replace(/^55/, '');
-        // Adicionar +55
         return '+55' + withoutCountry;
       }
 
       const phone = formatPhone(rawPhone);
       console.log('📱 Telefone formatado:', phone);
 
-      // Validação básica
+      // Validação básica apenas do formato
       if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
         showMessage("Formato inválido. Use: 11987654321 (DDD + número)", "error");
         return false;
       }
 
       try {
-        // Verificar se o número já foi usado
-        const phoneSnap = await getDoc(doc(db, "phones", phone.replace('+55', '')));
-        if (phoneSnap.exists()) {
-          showMessage("Esse telefone já está cadastrado!", "error");
-          return false;
-        }
+        // ✅ REMOVIDO: Verificação se o número já foi usado
+        // Agora permite múltiplas contas com o mesmo telefone
+        console.log('🔓 Verificação de telefone duplicado: DESABILITADA');
 
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
@@ -234,7 +228,7 @@ console.log('auth.js iniciado');
 
         console.log('🔄 Criando novo reCAPTCHA...');
         
-        // Criar novo reCAPTCHA v2 (NÃO Enterprise)
+        // Criar novo reCAPTCHA v2
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
           callback: (response) => {
@@ -263,7 +257,6 @@ console.log('auth.js iniciado');
       } catch (error) {
         console.error("❌ Erro detalhado ao enviar SMS:", error);
         
-        // Mensagens específicas para diferentes erros
         if (error.code === 'auth/too-many-requests') {
           showMessage("Muitas tentativas. Aguarde 5 minutos e tente novamente.", "error");
         } else if (error.code === 'auth/captcha-check-failed') {
@@ -279,7 +272,7 @@ console.log('auth.js iniciado');
 
     // Função de cadastro
     async function signUp() {
-      console.log('🚀 signUp iniciado');
+      console.log('🚀 signUp iniciado - MODO LIBERADO');
       
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
@@ -319,7 +312,7 @@ console.log('auth.js iniciado');
         return;
       }
 
-      // Enviar SMS
+      // Enviar SMS (sem verificações de duplicata)
       isNewUserRegistering = true;
       const sent = await sendSMS(rawPhone);
       if (!sent) {
@@ -328,7 +321,7 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função para confirmar código SMS
+    // Função para confirmar código SMS - SEM VERIFICAÇÕES DE DUPLICATA
     async function confirmSMSCode() {
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
@@ -370,31 +363,29 @@ console.log('auth.js iniciado');
         // Obter fingerprint
         const fingerprint = await getFingerprint();
 
+        // Gerar ID único para evitar conflitos no Firestore
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substr(2, 9);
+        const uniqueId = `${timestamp}_${randomId}`;
+
         // Salvar dados do usuário
         await setDoc(doc(db, 'usuarios', phoneResult.user.uid), {
           email: email,
           phone: phone,
           fingerprint: fingerprint,
+          uniqueId: uniqueId, // ID único para tracking
           entrevistaConcluida: false,
           createdAt: new Date(),
           lastLogin: new Date()
         });
 
-        // Salvar telefone para evitar duplicatas
-        await setDoc(doc(db, 'phones', phone.replace(/\D/g, '')), {
-          userId: phoneResult.user.uid,
-          createdAt: new Date()
-        });
+        // ✅ REMOVIDO: Salvar telefone na coleção "phones" para evitar duplicatas
+        // Agora permite múltiplas contas com o mesmo telefone
+        console.log('🔓 Salvamento de telefone para verificação de duplicata: DESABILITADO');
 
-        // Tentar registrar na cloud function (opcional)
-        if (fingerprint) {
-          try {
-            const registerAccount = httpsCallable(functions, 'registerAccount');
-            await registerAccount({ fingerprint, phone });
-          } catch (e) {
-            console.warn('Cloud function falhou (não crítico):', e);
-          }
-        }
+        // ✅ REMOVIDO: Cloud function registerAccount (fingerprint tracking)
+        // Permite múltiplas contas por dispositivo
+        console.log('🔓 Cloud function de registro: DESABILITADA');
 
         // Salvar no localStorage
         const idToken = await phoneResult.user.getIdToken();
@@ -404,7 +395,7 @@ console.log('auth.js iniciado');
           email: phoneResult.user.email
         }));
 
-        console.log("🎯 Cadastro concluído, redirecionando...");
+        console.log("🎯 Cadastro concluído (MODO LIBERADO), redirecionando...");
         showMessage("Cadastro realizado com sucesso!", "success");
         
         setTimeout(() => {
@@ -419,7 +410,12 @@ console.log('auth.js iniciado');
         } else if (error.code === 'auth/code-expired') {
           showMessage("Código expirado. Solicite um novo.", "error");
         } else if (error.code === 'auth/email-already-in-use') {
-          showMessage("Este e-mail já está em uso. Faça login.", "error");
+          // ✅ ALTERADO: Não bloqueia mais por e-mail duplicado
+          showMessage("Este e-mail já está em uso, mas permitindo múltiplas contas.", "success");
+          // Continua o fluxo normalmente
+          setTimeout(() => {
+            window.location.replace("entrevista.html");
+          }, 1500);
         } else {
           showMessage(error, "error");
         }
@@ -558,7 +554,7 @@ console.log('auth.js iniciado');
     // Verificar estado de autenticação
     checkAuthState();
 
-    console.log('✅ auth.js carregado com reCAPTCHA v2');
+    console.log('✅ auth.js carregado - MODO LIBERADO (múltiplas contas permitidas)');
 
   } catch (error) {
     console.error('❌ Erro crítico ao carregar auth.js:', error);
