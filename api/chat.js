@@ -285,13 +285,7 @@ Seu foco é: melhorar o som do usuário, aprofundar sua visão técnica e ajudá
 
 export default async function handler(req, res) {
   
-  // CORS Headers
-  const allowedOrigin = 'https://prod-ai-teste.vercel.app';
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // CORS será tratado apenas pelo middleware dinâmico abaixo
 
 
   // Log da requisição para debug
