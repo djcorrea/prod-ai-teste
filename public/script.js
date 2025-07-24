@@ -10,7 +10,7 @@ let chatStarted = false;
 const API_CONFIG = {
   baseURL: (() => {
     if (window.location.hostname === 'localhost') {
-      return 'http://localhost:3000'; 
+      return 'https://prod-ai-teste.vercel.app/api/chat';
     } else if (window.location.hostname.includes('vercel.app')) {
       // ⚠️ ALTERE ESTA URL PARA SUA API REAL:
       return 'https://sua-api-prodai.vercel.app'; 
