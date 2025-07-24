@@ -4,9 +4,16 @@ import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 // Domínios permitidos para as requisições
 const ALLOWED_ORIGINS = [
-  'https://prod-ai-teste-3liqy7iks-dj-correas-projects.vercel.app',
   'https://prod-ai-teste.vercel.app',
 ];
+
+// Regex que cobre qualquer deploy temporário do Vercel
+const VERCEL_TEMP_REGEX = /^https:\/\/prod-ai-teste-[^.]+\.vercel\.app$/;
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.includes(origin) || VERCEL_TEMP_REGEX.test(origin);
+}
 
 // Função melhorada para inicializar Firebase
 async function initializeFirebase() {
@@ -271,7 +278,7 @@ export default async function handler(req, res) {
 
   // Define os cabecalhos de CORS para todas as respostas
   const origin = req.headers.origin;
-  if (ALLOWED_ORIGINS.includes(origin)) {
+  if (isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   res.setHeader('Vary', 'Origin');
