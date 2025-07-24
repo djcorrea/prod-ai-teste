@@ -1,18 +1,23 @@
-// Sistema de autenticação robusto para produção
-// Evita rate limits e suporta alto volume de usuários
-
-console.log('🚀 Production Auth System - High Volume Ready');
+console.log('auth.js iniciado - SEM App Check');
 
 (async () => {
   try {
-    // Importações Firebase
+    // Importações dinâmicas - SEM APP CHECK
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js');
     const { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js');
     const { getFirestore, doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js');
     const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js');
-    const { initializeAppCheck, ReCaptchaV3Provider } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check.js');
+    
+    // Importação do FingerprintJS
+    let FingerprintJS;
+    try {
+      const mod = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
+      FingerprintJS = mod.default || mod;
+    } catch (e) {
+      console.warn('FingerprintJS não carregado:', e);
+    }
 
-    // Configuração Firebase
+    // Configuração Firebase - LIMPA, SEM APP CHECK
     const firebaseConfig = {
       apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
       authDomain: "prodai-58436.firebaseapp.com",
@@ -28,66 +33,71 @@ console.log('🚀 Production Auth System - High Volume Ready');
     const auth = getAuth(app);
     const functions = getFunctions(app);
 
-    // CONFIGURAÇÃO APP CHECK para produção
-    try {
-      // App Check para verificar que requests vêm do seu site real
-      const appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6LfBQYcqAAAAABGHhOw_site_key_here'), // Substitua pela sua site key
-        isTokenAutoRefreshEnabled: true
-      });
-      console.log('✅ App Check configurado para produção');
-    } catch (e) {
-      console.warn('⚠️ App Check não configurado:', e);
+    // CONFIGURAÇÃO: Desabilitar verificações desnecessárias
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
+      console.log('🔧 Modo desenvolvimento/produção detectado');
+      
+      // Configurações para evitar conflitos
+      auth.settings = {
+        appVerificationDisabledForTesting: false // Manter false para produção
+      };
     }
 
-    // Sistema de rate limiting inteligente
-    class ProductionRateLimit {
+    // Rate limiting local inteligente
+    class SmartRateLimit {
       constructor() {
-        this.attempts = new Map(); // Tracking por IP/session
-        this.globalCounter = this.loadGlobalCounter();
-        this.lastReset = Date.now();
+        this.attempts = this.loadAttempts();
+        this.lastCleanup = Date.now();
       }
 
-      loadGlobalCounter() {
-        const stored = localStorage.getItem('prodai_global_counter');
-        return stored ? JSON.parse(stored) : { count: 0, date: new Date().toDateString() };
+      loadAttempts() {
+        try {
+          const stored = localStorage.getItem('prodai_rate_limit');
+          return stored ? JSON.parse(stored) : {};
+        } catch {
+          return {};
+        }
       }
 
-      saveGlobalCounter() {
-        localStorage.setItem('prodai_global_counter', JSON.stringify(this.globalCounter));
+      saveAttempts() {
+        try {
+          localStorage.setItem('prodai_rate_limit', JSON.stringify(this.attempts));
+        } catch (e) {
+          console.warn('Não foi possível salvar rate limit:', e);
+        }
       }
 
-      canAttempt(identifier = 'default') {
+      cleanup() {
         const now = Date.now();
-        const today = new Date().toDateString();
-
-        // Reset diário do contador global
-        if (this.globalCounter.date !== today) {
-          this.globalCounter = { count: 0, date: today };
-          this.attempts.clear();
+        if (now - this.lastCleanup > 300000) { // 5 minutos
+          const cutoff = now - 3600000; // 1 hora
+          for (const [key, times] of Object.entries(this.attempts)) {
+            this.attempts[key] = times.filter(time => time > cutoff);
+            if (this.attempts[key].length === 0) {
+              delete this.attempts[key];
+            }
+          }
+          this.lastCleanup = now;
+          this.saveAttempts();
         }
+      }
 
-        // Limite global diário: 300 SMS (margem de segurança)
-        if (this.globalCounter.count >= 300) {
-          return {
-            allowed: false,
-            reason: 'Limite diário do sistema atingido. Tente novamente amanhã.',
-            waitTime: null
-          };
-        }
-
-        // Rate limiting por sessão/IP
-        const userAttempts = this.attempts.get(identifier) || [];
-        const recentAttempts = userAttempts.filter(time => now - time < 300000); // 5 minutos
-
-        // Máximo 3 tentativas por 5 minutos por usuário
-        if (recentAttempts.length >= 3) {
+      canAttempt(identifier) {
+        this.cleanup();
+        const now = Date.now();
+        const userAttempts = this.attempts[identifier] || [];
+        
+        // Limpar tentativas antigas (mais de 1 hora)
+        const recentAttempts = userAttempts.filter(time => now - time < 3600000);
+        
+        // Limite: 5 tentativas por hora por identificador
+        if (recentAttempts.length >= 5) {
           const oldestAttempt = Math.min(...recentAttempts);
-          const waitTime = Math.ceil((300000 - (now - oldestAttempt)) / 1000);
+          const waitTime = Math.ceil((3600000 - (now - oldestAttempt)) / 60000);
           
           return {
             allowed: false,
-            reason: `Muitas tentativas. Aguarde ${waitTime} segundos.`,
+            reason: `Muitas tentativas. Aguarde ${waitTime} minutos ou use número diferente.`,
             waitTime: waitTime
           };
         }
@@ -95,27 +105,17 @@ console.log('🚀 Production Auth System - High Volume Ready');
         return { allowed: true };
       }
 
-      recordAttempt(identifier = 'default') {
+      recordAttempt(identifier) {
         const now = Date.now();
-        const userAttempts = this.attempts.get(identifier) || [];
-        
-        userAttempts.push(now);
-        this.attempts.set(identifier, userAttempts);
-        
-        this.globalCounter.count++;
-        this.saveGlobalCounter();
-      }
-
-      getStats() {
-        return {
-          globalCount: this.globalCounter.count,
-          date: this.globalCounter.date,
-          sessionAttempts: this.attempts.size
-        };
+        if (!this.attempts[identifier]) {
+          this.attempts[identifier] = [];
+        }
+        this.attempts[identifier].push(now);
+        this.saveAttempts();
       }
     }
 
-    const rateLimit = new ProductionRateLimit();
+    const rateLimit = new SmartRateLimit();
 
     // Variáveis globais
     let confirmationResult = null;
@@ -123,19 +123,12 @@ console.log('🚀 Production Auth System - High Volume Ready');
     let isNewUserRegistering = false;
     let recaptchaVerifier = null;
 
-    // Sistema de fallback robusto
-    const fallbackStrategies = {
-      smsUnavailable: false,
-      useEmailOnly: false,
-      maintenanceMode: false
-    };
-
     // Mensagens de erro em português
     const firebaseErrorsPt = {
       'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato: 11987654321',
       'auth/missing-phone-number': 'Digite seu número de telefone.',
-      'auth/too-many-requests': 'Sistema temporariamente indisponível. Tente novamente em alguns minutos.',
-      'auth/quota-exceeded': 'Limite de SMS atingido. Entre em contato com o suporte.',
+      'auth/too-many-requests': 'Limite temporário atingido. Aguarde alguns minutos ou use número diferente.',
+      'auth/quota-exceeded': 'Limite de SMS atingido. Tente novamente mais tarde.',
       'auth/user-disabled': 'Usuário desativado.',
       'auth/code-expired': 'O código expirou. Solicite um novo.',
       'auth/invalid-verification-code': 'Código de verificação inválido.',
@@ -144,28 +137,20 @@ console.log('🚀 Production Auth System - High Volume Ready');
       'auth/app-not-authorized': 'Aplicação não autorizada.',
       'auth/session-expired': 'Sessão expirada. Tente novamente.',
       'auth/invalid-verification-id': 'Falha na verificação. Tente novamente.',
-      'auth/email-already-in-use': 'Esse e-mail já está cadastrado.',
+      'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Faça login ou recupere sua senha.',
       'auth/invalid-email': 'E-mail inválido.',
       'auth/wrong-password': 'Senha incorreta.',
       'auth/user-not-found': 'Usuário não encontrado.',
       'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
     };
 
-    // Função para mostrar mensagens com tracking
+    // Função para mostrar mensagens
     function showMessage(messageOrError, type = "error") {
       const msg = typeof messageOrError === 'object' && messageOrError.code
         ? (firebaseErrorsPt[messageOrError.code] || messageOrError.message || 'Erro desconhecido.')
         : messageOrError;
 
       console.log(`${type.toUpperCase()}: ${msg}`);
-
-      // Analytics de erro (opcional)
-      if (type === "error" && typeof gtag !== 'undefined') {
-        gtag('event', 'auth_error', {
-          'error_message': msg,
-          'timestamp': Date.now()
-        });
-      }
 
       const el = document.getElementById("error-message");
       if (el) {
@@ -184,33 +169,17 @@ console.log('🚀 Production Auth System - High Volume Ready');
       }
     }
 
-    // Sistema de retry inteligente
-    async function retryOperation(operation, maxRetries = 3, delayMs = 1000) {
-      for (let i = 0; i < maxRetries; i++) {
-        try {
-          return await operation();
-        } catch (error) {
-          console.log(`Tentativa ${i + 1} falhou:`, error);
-          
-          if (i === maxRetries - 1) throw error;
-          
-          // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, i)));
-        }
-      }
-    }
-
     // Função para obter fingerprint
     async function getFingerprint() {
-      try {
-        if (typeof FingerprintJS !== 'undefined' && FingerprintJS.load) {
+      if (FingerprintJS && typeof FingerprintJS.load === 'function') {
+        try {
           const fpPromise = FingerprintJS.load();
           const fp = await fpPromise;
           const result = await fp.get();
           return result.visitorId;
+        } catch (e) {
+          console.warn('Erro ao obter fingerprint:', e);
         }
-      } catch (e) {
-        console.warn('Fingerprint não disponível:', e);
       }
       return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     }
@@ -258,7 +227,6 @@ console.log('🚀 Production Auth System - High Volume Ready');
         showMessage("Entrando...", "success");
         const result = await signInWithEmailAndPassword(auth, email, password);
         const idToken = await result.user.getIdToken();
-        
         localStorage.setItem("user", JSON.stringify({
           uid: result.user.uid,
           email: result.user.email
@@ -298,7 +266,7 @@ console.log('🚀 Production Auth System - High Volume Ready');
       }
     }
 
-    // Função para enviar SMS com rate limiting robusto
+    // Função para enviar SMS - SIMPLIFICADA e ROBUSTA
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
@@ -307,9 +275,11 @@ console.log('🚀 Production Auth System - High Volume Ready');
       }
 
       const phone = formatPhone(rawPhone);
-      const userIdentifier = await getFingerprint(); // Usar fingerprint como identificador
+      const userIdentifier = phone.replace('+55', ''); // Usar telefone como identificador
 
-      // Verificar rate limiting
+      console.log('📱 Telefone formatado:', phone);
+
+      // Verificar rate limiting local
       const rateLimitCheck = rateLimit.canAttempt(userIdentifier);
       if (!rateLimitCheck.allowed) {
         showMessage(rateLimitCheck.reason, "error");
@@ -322,62 +292,47 @@ console.log('🚀 Production Auth System - High Volume Ready');
         return false;
       }
 
-      // Verificar se SMS está temporariamente indisponível
-      if (fallbackStrategies.smsUnavailable) {
-        showMessage("SMS temporariamente indisponível. Use apenas e-mail por enquanto.", "error");
-        return false;
-      }
-
       try {
-        console.log('📱 Tentando enviar SMS para:', phone);
-        console.log('📊 Stats do rate limit:', rateLimit.getStats());
+        console.log('🔄 Iniciando processo de SMS...');
 
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
 
-        // Limpar reCAPTCHA anterior com retry
+        // Limpar reCAPTCHA anterior - SEM delay desnecessário
         if (recaptchaVerifier) {
           try { 
             recaptchaVerifier.clear(); 
-            await new Promise(resolve => setTimeout(resolve, 1000));
           } catch (e) {
             console.warn('Limpeza do reCAPTCHA anterior:', e);
           }
+          recaptchaVerifier = null;
         }
 
-        console.log('🔄 Criando novo reCAPTCHA...');
+        console.log('🎯 Criando reCAPTCHA v2...');
         
-        // Criar reCAPTCHA com configurações de produção
+        // Criar reCAPTCHA v2 simples - SEM configurações complicadas
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
           callback: (response) => {
-            console.log("✅ reCAPTCHA resolvido para produção");
+            console.log("✅ reCAPTCHA resolvido");
           },
           'expired-callback': () => {
             console.warn("⚠️ reCAPTCHA expirado");
             showMessage("Verificação expirou. Tente novamente.", "error");
-          },
-          'error-callback': (error) => {
-            console.error("❌ Erro no reCAPTCHA:", error);
-            showMessage("Erro na verificação. Recarregue a página.", "error");
           }
         });
 
-        console.log('🎯 Renderizando reCAPTCHA...');
+        console.log('🔄 Renderizando reCAPTCHA...');
         await recaptchaVerifier.render();
         
-        // Retry logic para envio de SMS
-        const sendSMSOperation = async () => {
-          return await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        };
-
-        console.log('📤 Enviando SMS com retry...');
+        console.log('📤 Enviando SMS...');
         showMessage("Enviando código SMS...", "success");
         
-        confirmationResult = await retryOperation(sendSMSOperation, 2, 2000);
+        // Enviar SMS diretamente - SEM retry que pode causar conflito
+        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
         
-        // Registrar tentativa bem-sucedida
+        // Registrar tentativa
         rateLimit.recordAttempt(userIdentifier);
         
         console.log('✅ SMS enviado com sucesso');
@@ -386,35 +341,26 @@ console.log('🚀 Production Auth System - High Volume Ready');
         return true;
 
       } catch (error) {
-        console.error("❌ Erro detalhado ao enviar SMS:", error);
+        console.error("❌ Erro ao enviar SMS:", error);
         
-        // Tratamento inteligente de erros para produção
         if (error.code === 'auth/too-many-requests') {
-          // Ativar fallback se muitos erros
-          fallbackStrategies.smsUnavailable = true;
-          setTimeout(() => {
-            fallbackStrategies.smsUnavailable = false;
-          }, 900000); // 15 minutos
-          
-          showMessage("Sistema de SMS temporariamente sobrecarregado. Nossa equipe foi notificada.", "error");
-          
+          showMessage("Limite temporário atingido. Aguarde 15 minutos ou use número diferente.", "error");
         } else if (error.code === 'auth/captcha-check-failed') {
-          showMessage("Falha na verificação de segurança. Recarregue a página.", "error");
+          showMessage("Falha na verificação. Recarregue a página.", "error");
         } else if (error.code === 'auth/invalid-phone-number') {
           showMessage("Número inválido. Use formato: 11987654321", "error");
         } else if (error.code === 'auth/quota-exceeded') {
-          fallbackStrategies.smsUnavailable = true;
-          showMessage("Limite de SMS atingido. Entre em contato com o suporte.", "error");
+          showMessage("Limite de SMS atingido. Tente novamente mais tarde.", "error");
         } else {
-          showMessage("Erro temporário. Tente novamente em alguns minutos.", "error");
+          showMessage("Erro temporário. Tente novamente.", "error");
         }
         return false;
       }
     }
 
-    // Função de cadastro com proteções de produção
+    // Função de cadastro
     async function signUp() {
-      console.log('🚀 Production SignUp iniciado');
+      console.log('🚀 signUp iniciado');
       
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
@@ -425,7 +371,7 @@ console.log('🚀 Production Auth System - High Volume Ready');
         return;
       }
 
-      // Validações robustas
+      // Validações básicas
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         showMessage("Digite um e-mail válido.", "error");
@@ -452,7 +398,7 @@ console.log('🚀 Production Auth System - High Volume Ready');
         return;
       }
 
-      // Enviar SMS com proteções
+      // Enviar SMS
       isNewUserRegistering = true;
       const sent = await sendSMS(rawPhone);
       if (!sent) {
@@ -461,31 +407,176 @@ console.log('🚀 Production Auth System - High Volume Ready');
       }
     }
 
-    // Resto das funções (confirmSMSCode, logout, checkAuthState) mantidas iguais...
-    // [As outras funções continuam as mesmas do código anterior]
+    // Função para confirmar código SMS
+    async function confirmSMSCode() {
+      const email = document.getElementById("email")?.value?.trim();
+      const password = document.getElementById("password")?.value?.trim();
+      const phone = document.getElementById("phone")?.value?.trim();
+      const code = document.getElementById("smsCode")?.value?.trim();
+
+      if (!code) {
+        showMessage("Digite o código recebido por SMS.", "error");
+        return;
+      }
+
+      if (code.length !== 6) {
+        showMessage("O código deve ter 6 dígitos.", "error");
+        return;
+      }
+
+      if (!confirmationResult) {
+        showMessage("Solicite um novo código SMS.", "error");
+        return;
+      }
+
+      try {
+        console.log('🔍 Verificando código SMS...');
+        showMessage("Verificando código...", "success");
+
+        // Confirmar código SMS
+        const phoneCredential = PhoneAuthProvider.credential(
+          confirmationResult.verificationId, 
+          code
+        );
+        const phoneResult = await signInWithCredential(auth, phoneCredential);
+
+        console.log('✅ Telefone verificado, criando conta...');
+
+        // Vincular e-mail à conta
+        const emailCredential = EmailAuthProvider.credential(email, password);
+        await linkWithCredential(phoneResult.user, emailCredential);
+
+        // Obter fingerprint
+        const fingerprint = await getFingerprint();
+
+        // Salvar dados do usuário
+        await setDoc(doc(db, 'usuarios', phoneResult.user.uid), {
+          email: email,
+          phone: phone,
+          fingerprint: fingerprint,
+          entrevistaConcluida: false,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+
+        // Salvar no localStorage
+        const idToken = await phoneResult.user.getIdToken();
+        localStorage.setItem("idToken", idToken);
+        localStorage.setItem("user", JSON.stringify({
+          uid: phoneResult.user.uid,
+          email: phoneResult.user.email
+        }));
+
+        console.log("🎯 Cadastro concluído, redirecionando...");
+        showMessage("Cadastro realizado com sucesso!", "success");
+        
+        setTimeout(() => {
+          window.location.replace("entrevista.html");
+        }, 1500);
+
+      } catch (error) {
+        console.error("❌ Erro na confirmação do código:", error);
+        
+        if (error.code === 'auth/invalid-verification-code') {
+          showMessage("Código inválido. Verifique e tente novamente.", "error");
+        } else if (error.code === 'auth/code-expired') {
+          showMessage("Código expirado. Solicite um novo.", "error");
+        } else if (error.code === 'auth/email-already-in-use') {
+          showMessage("Este e-mail já está em uso. Faça login.", "error");
+        } else {
+          showMessage(error, "error");
+        }
+      }
+    }
+
+    // Função de logout
+    async function logout() {
+      try { 
+        await auth.signOut(); 
+      } catch (e) {
+        console.warn('Erro no logout:', e);
+      }
+      localStorage.removeItem("user");
+      localStorage.removeItem("idToken");
+      window.location.href = "login.html";
+    }
+
+    // Função para verificar estado de autenticação (simplificada)
+    function checkAuthState() {
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          const isLoginPage = window.location.pathname.includes("login.html");
+          if (!isLoginPage) window.location.href = "login.html";
+          resolve(null);
+        }, 5000);
+
+        auth.onAuthStateChanged(async (user) => {
+          clearTimeout(timeout);
+          const isLoginPage = window.location.pathname.includes("login.html");
+          const isEntrevistaPage = window.location.pathname.includes("entrevista.html");
+
+          if (isNewUserRegistering && isEntrevistaPage) {
+            isNewUserRegistering = false;
+            resolve(user);
+            return;
+          }
+
+          if (!user && !isLoginPage) {
+            window.location.href = "login.html";
+          } else if (user && isLoginPage) {
+            try {
+              const snap = await getDoc(doc(db, 'usuarios', user.uid));
+              if (snap.exists() && snap.data().entrevistaConcluida === false) {
+                window.location.href = "entrevista.html";
+              } else if (snap.exists() && snap.data().entrevistaConcluida === true) {
+                window.location.href = "index.html";
+              } else {
+                window.location.href = "entrevista.html";
+              }
+            } catch (e) {
+              console.warn('Erro ao verificar usuário:', e);
+              window.location.href = "entrevista.html";
+            }
+          } else if (user && !isLoginPage) {
+            try {
+              const idToken = await user.getIdToken();
+              localStorage.setItem("idToken", idToken);
+              localStorage.setItem("user", JSON.stringify({
+                uid: user.uid,
+                email: user.email
+              }));
+              
+              try {
+                const snap = await getDoc(doc(db, 'usuarios', user.uid));
+                if (snap.exists() && snap.data().entrevistaConcluida === false && !isEntrevistaPage) {
+                  window.location.href = "entrevista.html";
+                  return;
+                }
+              } catch (e) {
+                console.warn('Erro ao verificar entrevista:', e);
+              }
+            } catch (error) {
+              console.error('Erro ao obter token:', error);
+            }
+          }
+          resolve(user);
+        });
+      });
+    }
 
     // Expor funções globalmente
     window.login = login;
     window.signUp = signUp;
+    window.confirmSMSCode = confirmSMSCode;
     window.forgotPassword = forgotPassword;
-    window.rateLimit = rateLimit; // Para debug
+    window.logout = logout;
+    window.showSMSSection = showSMSSection;
 
-    // Monitoramento de performance (opcional)
-    window.authStats = () => {
-      console.log('📊 Auth System Stats:', {
-        rateLimitStats: rateLimit.getStats(),
-        fallbackStrategies: fallbackStrategies,
-        firebase: {
-          currentUser: auth.currentUser?.uid || 'none',
-          lastPhone: lastPhone
-        }
-      });
-    };
-
-    // Setup event listeners
+    // Configurar listeners dos botões
     function setupEventListeners() {
       const loginBtn = document.getElementById("loginBtn");
       const signUpBtn = document.getElementById("signUpBtn");
+      const confirmBtn = document.getElementById("confirmCodeBtn");
       const forgotLink = document.getElementById("forgotPasswordLink");
 
       if (loginBtn) {
@@ -502,6 +593,13 @@ console.log('🚀 Production Auth System - High Volume Ready');
         });
       }
       
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.confirmSMSCode();
+        });
+      }
+      
       if (forgotLink) {
         forgotLink.addEventListener("click", (e) => {
           e.preventDefault();
@@ -509,7 +607,7 @@ console.log('🚀 Production Auth System - High Volume Ready');
         });
       }
 
-      console.log('✅ Production event listeners configurados');
+      console.log('✅ Event listeners configurados');
     }
 
     // Inicializar
@@ -519,11 +617,12 @@ console.log('🚀 Production Auth System - High Volume Ready');
       setupEventListeners();
     }
 
-    console.log('✅ Sistema de autenticação para produção carregado');
-    console.log('📊 Rate limits: 300 SMS/dia, 3 tentativas/5min por usuário');
+    // Verificar estado de autenticação
+    checkAuthState();
+
+    console.log('✅ auth.js carregado SEM App Check - Máxima compatibilidade');
 
   } catch (error) {
-    console.error('❌ Erro crítico no sistema de produção:', error);
-    // Fallback para modo básico se sistema avançado falhar
+    console.error('❌ Erro crítico ao carregar auth.js:', error);
   }
 })();
