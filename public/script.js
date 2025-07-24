@@ -13,7 +13,7 @@ const API_CONFIG = {
       return 'https://prod-ai-teste.vercel.app/api/chat';
     } else if (window.location.hostname.includes('vercel.app')) {
       // ⚠️ ALTERE ESTA URL PARA SUA API REAL:
-      return 'https://sua-api-prodai.vercel.app'; 
+      return 'https://prod-ai-teste.vercel.app'; 
     } else {
       return window.location.origin;
     }
