@@ -206,19 +206,17 @@ console.log('🚀 Carregando auth.js...');
         });
 
         await recaptchaVerifier.render();
-        showMessage("Enviando código SMS...", "success");
-        
-        // Enviar SMS
-        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        lastPhone = phone;
-        showMessage("Código SMS enviado! Verifique seu celular.", "success");
-        showSMSSection();
-        return true;
-
-      } catch (error) {
-        showMessage(error, "error");
-        return false;
-      }
+        // Tenta enviar SMS
+        try {
+          confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+          lastPhone = phone;
+          showMessage("Código SMS enviado! Verifique seu celular.", "success");
+          showSMSSection();
+          return true;
+        } catch (error) {
+          showMessage(error, "error");
+          return false;
+        }
     }
 
     // Função de cadastro
