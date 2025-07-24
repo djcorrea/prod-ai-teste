@@ -6,21 +6,19 @@ let isFirstMessage = true;
 let conversationHistory = [];
 let chatStarted = false;
 
-// ✅ CONFIGURAÇÃO DA API - CORRIGIDA PARA VERCEL
+// ✅ CONFIGURAÇÃO DA API - Altere a URL aqui
 const API_CONFIG = {
-  // Detectar automaticamente a URL da API
   baseURL: (() => {
     if (window.location.hostname === 'localhost') {
-      return 'http://localhost:3000'; // Desenvolvimento local
+      return 'http://localhost:3000'; 
     } else if (window.location.hostname.includes('vercel.app')) {
-      // Substituir pela URL real da sua API no Vercel
-      return 'https://sua-api-prodai.vercel.app'; // ← ALTERE AQUI
+      // ⚠️ ALTERE ESTA URL PARA SUA API REAL:
+      return 'https://sua-api-prodai.vercel.app'; 
     } else {
-      return window.location.origin; // Fallback
+      return window.location.origin;
     }
   })(),
   
-  // Endpoint completo
   get chatEndpoint() {
     return `${this.baseURL}/api/chat`;
   }
@@ -28,18 +26,18 @@ const API_CONFIG = {
 
 console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
 
+// ✅ AGUARDAR FIREBASE MODULAR (v11) CARREGAR
 function waitForFirebase() {
   return new Promise((resolve) => {
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      resolve();
-    } else {
-      const checkFirebase = setInterval(() => {
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          clearInterval(checkFirebase);
-          resolve();
-        }
-      }, 100);
-    }
+    const checkFirebase = () => {
+      // Verificar se window.auth (do auth.js) está disponível
+      if (window.auth && window.firebaseReady) {
+        resolve();
+      } else {
+        setTimeout(checkFirebase, 100);
+      }
+    };
+    checkFirebase();
   });
 }
 
@@ -182,8 +180,10 @@ async function processMessage(message) {
 
   try {
     await waitForFirebase();
-    const user = firebase.auth().currentUser;
-    if (!user) {
+    
+    // ✅ USAR AUTH MODULAR DO auth.js
+    const currentUser = window.auth.currentUser;
+    if (!currentUser) {
       appendMessage(`<strong>Assistente:</strong> Você precisa estar logado para usar o chat.`, 'bot');
       hideTypingIndicator();
       if (mainSendBtn && chatStarted) {
@@ -193,7 +193,7 @@ async function processMessage(message) {
       return;
     }
 
-    const idToken = await user.getIdToken();
+    const idToken = await currentUser.getIdToken();
 
     console.log('🔗 Enviando para:', API_CONFIG.chatEndpoint);
 
@@ -202,7 +202,7 @@ async function processMessage(message) {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}` // Adicionar header de auth
+        'Authorization': `Bearer ${idToken}`
       },
       body: JSON.stringify({ 
         message, 
@@ -212,7 +212,6 @@ async function processMessage(message) {
     });
 
     console.log('📡 Response status:', response.status);
-    console.log('📡 Response headers:', Object.fromEntries(response.headers));
 
     let data;
     if (response.ok) {
@@ -349,22 +348,6 @@ function setupEventListeners() {
   }
 }
 
-// ✅ FUNÇÃO DE DEBUG MELHORADA
-function debugVercel() {
-  console.log('=== DEBUG VERCEL ===');
-  console.log('🌐 Location:', window.location.href);
-  console.log('🔗 API Endpoint:', API_CONFIG.chatEndpoint);
-  console.log('🔥 Firebase loaded:', typeof firebase !== 'undefined');
-  console.log('🔒 Auth available:', typeof firebase !== 'undefined' && firebase.auth);
-  console.log('👤 Current user:', firebase?.auth()?.currentUser?.uid || 'None');
-  console.log('📝 Start input:', !!document.getElementById('start-input'));
-  console.log('🚀 Start button:', !!document.getElementById('startSendBtn'));
-  console.log('💬 User input:', !!document.getElementById('user-input'));
-  console.log('📤 Send button:', !!document.getElementById('sendBtn'));
-  console.log('📺 Chatbox:', !!document.getElementById('chatbox'));
-  console.log('=================');
-}
-
 // ✅ TESTE DE CONECTIVIDADE DA API
 async function testAPIConnection() {
   try {
@@ -377,6 +360,22 @@ async function testAPIConnection() {
     console.error('❌ API inacessível:', error.message);
     console.log('💡 Verifique se a URL da API está correta em API_CONFIG.baseURL');
   }
+}
+
+// ✅ FUNÇÃO DE DEBUG MELHORADA
+function debugVercel() {
+  console.log('=== DEBUG VERCEL ===');
+  console.log('🌐 Location:', window.location.href);
+  console.log('🔗 API Endpoint:', API_CONFIG.chatEndpoint);
+  console.log('🔥 Auth loaded:', !!window.auth);
+  console.log('🔥 Firebase ready:', window.firebaseReady);
+  console.log('👤 Current user:', window.auth?.currentUser?.uid || 'None');
+  console.log('📝 Start input:', !!document.getElementById('start-input'));
+  console.log('🚀 Start button:', !!document.getElementById('startSendBtn'));
+  console.log('💬 User input:', !!document.getElementById('user-input'));
+  console.log('📤 Send button:', !!document.getElementById('sendBtn'));
+  console.log('📺 Chatbox:', !!document.getElementById('chatbox'));
+  console.log('=================');
 }
 
 function initializeApp() {

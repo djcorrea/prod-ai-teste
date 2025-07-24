@@ -19,10 +19,7 @@
   });
 </script>
 
-  <!-- Firebase e dependências -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+  <!-- ✅ MUDANÇA: Firebase v11 modular em vez de v10 compat -->
   <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 
   <!-- Scripts principais -->
@@ -112,11 +109,15 @@
       const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
         logoutBtn.addEventListener("click", function () {
-          if (typeof logout === "function") {
-            logout();
-          } else {
-            console.warn("Função logout ainda não carregada.");
-          }
+          // Aguardar auth.js carregar
+          const checkLogout = () => {
+            if (typeof window.logout === "function") {
+              window.logout();
+            } else {
+              setTimeout(checkLogout, 100);
+            }
+          };
+          checkLogout();
         });
       }
     });

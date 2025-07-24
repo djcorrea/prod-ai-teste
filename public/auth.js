@@ -521,6 +521,11 @@ console.log('auth.js iniciado - SEM NENHUM BLOQUEIO');
     window.forgotPassword = forgotPassword;
     window.logout = logout;
     window.showSMSSection = showSMSSection;
+    
+    // ✅ EXPOR AUTH E MARCAR COMO PRONTO
+    window.auth = auth;
+    window.db = db;
+    window.firebaseReady = true;
 
     // Função de debug para limpar qualquer cache restante
     window.clearAllLimits = () => {
