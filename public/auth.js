@@ -163,71 +163,71 @@ console.log('🚀 Carregando auth.js...');
     }
 
     // Função para enviar SMS
-    async function sendSMS(rawPhone) {
-      function formatPhone(phone) {
-        const clean = phone.replace(/\D/g, '');
-        const withoutCountry = clean.replace(/^55/, '');
-        return '+55' + withoutCountry;
-      }
-
-      const phone = formatPhone(rawPhone);
-
-      // Validação básica do formato
-      if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
-        showMessage("Formato inválido. Use: 11987654321 (DDD + número)", "error");
-        return false;
-      }
-
-      try {
-        // Garantir container do reCAPTCHA
-        ensureRecaptchaDiv();
-
-        // Limpar reCAPTCHA anterior
-        if (recaptchaVerifier) {
-          try { 
-            recaptchaVerifier.clear(); 
-          } catch (e) {}
-          recaptchaVerifier = null;
-        }
-
-        // Limpar o container DOM
-        const container = document.getElementById('recaptcha-container');
-        if (container) {
-          container.innerHTML = '';
-        }
-        
-        // Criar reCAPTCHA
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {},
-          'expired-callback': () => {
-            showMessage("Verificação expirou. Tente novamente.", "error");
-          }
-        });
-
-        await recaptchaVerifier.render();
-        showMessage("Enviando código SMS...", "success");
-        
-        // Enviar SMS
-        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        lastPhone = phone;
-        showMessage("Código SMS enviado! Verifique seu celular.", "success");
-        showSMSSection();
-        return true;
-
-      } catch (error) {
-  // Verifica se o erro foi causado pelo fallback do reCAPTCHA Enterprise
-  const isEnterpriseFallback = error?.message?.includes("recaptcha enterprise") || error?.message?.includes("400");
-
-  if (confirmationResult) {
-    // SMS foi enviado mesmo com erro aparente
-    console.warn("⚠️ Aviso: erro retornado, mas SMS foi enviado com sucesso.");
-    return true;
+   // Função para enviar SMS
+async function sendSMS(rawPhone) {
+  function formatPhone(phone) {
+    const clean = phone.replace(/\D/g, '');
+    const withoutCountry = clean.replace(/^55/, '');
+    return '+55' + withoutCountry;
   }
 
-  // Caso contrário, erro real
-  showMessage(error, "error");
-  return false;
+  const phone = formatPhone(rawPhone);
+
+  // Validação básica do formato
+  if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
+    showMessage("Formato inválido. Use: 11987654321 (DDD + número)", "error");
+    return false;
+  }
+
+  // Garantir container do reCAPTCHA
+  ensureRecaptchaDiv();
+
+  // Limpar reCAPTCHA anterior
+  if (recaptchaVerifier) {
+    try { 
+      recaptchaVerifier.clear(); 
+    } catch (e) {}
+    recaptchaVerifier = null;
+  }
+
+  // Limpar o container DOM
+  const container = document.getElementById('recaptcha-container');
+  if (container) {
+    container.innerHTML = '';
+  }
+
+  try {
+    // Criar reCAPTCHA
+    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      size: 'invisible',
+      callback: () => {},
+      'expired-callback': () => {
+        showMessage("Verificação expirou. Tente novamente.", "error");
+      }
+    });
+
+    await recaptchaVerifier.render();
+    showMessage("Enviando código SMS...", "success");
+
+    // Enviar SMS
+    confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+    lastPhone = phone;
+    showMessage("Código SMS enviado! Verifique seu celular.", "success");
+    showSMSSection();
+    return true;
+
+  } catch (error) {
+    // Se o Firebase caiu no fallback do Enterprise, mas ainda assim enviou o SMS
+    if (confirmationResult) {
+      console.warn("⚠️ Aviso: erro retornado, mas SMS foi enviado com sucesso.");
+      showMessage("Código SMS enviado! Verifique seu celular.", "success");
+      showSMSSection();
+      return true;
+    }
+
+    showMessage(error, "error");
+    return false;
+  }
 }
 
 
