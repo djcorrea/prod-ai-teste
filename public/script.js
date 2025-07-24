@@ -6,6 +6,28 @@ let isFirstMessage = true;
 let conversationHistory = [];
 let chatStarted = false;
 
+// ✅ CONFIGURAÇÃO DA API - CORRIGIDA PARA VERCEL
+const API_CONFIG = {
+  // Detectar automaticamente a URL da API
+  baseURL: (() => {
+    if (window.location.hostname === 'localhost') {
+      return 'http://localhost:3000'; // Desenvolvimento local
+    } else if (window.location.hostname.includes('vercel.app')) {
+      // Substituir pela URL real da sua API no Vercel
+      return 'https://sua-api-prodai.vercel.app'; // ← ALTERE AQUI
+    } else {
+      return window.location.origin; // Fallback
+    }
+  })(),
+  
+  // Endpoint completo
+  get chatEndpoint() {
+    return `${this.baseURL}/api/chat`;
+  }
+};
+
+console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
+
 function waitForFirebase() {
   return new Promise((resolve) => {
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -148,6 +170,7 @@ function hideTypingIndicator() {
   }
 }
 
+// ✅ FUNÇÃO PROCESSAMENTO DE MENSAGEM - CORRIGIDA
 async function processMessage(message) {
   const mainSendBtn = document.getElementById('sendBtn');
   if (mainSendBtn && chatStarted) {
@@ -172,22 +195,48 @@ async function processMessage(message) {
 
     const idToken = await user.getIdToken();
 
-    const response = await fetch('/api/chat', {
+    console.log('🔗 Enviando para:', API_CONFIG.chatEndpoint);
+
+    // ✅ REQUISIÇÃO CORRIGIDA COM URL ABSOLUTA
+    const response = await fetch(API_CONFIG.chatEndpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, conversationHistory, idToken })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}` // Adicionar header de auth
+      },
+      body: JSON.stringify({ 
+        message, 
+        conversationHistory, 
+        idToken 
+      })
     });
+
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response headers:', Object.fromEntries(response.headers));
 
     let data;
     if (response.ok) {
       const rawText = await response.text();
+      console.log('📄 Raw response:', rawText.substring(0, 200) + '...');
       try {
         data = JSON.parse(rawText);
       } catch (parseError) {
-        data = { error: 'Erro ao processar resposta' };
+        console.error('❌ Erro ao parsear JSON:', parseError);
+        data = { error: 'Erro ao processar resposta do servidor' };
       }
     } else {
-      data = { error: 'limite diário' };
+      const errorText = await response.text();
+      console.error('❌ Erro HTTP:', response.status, errorText);
+      
+      if (response.status === 403) {
+        data = { error: 'limite diário' };
+      } else if (response.status === 401) {
+        data = { error: 'Token de autenticação inválido' };
+      } else if (response.status === 404) {
+        data = { error: 'API não encontrada. Verifique a configuração.' };
+      } else {
+        data = { error: 'Erro do servidor' };
+      }
     }
 
     hideTypingIndicator();
@@ -198,15 +247,40 @@ async function processMessage(message) {
         `🔓 <a href="planos.html" class="btn-plus" target="_blank">Assinar versão Plus</a>`,
         'bot'
       );
+    } else if (data.error && data.error.includes('API não encontrada')) {
+      appendMessage(
+        `<strong>Assistente:</strong> ⚙️ Sistema em configuração. Tente novamente em alguns minutos.`,
+        'bot'
+      );
+    } else if (data.error && data.error.includes('Token')) {
+      appendMessage(
+        `<strong>Assistente:</strong> 🔒 Sessão expirada. <a href="login.html">Faça login novamente</a>.`,
+        'bot'
+      );
     } else if (data.reply) {
       appendMessage(`<strong>Assistente:</strong> ${data.reply}`, 'bot');
       conversationHistory.push({ role: 'assistant', content: data.reply });
     } else {
-      appendMessage(`<strong>Assistente:</strong> Ocorreu um erro inesperado.`, 'bot');
+      appendMessage(
+        `<strong>Assistente:</strong> ❌ Erro: ${data.error || 'Erro inesperado'}.`,
+        'bot'
+      );
     }
   } catch (err) {
+    console.error('💥 Erro na requisição:', err);
     hideTypingIndicator();
-    appendMessage(`<strong>Assistente:</strong> Erro ao se conectar com o servidor.`, 'bot');
+    
+    if (err.name === 'TypeError' && err.message.includes('fetch')) {
+      appendMessage(
+        `<strong>Assistente:</strong> 🌐 Erro de conexão. Verifique sua internet e tente novamente.`,
+        'bot'
+      );
+    } else {
+      appendMessage(
+        `<strong>Assistente:</strong> ❌ Erro ao se conectar com o servidor.`,
+        'bot'
+      );
+    }
   } finally {
     if (mainSendBtn && chatStarted) {
       mainSendBtn.disabled = false;
@@ -275,6 +349,36 @@ function setupEventListeners() {
   }
 }
 
+// ✅ FUNÇÃO DE DEBUG MELHORADA
+function debugVercel() {
+  console.log('=== DEBUG VERCEL ===');
+  console.log('🌐 Location:', window.location.href);
+  console.log('🔗 API Endpoint:', API_CONFIG.chatEndpoint);
+  console.log('🔥 Firebase loaded:', typeof firebase !== 'undefined');
+  console.log('🔒 Auth available:', typeof firebase !== 'undefined' && firebase.auth);
+  console.log('👤 Current user:', firebase?.auth()?.currentUser?.uid || 'None');
+  console.log('📝 Start input:', !!document.getElementById('start-input'));
+  console.log('🚀 Start button:', !!document.getElementById('startSendBtn'));
+  console.log('💬 User input:', !!document.getElementById('user-input'));
+  console.log('📤 Send button:', !!document.getElementById('sendBtn'));
+  console.log('📺 Chatbox:', !!document.getElementById('chatbox'));
+  console.log('=================');
+}
+
+// ✅ TESTE DE CONECTIVIDADE DA API
+async function testAPIConnection() {
+  try {
+    console.log('🧪 Testando conexão com API...');
+    const response = await fetch(API_CONFIG.chatEndpoint, {
+      method: 'OPTIONS'
+    });
+    console.log('✅ API acessível:', response.status);
+  } catch (error) {
+    console.error('❌ API inacessível:', error.message);
+    console.log('💡 Verifique se a URL da API está correta em API_CONFIG.baseURL');
+  }
+}
+
 function initializeApp() {
   setTimeout(() => {
     setupEventListeners();
@@ -293,9 +397,10 @@ if (document.readyState === 'loading') {
   initializeApp();
 }
 
+// Expor funções globalmente
 window.sendFirstMessage = sendFirstMessage;
 window.sendMessage = sendMessage;
-window.logout = logout;
+window.testAPIConnection = testAPIConnection;
 
 document.addEventListener('DOMContentLoaded', () => {
   const phoneInput = document.getElementById('phone');
@@ -320,17 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function debugVercel() {
-  console.log('=== DEBUG VERCEL ===');
-  console.log('Location:', window.location.href);
-  console.log('Firebase loaded:', typeof firebase !== 'undefined');
-  console.log('Auth available:', typeof firebase !== 'undefined' && firebase.auth);
-  console.log('Start input:', document.getElementById('start-input'));
-  console.log('Start button:', document.getElementById('startSendBtn'));
-  console.log('User input:', document.getElementById('user-input'));
-  console.log('Send button:', document.getElementById('sendBtn'));
-  console.log('Chatbox:', document.getElementById('chatbox'));
-  console.log('=================');
-}
-
-setTimeout(debugVercel, 1000);
+// Debug automático
+setTimeout(() => {
+  debugVercel();
+  testAPIConnection();
+}, 1000);
