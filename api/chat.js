@@ -3,30 +3,20 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import cors from 'cors';
 
-// Domínios permitidos para as requisições
-const ALLOWED_ORIGINS = [
-  'https://prod-ai-teste.vercel.app',
-];
-
-// Regex que cobre qualquer deploy temporário do Vercel
-const VERCEL_TEMP_REGEX = /^https:\/\/prod-ai-teste-[^.]+\.vercel\.app$/;
-
-function isAllowedOrigin(origin) {
-  if (!origin) return false;
-  return ALLOWED_ORIGINS.includes(origin) || VERCEL_TEMP_REGEX.test(origin);
-}
-
 // Middleware CORS dinâmico
 const corsMiddleware = cors({
   origin: (origin, callback) => {
-    if (isAllowedOrigin(origin)) {
-      return callback(null, true);
+    const fixedOrigin = 'https://prod-ai-teste.vercel.app';
+    const vercelPreviewRegex = /^https:\/\/prod-ai-teste-[a-z0-9\-]+\.vercel\.app$/;
+
+    if (!origin || origin === fixedOrigin || vercelPreviewRegex.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
     }
-    return callback(new Error('Not allowed by CORS'));
   },
-  methods: ['POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  maxAge: 86400,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
 });
 
 function runMiddleware(req, res, fn) {
