@@ -5,7 +5,20 @@ import cors from 'cors';
 
 // ─── 1) CONFIGURAÇÃO DO EXPRESS ────────────────────────────
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    const fixedOrigin = 'https://prod-ai-teste.vercel.app';
+    const vercelPreviewRegex = /^https:\/\/prod-ai-teste-[a-z0-9\-]+\.vercel\.app$/;
+
+    if (!origin || origin === fixedOrigin || vercelPreviewRegex.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
+}));
 app.use(express.json());
 
 // ─── 2) CONFIGURAÇÃO DO MERCADO PAGO ──────────────────────
