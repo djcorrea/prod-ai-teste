@@ -192,7 +192,7 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função para enviar SMS - SEM VERIFICAÇÕES DE DUPLICATA
+    // Função para enviar SMS - COM CONTROLE DE RATE LIMIT
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
@@ -210,17 +210,25 @@ console.log('auth.js iniciado');
       }
 
       try {
-        // ✅ REMOVIDO: Verificação se o número já foi usado
-        // Agora permite múltiplas contas com o mesmo telefone
+        // Verificar rate limit local (opcional - pode comentar se quiser)
+        const lastSMSTime = localStorage.getItem('lastSMSTime');
+        const now = Date.now();
+        if (lastSMSTime && (now - parseInt(lastSMSTime)) < 60000) {
+          const waitTime = Math.ceil((60000 - (now - parseInt(lastSMSTime))) / 1000);
+          showMessage(`Aguarde ${waitTime} segundos antes de solicitar outro SMS.`, "error");
+          return false;
+        }
+
         console.log('🔓 Verificação de telefone duplicado: DESABILITADA');
 
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
 
-        // Limpar reCAPTCHA anterior
+        // Limpar reCAPTCHA anterior COM DELAY
         if (recaptchaVerifier) {
           try { 
             recaptchaVerifier.clear(); 
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Aguarda 1 segundo
           } catch (e) {
             console.warn('Limpeza do reCAPTCHA anterior:', e);
           }
@@ -228,7 +236,7 @@ console.log('auth.js iniciado');
 
         console.log('🔄 Criando novo reCAPTCHA...');
         
-        // Criar novo reCAPTCHA v2
+        // Criar novo reCAPTCHA v2 com configurações mais robustas
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
           callback: (response) => {
@@ -236,18 +244,28 @@ console.log('auth.js iniciado');
           },
           'expired-callback': () => {
             console.warn("⚠️ reCAPTCHA expirado");
-            showMessage("Verificação expirou. Tente novamente.", "error");
+            showMessage("Verificação expirou. Recarregue a página.", "error");
+          },
+          'error-callback': (error) => {
+            console.error("❌ Erro no reCAPTCHA:", error);
+            showMessage("Erro na verificação. Recarregue a página.", "error");
           }
         });
 
         console.log('🎯 Renderizando reCAPTCHA...');
         await recaptchaVerifier.render();
         
+        // Aguardar um pouco antes de enviar SMS
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         console.log('📤 Enviando SMS para:', phone);
         showMessage("Enviando código SMS...", "success");
         
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
+        
+        // Salvar timestamp do último SMS
+        localStorage.setItem('lastSMSTime', now.toString());
         
         console.log('✅ SMS enviado com sucesso');
         showMessage("Código SMS enviado! Verifique seu celular.", "success");
@@ -258,11 +276,19 @@ console.log('auth.js iniciado');
         console.error("❌ Erro detalhado ao enviar SMS:", error);
         
         if (error.code === 'auth/too-many-requests') {
-          showMessage("Muitas tentativas. Aguarde 5 minutos e tente novamente.", "error");
+          // Calcular tempo de espera baseado no erro
+          const waitMinutes = 10; // Firebase geralmente bloqueia por 10-15 minutos
+          showMessage(`Muitas tentativas de SMS. Aguarde ${waitMinutes} minutos ou use um número diferente.`, "error");
+          
+          // Salvar timestamp do bloqueio
+          localStorage.setItem('smsBlocked', (Date.now() + (waitMinutes * 60000)).toString());
+          
         } else if (error.code === 'auth/captcha-check-failed') {
           showMessage("Falha na verificação. Recarregue a página e tente novamente.", "error");
         } else if (error.code === 'auth/invalid-phone-number') {
           showMessage("Número inválido. Use formato: 11987654321", "error");
+        } else if (error.code === 'auth/quota-exceeded') {
+          showMessage("Limite diário de SMS atingido. Tente novamente amanhã.", "error");
         } else {
           showMessage(error, "error");
         }
@@ -270,9 +296,17 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função de cadastro
+    // Função de cadastro com verificação de bloqueio
     async function signUp() {
       console.log('🚀 signUp iniciado - MODO LIBERADO');
+      
+      // Verificar se está bloqueado por too-many-requests
+      const smsBlocked = localStorage.getItem('smsBlocked');
+      if (smsBlocked && Date.now() < parseInt(smsBlocked)) {
+        const waitTime = Math.ceil((parseInt(smsBlocked) - Date.now()) / 60000);
+        showMessage(`Sistema bloqueado por tentativas excessivas. Aguarde ${waitTime} minutos.`, "error");
+        return;
+      }
       
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
