@@ -68,12 +68,7 @@ console.log('🚀 Carregando auth.js...');
         el.style.display = "block";
         el.classList.remove("error-message", "success-message");
         el.classList.add(type === "success" ? "success-message" : "error-message");
-        
-        if (type === "success") {
-          setTimeout(() => {
-            el.style.display = "none";
-          }, 5000);
-        }
+        // Mensagem de sucesso permanece visível até nova ação do usuário
       } else {
         alert(msg);
       }
