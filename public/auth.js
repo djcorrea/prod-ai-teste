@@ -178,46 +178,45 @@ console.log('🚀 Carregando auth.js...');
         return false;
       }
 
+      // Garantir container do reCAPTCHA
+      ensureRecaptchaDiv();
+
+      // Limpar reCAPTCHA anterior
+      if (recaptchaVerifier) {
+        try { 
+          recaptchaVerifier.clear(); 
+        } catch (e) {}
+        recaptchaVerifier = null;
+      }
+
+      // Limpar o container DOM
+      const container = document.getElementById('recaptcha-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+
+      // Criar reCAPTCHA
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {},
+        'expired-callback': () => {
+          showMessage("Verificação expirou. Tente novamente.", "error");
+        }
+      });
+
+      await recaptchaVerifier.render();
+      // Tenta enviar SMS
+      let smsSent = false;
       try {
-        // Garantir container do reCAPTCHA
-        ensureRecaptchaDiv();
-
-        // Limpar reCAPTCHA anterior
-        if (recaptchaVerifier) {
-          try { 
-            recaptchaVerifier.clear(); 
-          } catch (e) {}
-          recaptchaVerifier = null;
-        }
-
-        // Limpar o container DOM
-        const container = document.getElementById('recaptcha-container');
-        if (container) {
-          container.innerHTML = '';
-        }
-        
-        // Criar reCAPTCHA
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {},
-          'expired-callback': () => {
-            showMessage("Verificação expirou. Tente novamente.", "error");
-          }
-        });
-
-        await recaptchaVerifier.render();
-        // Tenta enviar SMS
-        let smsSent = false;
-        try {
-          confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-          lastPhone = phone;
-          showMessage("Código SMS enviado! Verifique seu celular.", "success");
-          showSMSSection();
-          smsSent = true;
-        } catch (error) {
-          showMessage(error, "error");
-        }
-        return smsSent;
+        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+        lastPhone = phone;
+        showMessage("Código SMS enviado! Verifique seu celular.", "success");
+        showSMSSection();
+        smsSent = true;
+      } catch (error) {
+        showMessage(error, "error");
+      }
+      return smsSent;
     }
 
     // Função de cadastro
