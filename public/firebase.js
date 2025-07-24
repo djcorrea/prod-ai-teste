@@ -6,12 +6,13 @@ import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.24.0/firebas
 
 // Configuração do seu projeto Firebase (substitua pelos seus dados reais)
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SUA_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_STORAGE_BUCKET",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey:            "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+  authDomain:        "prodai-58436.firebaseapp.com",
+  projectId:         "prodai-58436",
+  storageBucket:     "prodai-58436.appspot.com",
+  messagingSenderId: "801631191322",
+  appId:             "1:801631322:web:80e3d29cf7468331652ca3",
+  measurementId:     "G-MBDHDYN6Z0"
 };
 
 // Inicializa Firebase apenas uma vez
