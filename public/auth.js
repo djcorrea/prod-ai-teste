@@ -5,7 +5,7 @@ console.log('auth.js iniciado');
     // Importações dinâmicas
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js');
     const { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js');
-    const { getFirestore, doc, getDoc, setDoc, collection } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js');
+    const { getFirestore, doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js');
     const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js');
     
     // Importação do FingerprintJS
@@ -15,7 +15,6 @@ console.log('auth.js iniciado');
       FingerprintJS = mod.default || mod;
     } catch (e) {
       console.warn('FingerprintJS não carregado:', e);
-      FingerprintJS = window.FingerprintJS;
     }
 
     // Configuração Firebase CORRIGIDA
@@ -25,7 +24,7 @@ console.log('auth.js iniciado');
       projectId: "prodai-58436",
       storageBucket: "prodai-58436.appspot.com",
       messagingSenderId: "801631191322",
-      appId: "1:801631191322:web:80e3d29cf7468331652ca3", // CORRIGIDO
+      appId: "1:801631191322:web:80e3d29cf7468331652ca3",
       measurementId: "G-MBDHDYN6Z0"
     };
 
@@ -34,11 +33,14 @@ console.log('auth.js iniciado');
     const auth = getAuth(app);
     const functions = getFunctions(app);
 
-    // CONFIGURAÇÃO DO reCAPTCHA PARA DESENVOLVIMENTO
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
-      auth.settings = auth.settings || {};
-      auth.settings.appVerificationDisabledForTesting = true;
-      console.log('✅ reCAPTCHA desabilitado para desenvolvimento');
+    // CONFIGURAÇÃO IMPORTANTE: Desabilitar App Check para desenvolvimento
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      console.log('🔧 Modo desenvolvimento detectado');
+      
+      // Configurar auth para desenvolvimento
+      auth.settings = {
+        appVerificationDisabledForTesting: true
+      };
     }
 
     // Variáveis globais
@@ -49,20 +51,20 @@ console.log('auth.js iniciado');
 
     // Mensagens de erro em português
     const firebaseErrorsPt = {
-      'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato +55 DDD + número.',
+      'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato: 11987654321',
       'auth/missing-phone-number': 'Digite seu número de telefone.',
-      'auth/too-many-requests': 'Muitas tentativas. Tente novamente mais tarde.',
+      'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
       'auth/quota-exceeded': 'Limite de SMS excedido. Tente novamente mais tarde.',
       'auth/user-disabled': 'Usuário desativado.',
       'auth/code-expired': 'O código expirou. Solicite um novo.',
       'auth/invalid-verification-code': 'Código de verificação inválido.',
-      'auth/captcha-check-failed': 'Falha na verificação. Tente novamente em alguns minutos.',
-      'auth/network-request-failed': 'Falha de conexão com a internet.',
-      'auth/app-not-authorized': 'App não autorizado. Verifique as configurações do Firebase.',
+      'auth/captcha-check-failed': 'Falha na verificação reCAPTCHA. Recarregue a página e tente novamente.',
+      'auth/network-request-failed': 'Falha de conexão. Verifique sua internet.',
+      'auth/app-not-authorized': 'Aplicação não autorizada para este domínio.',
       'auth/session-expired': 'Sessão expirada. Tente novamente.',
       'auth/invalid-verification-id': 'Falha na verificação. Tente novamente.',
       'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Faça login ou recupere sua senha.',
-      'auth/invalid-email': 'E-mail inválido. Digite um e-mail válido.',
+      'auth/invalid-email': 'E-mail inválido.',
       'auth/wrong-password': 'Senha incorreta.',
       'auth/user-not-found': 'Usuário não encontrado.',
       'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
@@ -74,14 +76,22 @@ console.log('auth.js iniciado');
         ? (firebaseErrorsPt[messageOrError.code] || messageOrError.message || 'Erro desconhecido.')
         : messageOrError;
 
+      console.log(`${type.toUpperCase()}: ${msg}`);
+
       const el = document.getElementById("error-message");
       if (el) {
         el.innerText = msg;
         el.style.display = "block";
         el.classList.remove("error-message", "success-message");
         el.classList.add(type === "success" ? "success-message" : "error-message");
+        
+        // Auto-hide success messages
+        if (type === "success") {
+          setTimeout(() => {
+            el.style.display = "none";
+          }, 5000);
+        }
       } else {
-        console.log(`${type}: ${msg}`);
         alert(msg);
       }
     }
@@ -98,7 +108,7 @@ console.log('auth.js iniciado');
           console.warn('Erro ao obter fingerprint:', e);
         }
       }
-      return null;
+      return 'dev-' + Date.now();
     }
 
     // Função para garantir div do reCAPTCHA
@@ -107,7 +117,9 @@ console.log('auth.js iniciado');
       if (!recaptchaDiv) {
         recaptchaDiv = document.createElement('div');
         recaptchaDiv.id = 'recaptcha-container';
-        recaptchaDiv.style.display = 'none';
+        recaptchaDiv.style.position = 'absolute';
+        recaptchaDiv.style.top = '-9999px';
+        recaptchaDiv.style.left = '-9999px';
         document.body.appendChild(recaptchaDiv);
       }
       return recaptchaDiv;
@@ -116,10 +128,16 @@ console.log('auth.js iniciado');
     // Função para mostrar seção SMS
     function showSMSSection() {
       const smsSection = document.getElementById('sms-section');
-      if (smsSection) smsSection.style.display = 'block';
+      if (smsSection) {
+        smsSection.style.display = 'block';
+        smsSection.scrollIntoView({ behavior: 'smooth' });
+      }
 
       const signUpBtn = document.getElementById('signUpBtn');
-      if (signUpBtn) signUpBtn.disabled = true;
+      if (signUpBtn) {
+        signUpBtn.disabled = true;
+        signUpBtn.textContent = 'Código Enviado';
+      }
     }
 
     // Função de login
@@ -133,9 +151,13 @@ console.log('auth.js iniciado');
       }
 
       try {
+        showMessage("Entrando...", "success");
         const result = await signInWithEmailAndPassword(auth, email, password);
         const idToken = await result.user.getIdToken();
-        localStorage.setItem("user", JSON.stringify(result.user));
+        localStorage.setItem("user", JSON.stringify({
+          uid: result.user.uid,
+          email: result.user.email
+        }));
         localStorage.setItem("idToken", idToken);
 
         try {
@@ -164,129 +186,146 @@ console.log('auth.js iniciado');
       }
       try {
         await sendPasswordResetEmail(auth, email);
-        showMessage("Enviamos um link de redefinição de senha para seu e-mail.", "success");
+        showMessage("Link de redefinição enviado para seu e-mail!", "success");
       } catch (error) {
         console.error('Erro na recuperação de senha:', error);
         showMessage(error, "error");
       }
     }
 
-    // Função para enviar SMS CORRIGIDA
+    // Função para enviar SMS com reCAPTCHA v2
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
-        return '+55' + clean.replace(/^55/, '');
+        // Se começar com 55, remover
+        const withoutCountry = clean.replace(/^55/, '');
+        // Adicionar +55
+        return '+55' + withoutCountry;
       }
 
       const phone = formatPhone(rawPhone);
+      console.log('📱 Telefone formatado:', phone);
 
-      if (!phone.startsWith('+55') || phone.length < 13) {
-        showMessage("Formato inválido. Use DDD + número, ex: 34987654321", "error");
+      // Validação básica
+      if (!phone.startsWith('+55') || phone.length < 13 || phone.length > 14) {
+        showMessage("Formato inválido. Use: 11987654321 (DDD + número)", "error");
         return false;
       }
 
       try {
-        // Verifica se o número já foi usado
-        const phoneSnap = await getDoc(doc(db, "phones", phone));
+        // Verificar se o número já foi usado
+        const phoneSnap = await getDoc(doc(db, "phones", phone.replace('+55', '')));
         if (phoneSnap.exists()) {
-          showMessage("Esse telefone já está cadastrado em outra conta!", "error");
+          showMessage("Esse telefone já está cadastrado!", "error");
           return false;
         }
 
-        // Garante que o container do reCAPTCHA existe
+        // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
 
-        // Limpa reCAPTCHA anterior
+        // Limpar reCAPTCHA anterior
         if (recaptchaVerifier) {
           try { 
             recaptchaVerifier.clear(); 
           } catch (e) {
-            console.warn('Erro ao limpar reCAPTCHA anterior:', e);
-          }
-          recaptchaVerifier = null;
-        }
-
-        // NOVA CONFIGURAÇÃO DO reCAPTCHA - MAIS ROBUSTA
-        try {
-          recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: (response) => {
-              console.log("✅ reCAPTCHA resolvido");
-            },
-            'expired-callback': () => {
-              console.warn("⚠️ reCAPTCHA expirado");
-              showMessage("Verificação expirou. Tente novamente.", "error");
-            },
-            'error-callback': (error) => {
-              console.error("❌ Erro no reCAPTCHA:", error);
-              showMessage("Erro na verificação. Tente novamente.", "error");
-            }
-          });
-
-          console.log('🔄 Renderizando reCAPTCHA...');
-          await recaptchaVerifier.render();
-          
-          console.log('📱 Enviando SMS...');
-          confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-          lastPhone = phone;
-          
-          showMessage("Código SMS enviado! Digite o código recebido.", "success");
-          showSMSSection();
-          return true;
-
-        } catch (recaptchaError) {
-          console.error("❌ Erro específico do reCAPTCHA:", recaptchaError);
-          
-          // FALLBACK: Tentar sem reCAPTCHA em desenvolvimento
-          if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
-            console.log('🔄 Tentando sem reCAPTCHA...');
-            try {
-              // Para desenvolvimento, tenta enviar SMS sem reCAPTCHA
-              confirmationResult = await signInWithPhoneNumber(auth, phone);
-              lastPhone = phone;
-              showMessage("Código SMS enviado! Digite o código recebido.", "success");
-              showSMSSection();
-              return true;
-            } catch (fallbackError) {
-              console.error("❌ Fallback também falhou:", fallbackError);
-              showMessage("Por favor, tente novamente em alguns minutos.", "error");
-              return false;
-            }
-          } else {
-            throw recaptchaError;
+            console.warn('Limpeza do reCAPTCHA anterior:', e);
           }
         }
+
+        console.log('🔄 Criando novo reCAPTCHA...');
+        
+        // Criar novo reCAPTCHA v2 (NÃO Enterprise)
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: (response) => {
+            console.log("✅ reCAPTCHA resolvido", response?.substr(0, 10) + '...');
+          },
+          'expired-callback': () => {
+            console.warn("⚠️ reCAPTCHA expirado");
+            showMessage("Verificação expirou. Tente novamente.", "error");
+          }
+        });
+
+        console.log('🎯 Renderizando reCAPTCHA...');
+        await recaptchaVerifier.render();
+        
+        console.log('📤 Enviando SMS para:', phone);
+        showMessage("Enviando código SMS...", "success");
+        
+        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+        lastPhone = phone;
+        
+        console.log('✅ SMS enviado com sucesso');
+        showMessage("Código SMS enviado! Verifique seu celular.", "success");
+        showSMSSection();
+        return true;
 
       } catch (error) {
-        console.error("❌ Erro geral ao enviar SMS:", error);
-        showMessage(error, "error");
+        console.error("❌ Erro detalhado ao enviar SMS:", error);
+        
+        // Mensagens específicas para diferentes erros
+        if (error.code === 'auth/too-many-requests') {
+          showMessage("Muitas tentativas. Aguarde 5 minutos e tente novamente.", "error");
+        } else if (error.code === 'auth/captcha-check-failed') {
+          showMessage("Falha na verificação. Recarregue a página e tente novamente.", "error");
+        } else if (error.code === 'auth/invalid-phone-number') {
+          showMessage("Número inválido. Use formato: 11987654321", "error");
+        } else {
+          showMessage(error, "error");
+        }
         return false;
       }
     }
 
     // Função de cadastro
     async function signUp() {
-      console.log('signUp chamada');
+      console.log('🚀 signUp iniciado');
       
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
       const rawPhone = document.getElementById("phone")?.value?.trim();
 
       if (!email || !password || !rawPhone) {
-        showMessage("Preencha todos os campos.", "error");
+        showMessage("Preencha todos os campos obrigatórios.", "error");
         return;
       }
 
-      const formattedPhone = '+55' + rawPhone.replace(/\D/g, '').replace(/^55/, '');
-
-      if (!confirmationResult || lastPhone !== formattedPhone) {
-        isNewUserRegistering = true;
-        const sent = await sendSMS(rawPhone);
-        if (!sent) return;
+      // Validar e-mail
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage("Digite um e-mail válido.", "error");
         return;
       }
 
-      showMessage("Código SMS enviado! Digite o código recebido no campo abaixo.", "success");
+      // Validar senha
+      if (password.length < 6) {
+        showMessage("A senha deve ter pelo menos 6 caracteres.", "error");
+        return;
+      }
+
+      // Validar telefone
+      const cleanPhone = rawPhone.replace(/\D/g, '');
+      if (cleanPhone.length < 10 || cleanPhone.length > 11) {
+        showMessage("Digite um telefone válido com DDD.", "error");
+        return;
+      }
+
+      const formattedPhone = '+55' + cleanPhone.replace(/^55/, '');
+
+      // Se já enviou SMS para este telefone, mostrar seção SMS
+      if (confirmationResult && lastPhone === formattedPhone) {
+        showMessage("Código já enviado! Digite o código recebido.", "success");
+        showSMSSection();
+        return;
+      }
+
+      // Enviar SMS
+      isNewUserRegistering = true;
+      const sent = await sendSMS(rawPhone);
+      if (!sent) {
+        isNewUserRegistering = false;
+        return;
+      }
     }
 
     // Função para confirmar código SMS
@@ -296,39 +335,94 @@ console.log('auth.js iniciado');
       const phone = document.getElementById("phone")?.value?.trim();
       const code = document.getElementById("smsCode")?.value?.trim();
 
-      if (!code || code.length < 6) {
+      if (!code) {
         showMessage("Digite o código recebido por SMS.", "error");
         return;
       }
 
+      if (code.length !== 6) {
+        showMessage("O código deve ter 6 dígitos.", "error");
+        return;
+      }
+
+      if (!confirmationResult) {
+        showMessage("Solicite um novo código SMS.", "error");
+        return;
+      }
+
       try {
-        const phoneCred = PhoneAuthProvider.credential(confirmationResult.verificationId, code);
-        const phoneUser = await signInWithCredential(auth, phoneCred);
+        console.log('🔍 Verificando código SMS...');
+        showMessage("Verificando código...", "success");
 
-        const emailCred = EmailAuthProvider.credential(email, password);
-        await linkWithCredential(phoneUser.user, emailCred);
+        // Confirmar código SMS
+        const phoneCredential = PhoneAuthProvider.credential(
+          confirmationResult.verificationId, 
+          code
+        );
+        const phoneResult = await signInWithCredential(auth, phoneCredential);
 
+        console.log('✅ Telefone verificado, criando conta...');
+
+        // Vincular e-mail à conta
+        const emailCredential = EmailAuthProvider.credential(email, password);
+        await linkWithCredential(phoneResult.user, emailCredential);
+
+        // Obter fingerprint
         const fingerprint = await getFingerprint();
+
+        // Salvar dados do usuário
+        await setDoc(doc(db, 'usuarios', phoneResult.user.uid), {
+          email: email,
+          phone: phone,
+          fingerprint: fingerprint,
+          entrevistaConcluida: false,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        });
+
+        // Salvar telefone para evitar duplicatas
+        await setDoc(doc(db, 'phones', phone.replace(/\D/g, '')), {
+          userId: phoneResult.user.uid,
+          createdAt: new Date()
+        });
+
+        // Tentar registrar na cloud function (opcional)
         if (fingerprint) {
           try {
-            const registerAccountFunction = httpsCallable(functions, 'registerAccount');
-            await registerAccountFunction({ fingerprint, phone });
+            const registerAccount = httpsCallable(functions, 'registerAccount');
+            await registerAccount({ fingerprint, phone });
           } catch (e) {
-            console.warn('Erro ao registrar dados:', e);
-            // Não bloqueia o cadastro se a função cloud falhar
+            console.warn('Cloud function falhou (não crítico):', e);
           }
         }
 
-        const idToken = await phoneUser.user.getIdToken();
+        // Salvar no localStorage
+        const idToken = await phoneResult.user.getIdToken();
         localStorage.setItem("idToken", idToken);
-        localStorage.setItem("user", JSON.stringify({ uid: phoneUser.user.uid, email: phoneUser.user.email }));
+        localStorage.setItem("user", JSON.stringify({
+          uid: phoneResult.user.uid,
+          email: phoneResult.user.email
+        }));
 
-        console.log("🎯 Redirecionando novo usuário para entrevista.html");
-        window.location.replace("entrevista.html");
+        console.log("🎯 Cadastro concluído, redirecionando...");
+        showMessage("Cadastro realizado com sucesso!", "success");
+        
+        setTimeout(() => {
+          window.location.replace("entrevista.html");
+        }, 1500);
 
       } catch (error) {
-        console.error("Erro no cadastro:", error);
-        showMessage(error, "error");
+        console.error("❌ Erro na confirmação do código:", error);
+        
+        if (error.code === 'auth/invalid-verification-code') {
+          showMessage("Código inválido. Verifique e tente novamente.", "error");
+        } else if (error.code === 'auth/code-expired') {
+          showMessage("Código expirado. Solicite um novo.", "error");
+        } else if (error.code === 'auth/email-already-in-use') {
+          showMessage("Este e-mail já está em uso. Faça login.", "error");
+        } else {
+          showMessage(error, "error");
+        }
       }
     }
 
@@ -416,7 +510,7 @@ console.log('auth.js iniciado');
     window.showSMSSection = showSMSSection;
     window.register = signUp; // Alias
 
-    // Configurar listeners dos botões quando DOM estiver pronto
+    // Configurar listeners dos botões
     function setupEventListeners() {
       const loginBtn = document.getElementById("loginBtn");
       const signUpBtn = document.getElementById("signUpBtn");
@@ -451,10 +545,10 @@ console.log('auth.js iniciado');
         });
       }
 
-      console.log('Event listeners configurados');
+      console.log('✅ Event listeners configurados');
     }
 
-    // Inicializar quando DOM estiver pronto
+    // Inicializar
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', setupEventListeners);
     } else {
@@ -464,9 +558,9 @@ console.log('auth.js iniciado');
     // Verificar estado de autenticação
     checkAuthState();
 
-    console.log('auth.js carregado com sucesso');
+    console.log('✅ auth.js carregado com reCAPTCHA v2');
 
   } catch (error) {
-    console.error('Erro ao carregar auth.js:', error);
+    console.error('❌ Erro crítico ao carregar auth.js:', error);
   }
 })();
