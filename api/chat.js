@@ -1,4 +1,4 @@
-import { auth, db } from './firebaseAdmin';
+import { auth, db } from './firebaseAdmin.js';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import cors from 'cors';
 
