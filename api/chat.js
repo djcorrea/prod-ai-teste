@@ -2,6 +2,9 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 
+// Domínio permitido para as requisicoes
+const ALLOWED_ORIGIN = 'https://prod-ai-teste.vercel.app';
+
 // Função melhorada para inicializar Firebase
 async function initializeFirebase() {
   // Verifica se já existe uma instância ativa
@@ -262,6 +265,16 @@ export default async function handler(req, res) {
     timestamp: new Date().toISOString(),
     hasBody: !!req.body
   });
+
+  // Define os cabecalhos de CORS para todas as respostas
+  res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization'
+  );
+  res.setHeader('Access-Control-Max-Age', '86400');
 
   // Tratamento de CORS
   if (req.method === 'OPTIONS') {
