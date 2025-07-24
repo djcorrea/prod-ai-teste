@@ -1,36 +1,5 @@
 console.log('auth.js iniciado');
 
-(async () => {
-  // Importações dinâmicas
-  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js');
-  const { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js');
-  const { getFirestore, doc, getDoc, setDoc, collection } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js');
-  const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js');
-  let FingerprintJS;
-  try {
-    const mod = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
-    FingerprintJS = mod.default || mod;
-  } catch (e) {
-    FingerprintJS = window.FingerprintJS;
-  }
-  // Configuração Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
-    measurementId: "G-MBDHDYN6Z0"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-  const functions = getFunctions(app);
-  // ...todo o restante do seu código auth.js (funções, listeners, etc.)...
-
-  // Expor explicitamente as funções no window para garantir acesso global
-  window.signUp = window.signUp;
-  window.login = window.login;
-  window.confirmSMSCode = window.confirmSMSCode;
-  window.forgotPassword = window.forgotPassword;
-  console.log('auth.js finalizado');
-})();
 function waitForFirebase(callback) {
   const check = () => {
     if (typeof firebase !== 'undefined' && firebase.auth) {
@@ -42,10 +11,6 @@ function waitForFirebase(callback) {
 }
 
 // === Firebase Auth modular com login por telefone e reCAPTCHA invisível/Enterprise ===
-console.log('auth.js iniciado');
-// Função para aguardar o carregamento do Firebase antes de executar código dependente
-
-// === Firebase Auth modular com login por telefone e reCAPTCHA invisível/Enterprise ===
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
@@ -55,7 +20,6 @@ import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/
 let FingerprintJS;
 try {
   const mod = await import('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
-(async () => {
   FingerprintJS = mod.default || mod;
 } catch (e) {
   FingerprintJS = window.FingerprintJS;
@@ -293,12 +257,6 @@ async function sendSMS(rawPhone) {
 
 window.signUp = async function () {
   console.log('window.signUp chamada');
-// Expor explicitamente as funções no window para garantir acesso global
-window.signUp = window.signUp;
-window.login = window.login;
-window.confirmSMSCode = window.confirmSMSCode;
-window.forgotPassword = window.forgotPassword;
-console.log('auth.js finalizado');
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const rawPhone = document.getElementById("phone").value.trim();
