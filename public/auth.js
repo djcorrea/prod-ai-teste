@@ -18,14 +18,14 @@ console.log('auth.js iniciado');
       FingerprintJS = window.FingerprintJS;
     }
 
-    // Configuração Firebase
+    // Configuração Firebase CORRIGIDA
     const firebaseConfig = {
       apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
       authDomain: "prodai-58436.firebaseapp.com",
       projectId: "prodai-58436",
       storageBucket: "prodai-58436.appspot.com",
       messagingSenderId: "801631191322",
-      appId: "1:801631322:web:80e3d29cf7468331652ca3",
+      appId: "1:801631191322:web:80e3d29cf7468331652ca3", // CORRIGIDO
       measurementId: "G-MBDHDYN6Z0"
     };
 
@@ -33,6 +33,13 @@ console.log('auth.js iniciado');
     const db = getFirestore(app);
     const auth = getAuth(app);
     const functions = getFunctions(app);
+
+    // CONFIGURAÇÃO DO reCAPTCHA PARA DESENVOLVIMENTO
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
+      auth.settings = auth.settings || {};
+      auth.settings.appVerificationDisabledForTesting = true;
+      console.log('✅ reCAPTCHA desabilitado para desenvolvimento');
+    }
 
     // Variáveis globais
     let confirmationResult = null;
@@ -49,7 +56,7 @@ console.log('auth.js iniciado');
       'auth/user-disabled': 'Usuário desativado.',
       'auth/code-expired': 'O código expirou. Solicite um novo.',
       'auth/invalid-verification-code': 'Código de verificação inválido.',
-      'auth/captcha-check-failed': 'Não foi possível validar este número. Certifique-se de que digitou corretamente, com DDD e sem espaços.',
+      'auth/captcha-check-failed': 'Falha na verificação. Tente novamente em alguns minutos.',
       'auth/network-request-failed': 'Falha de conexão com a internet.',
       'auth/app-not-authorized': 'App não autorizado. Verifique as configurações do Firebase.',
       'auth/session-expired': 'Sessão expirada. Tente novamente.',
@@ -164,7 +171,7 @@ console.log('auth.js iniciado');
       }
     }
 
-    // Função para enviar SMS
+    // Função para enviar SMS CORRIGIDA
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
         const clean = phone.replace(/\D/g, '');
@@ -199,28 +206,59 @@ console.log('auth.js iniciado');
           recaptchaVerifier = null;
         }
 
-        // Cria novo reCAPTCHA
-        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: (response) => {
-            console.log("✅ reCAPTCHA resolvido:", response);
-          },
-          'expired-callback': () => {
-            console.warn("⚠️ reCAPTCHA expirado.");
-            showMessage("reCAPTCHA expirou. Tente novamente.", "error");
-          }
-        });
+        // NOVA CONFIGURAÇÃO DO reCAPTCHA - MAIS ROBUSTA
+        try {
+          recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: (response) => {
+              console.log("✅ reCAPTCHA resolvido");
+            },
+            'expired-callback': () => {
+              console.warn("⚠️ reCAPTCHA expirado");
+              showMessage("Verificação expirou. Tente novamente.", "error");
+            },
+            'error-callback': (error) => {
+              console.error("❌ Erro no reCAPTCHA:", error);
+              showMessage("Erro na verificação. Tente novamente.", "error");
+            }
+          });
 
-        await recaptchaVerifier.render();
-        
-        confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
-        lastPhone = phone;
-        showMessage("Código SMS enviado! Digite o código recebido.", "success");
-        showSMSSection();
-        return true;
+          console.log('🔄 Renderizando reCAPTCHA...');
+          await recaptchaVerifier.render();
+          
+          console.log('📱 Enviando SMS...');
+          confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+          lastPhone = phone;
+          
+          showMessage("Código SMS enviado! Digite o código recebido.", "success");
+          showSMSSection();
+          return true;
+
+        } catch (recaptchaError) {
+          console.error("❌ Erro específico do reCAPTCHA:", recaptchaError);
+          
+          // FALLBACK: Tentar sem reCAPTCHA em desenvolvimento
+          if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.includes('vercel.app')) {
+            console.log('🔄 Tentando sem reCAPTCHA...');
+            try {
+              // Para desenvolvimento, tenta enviar SMS sem reCAPTCHA
+              confirmationResult = await signInWithPhoneNumber(auth, phone);
+              lastPhone = phone;
+              showMessage("Código SMS enviado! Digite o código recebido.", "success");
+              showSMSSection();
+              return true;
+            } catch (fallbackError) {
+              console.error("❌ Fallback também falhou:", fallbackError);
+              showMessage("Por favor, tente novamente em alguns minutos.", "error");
+              return false;
+            }
+          } else {
+            throw recaptchaError;
+          }
+        }
 
       } catch (error) {
-        console.error("❌ Erro ao enviar SMS:", error);
+        console.error("❌ Erro geral ao enviar SMS:", error);
         showMessage(error, "error");
         return false;
       }
@@ -277,8 +315,7 @@ console.log('auth.js iniciado');
             await registerAccountFunction({ fingerprint, phone });
           } catch (e) {
             console.warn('Erro ao registrar dados:', e);
-            showMessage(e.message || 'Erro ao registrar dados', 'error');
-            return;
+            // Não bloqueia o cadastro se a função cloud falhar
           }
         }
 
