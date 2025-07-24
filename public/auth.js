@@ -1,13 +1,12 @@
+
 console.log('auth.js iniciado - SEM NENHUM BLOQUEIO');
 
 (async () => {
   try {
-    // Importações dinâmicas - SEM APP CHECK
-    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js');
-    const { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js');
-    const { getFirestore, doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js');
-    const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/11.6.0/firebase-functions.js');
-    
+    // Importação dinâmica do Firebase modular centralizado
+    const { auth, db } = await import('./firebase.js');
+    const { RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, sendPasswordResetEmail, EmailAuthProvider, PhoneAuthProvider, signInWithCredential, linkWithCredential } = await import('https://www.gstatic.com/firebasejs/11.24.0/firebase-auth.js');
+    const { doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/11.24.0/firebase-firestore.js');
     // Importação do FingerprintJS
     let FingerprintJS;
     try {
@@ -16,22 +15,6 @@ console.log('auth.js iniciado - SEM NENHUM BLOQUEIO');
     } catch (e) {
       console.warn('FingerprintJS não carregado:', e);
     }
-
-    // Configuração Firebase - LIMPA, SEM APP CHECK
-    const firebaseConfig = {
-      apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
-      authDomain: "prodai-58436.firebaseapp.com",
-      projectId: "prodai-58436",
-      storageBucket: "prodai-58436.appspot.com",
-      messagingSenderId: "801631191322",
-      appId: "1:801631191322:web:80e3d29cf7468331652ca3",
-      measurementId: "G-MBDHDYN6Z0"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const functions = getFunctions(app);
 
     console.log('🔓 MODO TOTALMENTE LIBERADO - Sem rate limits');
 
