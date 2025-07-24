@@ -1,6 +1,7 @@
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import cors from 'cors';
 
 // Domínios permitidos para as requisições
 const ALLOWED_ORIGINS = [
@@ -13,6 +14,30 @@ const VERCEL_TEMP_REGEX = /^https:\/\/prod-ai-teste-[^.]+\.vercel\.app$/;
 function isAllowedOrigin(origin) {
   if (!origin) return false;
   return ALLOWED_ORIGINS.includes(origin) || VERCEL_TEMP_REGEX.test(origin);
+}
+
+// Middleware CORS dinâmico
+const corsMiddleware = cors({
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400,
+});
+
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
 }
 
 // Função melhorada para inicializar Firebase
@@ -276,20 +301,14 @@ export default async function handler(req, res) {
     hasBody: !!req.body
   });
 
-  // Define os cabecalhos de CORS para todas as respostas
-  const origin = req.headers.origin;
-  if (isAllowedOrigin(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+  // Executa o middleware de CORS dinâmico
+  try {
+    await runMiddleware(req, res, corsMiddleware);
+  } catch (err) {
+    console.error('CORS error:', err);
+    return res.status(403).end();
   }
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization'
-  );
-  res.setHeader('Access-Control-Max-Age', '86400');
 
-  // Tratamento de CORS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
