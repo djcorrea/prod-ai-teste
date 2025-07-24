@@ -184,7 +184,7 @@ console.log('auth.js iniciado - SEM App Check');
       return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     }
 
-    // Função para garantir div do reCAPTCHA
+    // Função para garantir div do reCAPTCHA - VERSÃO MAIS ROBUSTA
     function ensureRecaptchaDiv() {
       let recaptchaDiv = document.getElementById('recaptcha-container');
       if (!recaptchaDiv) {
@@ -194,6 +194,11 @@ console.log('auth.js iniciado - SEM App Check');
         recaptchaDiv.style.top = '-9999px';
         recaptchaDiv.style.left = '-9999px';
         document.body.appendChild(recaptchaDiv);
+        console.log('📦 Container reCAPTCHA criado');
+      } else {
+        // Limpar conteúdo se já existe
+        recaptchaDiv.innerHTML = '';
+        console.log('🧹 Container reCAPTCHA limpo');
       }
       return recaptchaDiv;
     }
@@ -298,7 +303,7 @@ console.log('auth.js iniciado - SEM App Check');
         // Garantir container do reCAPTCHA
         ensureRecaptchaDiv();
 
-        // Limpar reCAPTCHA anterior - SEM delay desnecessário
+        // Limpar reCAPTCHA anterior - MÉTODO MAIS ROBUSTO
         if (recaptchaVerifier) {
           try { 
             recaptchaVerifier.clear(); 
@@ -308,9 +313,18 @@ console.log('auth.js iniciado - SEM App Check');
           recaptchaVerifier = null;
         }
 
+        // Limpar o container DOM também
+        const container = document.getElementById('recaptcha-container');
+        if (container) {
+          container.innerHTML = '';
+        }
+
+        // Recriar container se necessário
+        ensureRecaptchaDiv();
+
         console.log('🎯 Criando reCAPTCHA v2...');
         
-        // Criar reCAPTCHA v2 simples - SEM configurações complicadas
+        // Criar reCAPTCHA v2 com configuração de domínio corrigida
         recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
           callback: (response) => {
@@ -319,6 +333,12 @@ console.log('auth.js iniciado - SEM App Check');
           'expired-callback': () => {
             console.warn("⚠️ reCAPTCHA expirado");
             showMessage("Verificação expirou. Tente novamente.", "error");
+          },
+          'error-callback': (error) => {
+            console.error("❌ Erro no reCAPTCHA:", error);
+            if (error.message?.includes('hostname')) {
+              showMessage("Erro de configuração de domínio. Recarregue a página.", "error");
+            }
           }
         });
 
