@@ -62,15 +62,20 @@ console.log('🚀 Carregando auth.js...');
         console.log(`${type.toUpperCase()}: ${msg}`);
       }
 
-      const el = document.getElementById("error-message");
-      if (el) {
-        el.innerText = msg;
-        el.style.display = "block";
-        el.classList.remove("error-message", "success-message");
-        el.classList.add(type === "success" ? "success-message" : "error-message");
-        // Mensagem de sucesso permanece visível até nova ação do usuário
+      // Usar as novas funções de status se disponíveis
+      if (typeof window.showStatusMessage === 'function') {
+        window.showStatusMessage(msg, type === "success" ? "success" : "error");
       } else {
-        alert(msg);
+        // Fallback para o sistema antigo
+        const el = document.getElementById("error-message");
+        if (el) {
+          el.innerText = msg;
+          el.style.display = "block";
+          el.classList.remove("error-message", "success-message");
+          el.classList.add(type === "success" ? "success-message" : "error-message");
+        } else {
+          alert(msg);
+        }
       }
     }
 
@@ -205,7 +210,14 @@ console.log('🚀 Carregando auth.js...');
       try {
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
-        showMessage("Código SMS enviado! Verifique seu celular.", "success");
+        
+        // Usar função específica para sucesso do SMS
+        if (typeof window.showSMSSuccess === 'function') {
+          window.showSMSSuccess();
+        } else {
+          showMessage("Código SMS enviado! Verifique seu celular.", "success");
+        }
+        
         showSMSSection();
         smsSent = true;
       } catch (error) {
@@ -247,7 +259,11 @@ console.log('🚀 Carregando auth.js...');
 
       // Se já enviou SMS para este telefone, mostrar seção SMS
       if (confirmationResult && lastPhone === formattedPhone) {
-        showMessage("Código já enviado! Digite o código recebido.", "success");
+        if (typeof window.showSMSSuccess === 'function') {
+          window.showSMSSuccess();
+        } else {
+          showMessage("Código já enviado! Digite o código recebido.", "success");
+        }
         showSMSSection();
         return;
       }
