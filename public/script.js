@@ -50,6 +50,13 @@ function initVantaBackground() {
                 spacing: isDesktop ? 18.00 : 25.00,
                 showDots: true
             });
+            console.log('✅ Vanta.js carregado com sucesso');
+        } else {
+            console.warn('⚠️ Vanta.js ou THREE.js não encontrados, usando fallback');
+        }
+    } catch (error) {
+        console.warn('⚠️ Erro ao carregar Vanta.js:', error);
+    }
 }
 
 /* ============ EFEITOS DE HOVER (Visual Novo) ============ */
@@ -561,13 +568,6 @@ setTimeout(() => {
   debugVercel();
   testAPIConnection();
 }, 1000);
-            console.log('✅ Vanta.js carregado com sucesso');
-        } else {
-            console.warn('⚠️ Vanta.js ou THREE.js não encontrados, usando fallback');
-        }
-    } catch (error) {
-        console.warn('⚠️ Erro ao carregar Vanta.js:', error);
-    }
 
 /* ============ ANIMAÇÕES DE ENTRADA (Visual Novo) ============ */
 function initEntranceAnimations() {
@@ -661,3 +661,4 @@ function initParallaxEffect() {
             });
         }
     });
+}
