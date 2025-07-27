@@ -1,125 +1,124 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prod.AI - Mentor Virtual</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prod.AI - Mentor Virtual</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Fontes e ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bibliotecas para efeitos visuais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-  <style>
-    body.loading {
-      visibility: hidden;
-    }
-  </style>
- <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("loading");
-    document.body.classList.remove("loading");
-  });
-</script>
+    <!-- Firebase e FingerprintJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 
-  <!-- ✅ MUDANÇA: Firebase v11 modular em vez de v10 compat -->
-  <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
-
-  <!-- Scripts principais -->
-  <script src="auth.js" defer></script>
-  <script src="script.js" defer></script>
+    <!-- Scripts funcionais existentes -->
+    <script type="module" src="firebase.js"></script>
+    <script src="auth.js" defer></script>
 </head>
 <body>
-  <div class="particles"></div>
+    <!-- Cenário 3D -->
+    <div class="cenario">
+        <!-- Container para o fundo animado Vanta.js -->
+        <div class="vanta-background" id="vanta-bg"></div>
+        
+        <!-- Plano de fundo com rede neural (mantido como fallback) -->
+        <img src="fundo.jpg" alt="Fundo futurista" class="fundo" />
 
-  <div class="container fade-in">
-    <!-- TELA INICIAL -->
-    <div class="start-screen" id="startScreen">
-      <div class="start-header" id="startHeader">
-        <h1 class="logo" id="mainLogo">Prod.AI</h1>
-        <p class="subtitle" id="mainSubtitle">Seu mentor virtual inteligente</p>
-        <p class="motivational-text" id="motivationalText">
-          <span class="motivational-line-2">Estou aqui para resolver qualquer problema sobre Produção Musical!</span>
-        </p>
-      </div>
-      
-      <div class="start-input-container" id="startInputContainer">
-        <div class="start-input-wrapper">
-          <input type="text" id="start-input" placeholder="Digite aqui..." autocomplete="off" />
-          <button onclick="sendFirstMessage()" id="startSendBtn" class="start-send-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m22 2-7 20-4-9-9-4Z"/>
-              <path d="M22 2 11 13"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+        <!-- Elementos do cenário -->
+        <img src="robo.png" alt="Robô futurista" class="robo" />
+        <img src="mesa.png" alt="Mesa" class="mesa" />
+        <img src="caixas.png" alt="Caixas de som principais" class="caixas" />
+        <img src="notebook.png" alt="Notebook" class="notebook" />
+        <img src="teclado.png" alt="teclado" class="teclado" />
+        
+        <!-- Overlay de partículas extras -->
+        <div class="particles-overlay"></div>
     </div>
 
-    <!-- HEADER APÓS ANIMAÇÃO -->
-    <header class="header" id="mainHeader" style="display: none;">
-      <h1 class="logo">Prod.AI</h1>
-      <p class="subtitle">Seu mentor virtual inteligente</p>
-    </header>
-
-    <!-- CHAT PRINCIPAL -->
-    <div class="chat-container" id="chatContainer" style="display: none;">
-      <div class="chatbox" id="chatbox">
-        <div style="height: 1px; visibility: hidden;"></div>
-      </div>
-
-      <div class="typing-indicator" id="typingIndicator">
-        <div class="typing-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+    <!-- Chatbot posicionado no monitor -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <!-- Estado Inicial (Welcome) -->
+        <div class="chatbot-welcome-state" id="chatbotWelcomeState">
+            <div class="chatbot-robot-wrapper">
+                <img src="robo 2.png" alt="PROD.AI Robot" class="chatbot-main-robot" id="chatbotMainRobot">
+            </div>
+            
+            <div class="chatbot-branding" id="chatbotBranding">
+                <h1 class="chatbot-main-title" id="chatbotMainTitle">PROD.AI</h1>
+                <p class="chatbot-main-subtitle" id="chatbotMainSubtitle">Seu mentor virtual</p>
+            </div>
+            
+            <div class="chatbot-input-section" id="chatbotInputSection">
+                <div class="chatbot-input-field">
+                    <i class="fas fa-microphone chatbot-mic-icon"></i>
+                    <input type="text" 
+                           class="chatbot-main-input" 
+                           id="chatbotMainInput" 
+                           placeholder="Digite aqui..."
+                           maxlength="500">
+                    <button class="chatbot-send-button" id="chatbotSendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <span class="typing-text">Assistente está digitando...</span>
-      </div>
+        
+        <!-- Estado Ativo (Chat) -->
+        <div class="chatbot-active-state" id="chatbotActiveState">
+            <div class="chatbot-header-bar" id="chatbotHeaderBar">
+                <div class="chatbot-header-centered">
+                    <div class="chatbot-header-text">
+                        <span class="chatbot-header-name">PROD.AI</span>
+                        <span class="chatbot-header-desc">Seu mentor virtual</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chatbot-conversation-area" id="chatbotConversationArea">
+                <!-- As mensagens serão inseridas aqui dinamicamente -->
+            </div>
+            
+            <div class="chatbot-input-area">
+                <div class="chatbot-typing-indicator" id="chatbotTypingIndicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="chatbot-active-input-field">
+                    <input type="text" 
+                           class="chatbot-active-input" 
+                           id="chatbotActiveInput" 
+                           placeholder="Digite sua mensagem..."
+                           maxlength="500">
+                    <button class="chatbot-active-send-btn" id="chatbotActiveSendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-      <div class="input-container">
-        <input type="text" id="user-input" placeholder="Digite sua mensagem..." autocomplete="off" />
-        <button onclick="sendMessage()" id="sendBtn" class="btn-plus">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m22 2-7 20-4-9-9-4Z"/>
-            <path d="M22 2 11 13"/>
-          </svg>
-          Enviar
+    <!-- Botões de ação do chatbot -->
+    <div class="chatbot-action-buttons">
+        <button class="chatbot-action-btn" data-action="upgrade">
+            <span>Assinar versão Plus</span>
         </button>
-      </div>
+        <button class="chatbot-action-btn" data-action="manage">
+            <span>Gerenciar conta</span>
+        </button>
+        <button class="chatbot-action-btn" data-action="logout">
+            <span>Sair</span>
+        </button>
     </div>
 
-    <!-- FOOTER - APÓS CHAT EXPANDIR -->
-    <footer class="footer" id="mainFooter" style="display: none;">
-      <div class="footer-content-grid">
-        <div class="footer-left">
-          <a href="planos.html" class="btn-plus">Assinar versão Plus</a>
-        </div>
-        <div class="footer-center">
-          <p class="instagram-text">Siga no Instagram: <a href="https://instagram.com/djcorreaoriginal" target="_blank">@djcorreaoriginal</a></p>
-        </div>
-        <div class="footer-right">
-          <button class="btn-logout" id="logoutBtn">Sair</button>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Script para evitar erro de logout indefinido -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const logoutBtn = document.getElementById("logoutBtn");
-      if (logoutBtn) {
-        logoutBtn.addEventListener("click", function () {
-          // Aguardar auth.js carregar
-          const checkLogout = () => {
-            if (typeof window.logout === "function") {
-              window.logout();
-            } else {
-              setTimeout(checkLogout, 100);
-            }
-          };
-          checkLogout();
-        });
-      }
-    });
-  </script>
+    <!-- Script integrado com as funcionalidades existentes -->
+    <script src="script.js"></script>
 </body>
 </html>
