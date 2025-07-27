@@ -7,10 +7,26 @@ const corsMiddleware = cors({
   origin: (origin, callback) => {
     const fixedOrigin = 'https://prod-ai-teste.vercel.app';
     const vercelPreviewRegex = /^https:\/\/prod-ai-teste-[a-z0-9\-]+\.vercel\.app$/;
+    
+    // Adicionar suporte para desenvolvimento local
+    const localOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5500',
+      'http://127.0.0.1:5500',
+      'http://127.0.0.1:3000',
+      'http://localhost:8080',
+      'http://127.0.0.1:8080'
+    ];
 
-    if (!origin || origin.includes(fixedOrigin) || vercelPreviewRegex.test(origin)) {
+    // Permitir origens locais, Vercel e file://
+    if (!origin || 
+        origin.includes(fixedOrigin) || 
+        vercelPreviewRegex.test(origin) ||
+        localOrigins.includes(origin) ||
+        origin.startsWith('file://')) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS: ' + origin));
     }
   },
