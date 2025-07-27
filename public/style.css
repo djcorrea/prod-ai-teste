@@ -1332,3 +1332,207 @@ footer, .chatbot-action-buttons {
         font-size: 1rem;
     }
 }
+
+/* ============ CONTAINER PRINCIPAL - LAYOUT TRAVADO ============ */
+.cenario {
+    position: relative;
+    width: 1440px; /* FIXO: não usa mais 100vw */
+    height: 900px; /* FIXO: não usa mais 100vh */
+    margin: 0 auto; /* Centraliza horizontalmente */
+    margin-top: 50px; /* Espaço do topo */
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #16213e 100%);
+    /* Garante que o container nunca saia da tela */
+    min-height: 900px;
+    max-height: 900px;
+    min-width: 1440px;
+    max-width: 1440px;
+}
+
+/* ============ BODY - PREPARAÇÃO PARA LAYOUT FIXO ============ */
+body {
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #0a0a1a;
+    margin: 0;
+    padding: 0;
+    /* Remover flexbox que está causando problema */
+    min-height: 100vh;
+}
+
+/* ============ ELEMENTOS TRAVADOS - POSIÇÕES MANTIDAS ============ */
+.fundo {
+    top: -450px; /* Mantém posição exata */
+    left: 0;
+    width: 2880px; /* Proporcional: era 200vw, agora 1440px * 2 */
+    height: 1500px;
+    z-index: 1;
+    object-fit: cover;
+    opacity: 0.3;
+    filter: blur(1px);
+    animation: fundoEntrance 0.8s ease-out forwards;
+}
+
+.robo {
+    top: 2%; /* Mantém % para proporção */
+    right: -10%; /* Mantém % para proporção */
+    height: auto;
+    max-height: 775px; /* Era 86.1vh, agora 86.1% de 900px */
+    z-index: 3;
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
+    animation: robotBreathingOptimized 2s ease-in-out infinite;
+    will-change: transform;
+    opacity: 0;
+    animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 2s ease-in-out infinite 1s;
+}
+
+.mesa {
+    bottom: -79%; /* Mantém posição exata */
+    left: -320px;
+    width: 145%;
+    height: auto;
+    max-height: 1500px;
+    z-index: 1;
+    filter: drop-shadow(0 0 15px rgba(0, 150, 255, 0.2));
+    transition: opacity 0.15s ease;
+}
+
+.notebook {
+    bottom: -75%; /* Mantém posição exata */
+    left: -32%;
+    height: auto;
+    max-height: 1620px; /* Era 180vh, agora 180% de 900px */
+    z-index: 2;
+    filter: drop-shadow(0 0 15px rgba(0, 150, 255, 0.3));
+    animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 3s ease-in-out infinite 1.2s;
+}
+
+.teclado {
+    bottom: -64%; /* Mantém posição exata */
+    left: 16%;
+    height: auto;
+    max-height: 1350px; /* Era 150vh, agora 150% de 900px */
+    z-index: 2;
+    filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.25));
+    animation: subtleGlowOptimized 2.5s ease-in-out infinite 0.5s;
+}
+
+.caixas {
+    bottom: 3%; /* Mantém posição exata */
+    left: -7%;
+    height: auto;
+    max-height: 1035px; /* Era 115vh, agora 115% de 900px */
+    z-index: 2;
+    filter: drop-shadow(0 0 18px rgba(138, 43, 226, 0.4));
+    animation: subtleGlowOptimized 3.5s ease-in-out infinite 1s;
+}
+
+/* ============ CHATBOT - POSIÇÕES TRAVADAS ============ */
+.chatbot-container {
+    position: absolute; /* Muda de fixed para absolute (relativo ao .cenario) */
+    top: 36px; /* Era 4% de 100vh, agora 4% de 900px = 36px */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 800px !important;
+    height: 600px !important;
+    min-width: 800px !important;
+    min-height: 650px !important;
+    max-width: 800px !important;
+    max-height: 600px !important;
+    background: linear-gradient(145deg, 
+        rgba(10, 15, 35, 0.95), 
+        rgba(15, 25, 55, 0.95), 
+        rgba(20, 10, 45, 0.95)
+    );
+    border: 2px solid rgba(0, 150, 255, 0.3);
+    border-radius: 24px;
+    box-shadow: 0 0 60px rgba(0, 150, 255, 0.3);
+    overflow: hidden;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+/* ============ BOTÕES DE AÇÃO - POSIÇÕES TRAVADAS ============ */
+.chatbot-action-buttons {
+    position: absolute; /* Muda de fixed para absolute */
+    bottom: 13px;
+    right: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 999;
+    transform: rotate(-0deg);
+    opacity: 0;
+    animation: chatbotButtonsAppearOptimized 1.2s ease-out 1.5s forwards;
+}
+
+/* ============ RESPONSIVIDADE MOBILE AJUSTADA ============ */
+@media (max-width: 767px) {
+    /* Para mobile, mantém o comportamento responsivo atual */
+    body {
+        overflow: auto;
+        overflow-x: hidden;
+        display: block; /* Remove flex para mobile */
+        height: auto;
+    }
+    
+    .cenario {
+        position: relative;
+        width: 100vw !important; /* Volta ao 100vw no mobile */
+        height: 100vh !important; /* Volta ao 100vh no mobile */
+        margin: 0;
+        top: 0;
+        transform: none;
+        min-width: auto;
+        max-width: none;
+        min-height: auto;
+        max-height: none;
+    }
+    
+    /* Elementos do cenário ficam ocultos no mobile (mantém seu código atual) */
+    .robo,
+    .mesa,
+    .notebook,
+    .teclado,
+    .caixas,
+    .fundo {
+        opacity: 0 !important;
+        pointer-events: none;
+        visibility: hidden;
+    }
+    
+    /* Chatbot volta para fixed no mobile */
+    .chatbot-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(100vw - 30px) !important;
+        max-width: 400px !important;
+        min-width: auto !important;
+        height: 60vh !important;
+        max-height: 60vh !important;
+        min-height: 50vh !important;
+    }
+    
+    /* Botões de ação voltam para fixed no mobile */
+    .chatbot-action-buttons {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        right: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: calc(100vw - 30px);
+        max-width: 400px;
+        z-index: 1001;
+        opacity: 1;
+        animation: none;
+        margin-top: 10px;
+    }
+}
