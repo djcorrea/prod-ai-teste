@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PROD.AI - Configuração do Perfil</title>
     
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap');
         
@@ -517,93 +512,113 @@
             });
         });
         
-        // Configuração do Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
-            authDomain: "prodai-58436.firebaseapp.com",
-            projectId: "prodai-58436",
-            storageBucket: "prodai-58436.appspot.com",
-            messagingSenderId: "801631191322",
-            appId: "1:801631191322:web:80e3d29cf7468331652ca3"
-        };
-        
-        // Inicializar Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        
-        // Firebase config (usar o Firebase já incluído na página)
-        // Assumindo que firebase.js já foi carregado
-        
-        // Capturar submissão do formulário
-        document.getElementById('interviewForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
+        // Script moderno usando Firebase v11 (mesmo do projeto)
+        (async () => {
             try {
-                // Aguardar o Firebase estar pronto
-                await new Promise(resolve => {
-                    if (window.firebase && window.firebase.auth) {
-                        resolve();
+                console.log('🔄 Carregando Firebase...');
+                
+                // Importar Firebase (mesmo padrão do auth.js)
+                const { auth, db } = await import('./firebase.js');
+                const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+                const { doc, setDoc, Timestamp } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                
+                console.log('✅ Firebase carregado com sucesso');
+                
+                // Verificar autenticação quando a página carrega
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log('✅ Usuário autenticado detectado:', user.uid, user.email);
                     } else {
-                        const checkFirebase = setInterval(() => {
-                            if (window.firebase && window.firebase.auth) {
-                                clearInterval(checkFirebase);
-                                resolve();
-                            }
-                        }, 100);
+                        console.log('❌ Nenhum usuário autenticado encontrado');
+                        // Mostrar aviso na tela
+                        const container = document.querySelector('.interview-container');
+                        if (container) {
+                            const warning = document.createElement('div');
+                            warning.style.cssText = `
+                                background: rgba(255, 0, 0, 0.1);
+                                border: 1px solid rgba(255, 0, 0, 0.3);
+                                color: #ff6b6b;
+                                padding: 1rem;
+                                border-radius: 8px;
+                                margin-bottom: 1rem;
+                                text-align: center;
+                            `;
+                            warning.innerHTML = '⚠️ Você precisa estar logado. <a href="login.html" style="color: #ff6b6b; text-decoration: underline;">Clique aqui para fazer login</a>';
+                            container.insertBefore(warning, container.firstChild);
+                        }
                     }
                 });
                 
-                // Verificar autenticação
-                const user = firebase.auth().currentUser;
-                if (!user) {
-                    alert('Você precisa estar logado para preencher a entrevista.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                // Coletar dados do formulário usando os atributos name
-                const formData = new FormData(this);
-                const nomeArtistico = formData.get('nomeArtistico');
-                const nivelTecnico = formData.get('nivelTecnico');
-                const daw = formData.get('daw');
-                const dificuldade = formData.get('dificuldade');
-                const estilo = formData.get('estilo');
-                const sobre = formData.get('sobre');
-                
-                // Validação básica
-                if (!nomeArtistico || !nivelTecnico || !daw || !dificuldade || !estilo) {
-                    alert('Por favor, preencha todos os campos obrigatórios.');
-                    return;
-                }
-                
-                // Dados da entrevista
-                const perfilData = {
-                    nomeArtistico: nomeArtistico.trim(),
-                    nivelTecnico: nivelTecnico,
-                    daw: daw,
-                    dificuldade: dificuldade.trim(),
-                    estilo: estilo.trim(),
-                    sobre: sobre ? sobre.trim() : '',
-                    dataPreenchimento: firebase.firestore.Timestamp.now(),
-                    entrevistaConcluida: true
-                };
-                
-                // Salvar no Firestore
-                await firebase.firestore().collection('usuarios').doc(user.uid).set({
-                    perfil: perfilData
-                }, { merge: true });
-                
-                console.log('✅ Perfil salvo com sucesso!', perfilData);
-                
-                // Redirecionar para página final
-                window.location.href = 'entrevista-final.html';
+                // Capturar submissão do formulário
+                document.getElementById('interviewForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    try {
+                        console.log('🔄 Formulário submetido, verificando autenticação...');
+                        
+                        // Verificar se há usuário autenticado
+                        const user = auth.currentUser;
+                        if (!user) {
+                            alert('Você precisa estar logado para preencher a entrevista. Redirecionando...');
+                            window.location.href = 'login.html';
+                            return;
+                        }
+                        
+                        console.log('✅ Usuário encontrado:', user.uid, user.email);
+                        
+                        // Coletar dados do formulário
+                        const formData = new FormData(this);
+                        const nomeArtistico = formData.get('nomeArtistico');
+                        const nivelTecnico = formData.get('nivelTecnico');
+                        const daw = formData.get('daw');
+                        const dificuldade = formData.get('dificuldade');
+                        const estilo = formData.get('estilo');
+                        const sobre = formData.get('sobre');
+                        
+                        console.log('📋 Dados coletados:', { nomeArtistico, nivelTecnico, daw, dificuldade, estilo });
+                        
+                        // Validação básica
+                        if (!nomeArtistico || !nivelTecnico || !daw || !dificuldade || !estilo) {
+                            alert('Por favor, preencha todos os campos obrigatórios.');
+                            return;
+                        }
+                        
+                        // Dados da entrevista
+                        const perfilData = {
+                            nomeArtistico: nomeArtistico.trim(),
+                            nivelTecnico: nivelTecnico,
+                            daw: daw,
+                            dificuldade: dificuldade.trim(),
+                            estilo: estilo.trim(),
+                            sobre: sobre ? sobre.trim() : '',
+                            dataPreenchimento: Timestamp.now(),
+                            entrevistaConcluida: true
+                        };
+                        
+                        console.log('💾 Salvando perfil para usuário:', user.uid);
+                        
+                        // Salvar no Firestore usando a API v11
+                        await setDoc(doc(db, 'usuarios', user.uid), {
+                            perfil: perfilData
+                        }, { merge: true });
+                        
+                        console.log('✅ Perfil salvo com sucesso!', perfilData);
+                        alert('Perfil salvo com sucesso! Redirecionando...');
+                        
+                        // Redirecionar para página final
+                        window.location.href = 'entrevista-final.html';
+                        
+                    } catch (error) {
+                        console.error('❌ Erro completo:', error);
+                        alert('Erro ao salvar suas informações. Detalhes: ' + error.message);
+                    }
+                });
                 
             } catch (error) {
-                console.error('❌ Erro ao salvar perfil:', error);
-                alert('Erro ao salvar suas informações. Tente novamente.');
+                console.error('❌ Erro ao carregar Firebase:', error);
+                alert('Erro ao carregar o sistema. Recarregue a página.');
             }
-        });
+        })();
     </script>
 </body>
 </html>
