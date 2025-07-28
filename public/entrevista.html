@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PROD.AI - Configuração do Perfil</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;700&family=Poppins:wght@300;400;600&display=swap');
         
@@ -437,12 +443,12 @@
         <form id="interviewForm" action="entrevista-final.html">
             <div class="form-group">
                 <label class="form-label">Nome Artístico</label>
-                <input type="text" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
+                <input type="text" name="nomeArtistico" class="form-input" placeholder="Como você gostaria de ser chamado?" required>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Nível Técnico</label>
-                <select class="form-select" required>
+                <select name="nivelTecnico" class="form-select" required>
                     <option value="">Selecione seu nível</option>
                     <option value="iniciante">Iniciante</option>
                     <option value="intermediario">Intermediário</option>
@@ -452,7 +458,7 @@
             
             <div class="form-group">
                 <label class="form-label">DAW Usada</label>
-                <select class="form-select" required>
+                <select name="daw" class="form-select" required>
                     <option value="">Selecione sua DAW</option>
                     <option value="fl-studio">FL Studio</option>
                     <option value="ableton">Ableton</option>
@@ -464,17 +470,17 @@
             
             <div class="form-group">
                 <label class="form-label">Maior Dificuldade na Produção</label>
-                <input type="text" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
+                <input type="text" name="dificuldade" class="form-input" placeholder="Ex: Mixagem, Melodias, Sound Design..." required>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Estilo Musical</label>
-                <input type="text" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
+                <input type="text" name="estilo" class="form-input" placeholder="Ex: Trap, House, Lo-fi..." required>
             </div>
             
             <div class="form-group">
                 <label class="form-label">Me conte mais sobre você</label>
-                <textarea class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
+                <textarea name="sobre" class="form-textarea" placeholder="Compartilhe seus objetivos, experiências e o que busca aprender..."></textarea>
             </div>
             
             <button type="submit" class="submit-button">Enviar Respostas</button>
@@ -509,6 +515,94 @@
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'scale(1)';
             });
+        });
+        
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
+            authDomain: "prodai-58436.firebaseapp.com",
+            projectId: "prodai-58436",
+            storageBucket: "prodai-58436.appspot.com",
+            messagingSenderId: "801631191322",
+            appId: "1:801631191322:web:80e3d29cf7468331652ca3"
+        };
+        
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Firebase config (usar o Firebase já incluído na página)
+        // Assumindo que firebase.js já foi carregado
+        
+        // Capturar submissão do formulário
+        document.getElementById('interviewForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Aguardar o Firebase estar pronto
+                await new Promise(resolve => {
+                    if (window.firebase && window.firebase.auth) {
+                        resolve();
+                    } else {
+                        const checkFirebase = setInterval(() => {
+                            if (window.firebase && window.firebase.auth) {
+                                clearInterval(checkFirebase);
+                                resolve();
+                            }
+                        }, 100);
+                    }
+                });
+                
+                // Verificar autenticação
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert('Você precisa estar logado para preencher a entrevista.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Coletar dados do formulário usando os atributos name
+                const formData = new FormData(this);
+                const nomeArtistico = formData.get('nomeArtistico');
+                const nivelTecnico = formData.get('nivelTecnico');
+                const daw = formData.get('daw');
+                const dificuldade = formData.get('dificuldade');
+                const estilo = formData.get('estilo');
+                const sobre = formData.get('sobre');
+                
+                // Validação básica
+                if (!nomeArtistico || !nivelTecnico || !daw || !dificuldade || !estilo) {
+                    alert('Por favor, preencha todos os campos obrigatórios.');
+                    return;
+                }
+                
+                // Dados da entrevista
+                const perfilData = {
+                    nomeArtistico: nomeArtistico.trim(),
+                    nivelTecnico: nivelTecnico,
+                    daw: daw,
+                    dificuldade: dificuldade.trim(),
+                    estilo: estilo.trim(),
+                    sobre: sobre ? sobre.trim() : '',
+                    dataPreenchimento: firebase.firestore.Timestamp.now(),
+                    entrevistaConcluida: true
+                };
+                
+                // Salvar no Firestore
+                await firebase.firestore().collection('usuarios').doc(user.uid).set({
+                    perfil: perfilData
+                }, { merge: true });
+                
+                console.log('✅ Perfil salvo com sucesso!', perfilData);
+                
+                // Redirecionar para página final
+                window.location.href = 'entrevista-final.html';
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar perfil:', error);
+                alert('Erro ao salvar suas informações. Tente novamente.');
+            }
         });
     </script>
 </body>

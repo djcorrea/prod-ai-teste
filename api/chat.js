@@ -141,8 +141,135 @@ async function handleUserLimits(db, uid, email) {
   }
 }
 
+// Função para gerar system prompt personalizado para usuários Plus
+function generatePersonalizedSystemPrompt(perfil) {
+  if (!perfil) {
+    // Prompt técnico padrão para usuarios Plus sem entrevista
+    return `Você é o PROD.AI 🎵, um especialista master em produção musical com conhecimento técnico avançado. 
+
+INSTRUÇÕES PRINCIPAIS:
+- Seja direto, técnico e preciso em todas as respostas
+- Use valores específicos, frequências exatas (Hz), faixas dinâmicas (dB), tempos (ms)
+- Mencione equipamentos, plugins e técnicas por nome
+- Forneça parâmetros exatos quando relevante
+- Seja conciso mas completo - evite respostas genéricas
+- Dê conselhos práticos e aplicáveis imediatamente
+
+ESPECIALIDADES TÉCNICAS:
+- Mixagem: EQ preciso, compressão dinâmica, reverb/delay, automação
+- Mastering: Limiters, maximizers, análise espectral, LUFS, headroom
+- Sound Design: Síntese, sampling, modulação, efeitos
+- Arranjo: Teoria musical aplicada, harmonias, progressões
+- Acústica: Tratamento de sala, posicionamento de monitores
+- Workflow: Técnicas de produção rápida e eficiente
+
+Responda sempre com excelência técnica e conhecimento profissional.`;
+  }
+
+  // Adaptar linguagem baseada no nível técnico
+  let linguagemStyle = '';
+  switch(perfil.nivelTecnico?.toLowerCase()) {
+    case 'iniciante':
+      linguagemStyle = 'Use linguagem acessível mas ainda técnica. Explique termos específicos quando necessário. Foque em conceitos fundamentais com valores práticos.';
+      break;
+    case 'intermediario':
+    case 'intermediário':
+      linguagemStyle = 'Misture explicações didáticas com terminologia técnica avançada. Use valores específicos e recomendações diretas.';
+      break;
+    case 'avancado':
+    case 'avançado':
+    case 'profissional':
+      linguagemStyle = 'Use linguagem totalmente técnica e profissional. Seja direto com parâmetros exatos, frequências específicas e técnicas avançadas.';
+      break;
+    default:
+      linguagemStyle = 'Adapte a linguagem conforme a complexidade da pergunta, sempre mantendo precisão técnica.';
+  }
+
+  // Informações específicas da DAW
+  let dawInfo = '';
+  switch(perfil.daw?.toLowerCase()) {
+    case 'fl-studio':
+    case 'fl studio':
+      dawInfo = 'Quando relevante, mencione atalhos do FL Studio (Ctrl+Shift+E para export, F9 para mixer), plugins nativos (Harmor, Serum, Parametric EQ 2), e workflows específicos do FL.';
+      break;
+    case 'ableton':
+    case 'ableton live':
+      dawInfo = 'Quando relevante, mencione recursos do Ableton Live (Session View, Operator, Simpler, Max for Live), atalhos específicos e técnicas de performance ao vivo.';
+      break;
+    case 'logic':
+    case 'logic pro':
+      dawInfo = 'Quando relevante, mencione plugins nativos do Logic (Alchemy, Sculpture, Space Designer), atalhos e bibliotecas incluídas.';
+      break;
+    case 'reaper':
+      dawInfo = 'Quando relevante, mencione a flexibilidade do REAPER, ReaPlugs, customização de interface e scripts personalizados.';
+      break;
+    default:
+      dawInfo = 'Adapte recomendações para diferentes DAWs quando necessário.';
+  }
+
+  // Contexto do estilo musical
+  const estiloContext = perfil.estilo ? `Foque suas respostas no estilo ${perfil.estilo}, incluindo técnicas específicas, faixas de frequência características, e referências do gênero.` : '';
+
+  // Área de dificuldade como prioridade
+  const dificuldadeContext = perfil.dificuldade ? `O usuário tem maior dificuldade com: ${perfil.dificuldade}. Priorize dicas e técnicas relacionadas a esta área.` : '';
+
+  // Nome personalizado
+  const nomeContext = perfil.nomeArtistico ? `Chame o usuário de ${perfil.nomeArtistico}.` : '';
+
+  // Contexto pessoal
+  const sobreContext = perfil.sobre ? `Contexto pessoal do usuário: ${perfil.sobre}` : '';
+
+  return `Você é o PROD.AI 🎵, especialista master em produção musical. ${nomeContext}
+
+PERFIL DO USUÁRIO:
+- Nível: ${perfil.nivelTecnico || 'Não informado'}
+- DAW Principal: ${perfil.daw || 'Não informado'}
+- Estilo Musical: ${perfil.estilo || 'Variado'}
+- Maior Dificuldade: ${perfil.dificuldade || 'Não informado'}
+${sobreContext ? `- Sobre: ${sobreContext}` : ''}
+
+INSTRUÇÕES DE RESPOSTA:
+${linguagemStyle}
+${dawInfo}
+${estiloContext}
+${dificuldadeContext}
+
+QUALIDADE TÉCNICA OBRIGATÓRIA:
+- Use valores específicos: frequências exatas (Hz), níveis (dB), tempos (ms)
+- Mencione equipamentos e plugins por nome quando relevante
+- Forneça parâmetros técnicos precisos
+- Seja direto e prático - evite respostas genéricas
+- Dê conselhos aplicáveis imediatamente
+
+ESPECIALIDADES:
+- Mixagem: EQ preciso, compressão dinâmica, espacialização
+- Mastering: Limiters, LUFS, análise espectral, loudness
+- Sound Design: Síntese, modulação, processamento
+- Arranjo: Teoria musical aplicada, progressões harmônicas
+- Produção: Workflow otimizado, técnicas avançadas
+
+Responda sempre com excelência técnica e conhecimento profissional aplicado ao perfil específico do usuário.`;
+}
+
 // Função para chamar a API da OpenAI
-async function callOpenAI(messages, profileInfo = '') {
+async function callOpenAI(messages, userData) {
+  let systemPrompt;
+  
+  if (userData.plano === 'plus') {
+    // Para usuários Plus, usar prompt personalizado baseado no perfil
+    systemPrompt = generatePersonalizedSystemPrompt(userData.perfil);
+  } else {
+    // Para usuários gratuitos, usar prompt básico existente
+    systemPrompt = `Você é o Prod.AI 🎵, especialista em produção musical. Ajude com dúvidas sobre produção, mixagem e masterização de forma técnica e direta.
+
+INSTRUÇÕES:
+- Seja técnico mas acessível
+- Use exemplos práticos
+- Mantenha respostas concisas
+- Foque em soluções aplicáveis
+
+Sua missão é ajudar produtores musicais com excelência técnica.`;
+  }
   const requestBody = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
@@ -150,9 +277,7 @@ async function callOpenAI(messages, profileInfo = '') {
     messages: [
       {
         role: 'system',
-        content: `Você é o Prod.AI 🎵, especialista master em produção musical. Sua missão é ajudar produtores, beatmakers e músicos a criar, mixar e masterizar, ajudar a resolver qualquer desafio com precisão técnica, criatividade e linguagem acessível. tirar duvidas gerais sobre produção musical e a industria da música com excelência.${profileInfo}
-        ...especialidades e instruções...
-        `
+        content: systemPrompt
       },
       ...messages,
     ],
@@ -247,16 +372,13 @@ export default async function handler(req, res) {
       { role: 'user', content: message },
     ];
 
-    let profileInfo = '';
-    if (userData.plano === 'plus' && userData.perfil) {
-      const p = userData.perfil;
-      profileInfo = `\n\nPERFIL DO USUÁRIO:\nNome artístico: ${p.nomeArtistico || ''}; Nível: ${p.nivelTecnico || ''}; DAW: ${p.daw || ''}; Estilo: ${p.estilo || ''}; Dificuldade: ${p.dificuldade || ''}.`;
-    }
-
-    const reply = await callOpenAI(messages, profileInfo);
+    // Chamar OpenAI com dados completos do usuário para personalização
+    const reply = await callOpenAI(messages, userData);
 
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
+    } else {
+      console.log('✅ Resposta personalizada gerada para usuário Plus:', email);
     }
 
     return res.status(200).json({ 
