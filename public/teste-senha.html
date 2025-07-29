@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Alterar Senha</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste - Funcionalidade Alterar Senha</h1>
+        
+        <div class="test-info">
+            <h3>📋 Testes que você pode fazer:</h3>
+            <ul>
+                <li>✅ Deixar campos vazios → deve mostrar erro</li>
+                <li>✅ Senhas diferentes → deve mostrar "As senhas não coincidem"</li>
+                <li>✅ Senha com menos de 6 caracteres → deve mostrar erro de validação</li>
+                <li>✅ Senhas iguais e válidas → deve mostrar "Senha atualizada com sucesso!" (simulado)</li>
+            </ul>
+        </div>
+        
+        <form id="password-form">
+            <div class="input-group">
+                <label for="new-password">Nova Senha:</label>
+                <input type="password" id="new-password" placeholder="Digite sua nova senha">
+            </div>
+            
+            <div class="input-group">
+                <label for="confirm-password">Confirmar Senha:</label>
+                <input type="password" id="confirm-password" placeholder="Confirme sua nova senha">
+            </div>
+            
+            <button type="button" id="test-button">Testar Validação</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Simulação da funcionalidade de alterar senha para testes
+        document.getElementById('test-button').addEventListener('click', function() {
+            const newPassword = document.getElementById('new-password').value.trim();
+            const confirmPassword = document.getElementById('confirm-password').value.trim();
+            const button = this;
+            const resultDiv = document.getElementById('result');
+            
+            // Limpar resultado anterior
+            resultDiv.innerHTML = '';
+            
+            // Validações (idênticas ao código real)
+            if (!newPassword || !confirmPassword) {
+                showMessage('Por favor, preencha todos os campos', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('As senhas não coincidem', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showMessage('A senha deve ter pelo menos 6 caracteres', 'error');
+                return;
+            }
+            
+            // Simular sucesso
+            button.disabled = true;
+            button.textContent = 'Atualizando...';
+            
+            setTimeout(() => {
+                showMessage('✅ Senha atualizada com sucesso! (simulação)', 'success');
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+                button.disabled = false;
+                button.textContent = 'Testar Validação';
+            }, 1500);
+        });
+        
+        function showMessage(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+        
+        // Permitir Enter nos campos
+        ['new-password', 'confirm-password'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('test-button').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

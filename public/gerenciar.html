@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Conta - PROD.AI</title>
+    <link rel="stylesheet" href="gerenciar.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="page-title">Gerenciar conta</h1>
+            
+            <div class="plan-status" id="plan-status">
+                <div class="plan-info">
+                    <span class="plan-label">Plano atual:</span>
+                    <span class="plan-type plus" id="plan-type">
+                        <span class="plan-name">PLUS</span>
+                        <span class="plan-icon">✅</span>
+                    </span>
+                </div>
+            </div>
+            
+            <button class="btn-back-simple" id="back-to-chat-simple">
+                <span class="back-icon">🔙</span>
+                Voltar ao chat
+            </button>
+        </div>
+
+        <div class="form-container">
+            <!-- Grid de Cards Principais -->
+            <div class="cards-grid">
+                <!-- Card: Alterar Senha -->
+                <section class="function-card">
+                    <div class="card-header">
+                        <span class="card-icon">🔒</span>
+                        <h3 class="card-title">Alterar Senha</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <div class="input-group">
+                                <label for="new-password">Nova senha</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">🔒</span>
+                                    <input type="password" id="new-password" placeholder="Digite sua nova senha">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="confirm-password">Confirmar senha</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">🔒</span>
+                                    <input type="password" id="confirm-password" placeholder="Confirme sua nova senha">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-primary" id="update-password-btn">Atualizar senha</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card: Alterar E-mail -->
+                <section class="function-card">
+                    <div class="card-header">
+                        <span class="card-icon">✉️</span>
+                        <h3 class="card-title">Alterar E-mail</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <div class="input-group">
+                                <label for="new-email">Novo e-mail</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">✉️</span>
+                                    <input type="email" id="new-email" placeholder="Digite seu novo e-mail">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="confirm-email">Confirmar e-mail</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">✉️</span>
+                                    <input type="email" id="confirm-email" placeholder="Confirme seu novo e-mail">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-primary" id="update-email-btn">Atualizar e-mail</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card: Refazer Entrevista -->
+                <section class="function-card">
+                    <div class="card-header">
+                        <span class="card-icon">♻️</span>
+                        <h3 class="card-title">Personalizar Novamente</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <p class="card-description">Quer mudar suas respostas personalizadas?</p>
+                            <p class="card-description">Refaça o processo de configuração inicial.</p>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-special" id="redo-interview-btn">
+                                <span class="btn-icon">♻️</span>
+                                Personalizar novamente
+                            </button>
+                            <p class="info-text">Essa funcionalidade é exclusiva para usuários Plus.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card: Fazer Upgrade -->
+                <section class="function-card upgrade-card" id="upgrade-card">
+                    <div class="card-header">
+                        <span class="card-icon">🔓</span>
+                        <h3 class="card-title">Upgrade de Plano</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <p class="card-description">Você está no plano gratuito. Desbloqueie todo o potencial do PROD.AI</p>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-upgrade-premium" id="upgrade-plan-btn">
+                                <span class="btn-icon">⭐</span>
+                                Fazer Upgrade para Plus
+                            </button>
+                            <p class="upgrade-benefits">Desbloqueie mensagens ilimitadas e respostas avançadas</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card: Cancelar Assinatura -->
+                <section class="function-card card-perigo">
+                    <div class="card-header">
+                        <span class="card-icon">❌</span>
+                        <h3 class="card-title">Cancelar Assinatura</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <p class="card-description">Cancelar sua assinatura atual do plano Plus.</p>
+                            <p class="card-description">Você manterá acesso até o fim do período atual.</p>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-danger" id="cancel-subscription-btn">
+                                <span class="btn-icon">❌</span>
+                                Cancelar assinatura
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card: Excluir Conta -->
+                <section class="function-card card-perigo">
+                    <div class="card-header">
+                        <span class="card-icon">⚠️</span>
+                        <h3 class="card-title">Zona de Perigo</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-content-section">
+                            <p class="card-description">
+                                <strong>⚠️ Esta ação é irreversível!</strong>
+                            </p>
+                            <p class="card-description">
+                                Ao excluir sua conta, todos os dados serão perdidos permanentemente.
+                            </p>
+                        </div>
+                        <div class="card-button-section">
+                            <button class="btn btn-delete-account" id="delete-account-btn">
+                                <span class="btn-icon">🗑️</span>
+                                Excluir Conta Permanentemente
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Seção de Suporte - Rodapé -->
+        <div class="support-footer-card">
+            <h3 class="support-footer-title">
+                <span class="support-icon">💬</span>
+                Suporte
+            </h3>
+            <p class="support-footer-text">Precisa de ajuda? Entre em contato conosco:</p>
+            <div class="support-footer-contact">
+                <span class="support-email">prod.ai@gmail.com</span>
+            </div>
+            <div class="support-footer-info">
+                <div class="support-footer-item">
+                    <span class="support-item-icon">📞</span>
+                    <span>Suporte telefônico: Seg-Sex, 9h-18h</span>
+                </div>
+                <div class="support-footer-item">
+                    <span class="support-item-icon">💬</span>
+                    <span>Chat online: 24/7</span>
+                </div>
+                <div class="support-footer-item">
+                    <span class="support-item-icon">⚡</span>
+                    <span>Resposta em até 2 horas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="background-effects">
+        <div class="grid-pattern"></div>
+        <div class="glow-effect glow-1"></div>
+        <div class="glow-effect glow-2"></div>
+        <div class="neural-network">
+            <div class="neural-node node-1"></div>
+            <div class="neural-node node-2"></div>
+            <div class="neural-node node-3"></div>
+        </div>
+    </div>
+
+    <!-- Firebase e Script de Gerenciamento -->
+    <script type="module">
+        // Aguardar um pouco para garantir que o Firebase carregue
+        setTimeout(async () => {
+            const { auth } = await import('./firebase.js');
+            const { onAuthStateChanged, updatePassword } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+            
+            console.log('🔧 Gerenciar.js carregado');
+            
+            // Elementos do DOM
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const updatePasswordBtn = document.getElementById('update-password-btn');
+            const backToChatBtn = document.getElementById('back-to-chat-simple');
+            
+            // Verificar se o usuário está autenticado
+            let currentUser = null;
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    console.log('✅ Usuário autenticado:', user.email);
+                    
+                    // Atualizar informações do usuário na página
+                    updateUserInfo(user);
+                } else {
+                    console.log('❌ Usuário não autenticado - redirecionando...');
+                    // Redirecionar usuários não autenticados
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Função para atualizar informações do usuário
+            function updateUserInfo(user) {
+                // Você pode expandir isso para mostrar mais informações do usuário
+                console.log('📧 Email do usuário:', user.email);
+                console.log('🆔 UID do usuário:', user.uid);
+            }
+            
+            // Função para mostrar mensagens de feedback
+            function showMessage(message, type = 'success') {
+                // Remove mensagem anterior se existir
+                const existingMessage = document.querySelector('.feedback-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // Criar elemento de mensagem
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `feedback-message ${type}`;
+                messageDiv.textContent = message;
+                
+                // Adicionar ao card de alterar senha
+                const passwordCard = updatePasswordBtn.closest('.function-card');
+                passwordCard.insertBefore(messageDiv, passwordCard.querySelector('.card-body'));
+                
+                // Auto-remover após 5 segundos
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 5000);
+            }
+            
+            // Função para validar senha
+            function validatePassword(password) {
+                if (password.length < 6) {
+                    return 'A senha deve ter pelo menos 6 caracteres';
+                }
+                return null;
+            }
+            
+            // Função principal para alterar senha
+            async function changePassword() {
+                if (!currentUser) {
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const newPassword = newPasswordInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value.trim();
+                
+                // Validações
+                if (!newPassword || !confirmPassword) {
+                    showMessage('Por favor, preencha todos os campos', 'error');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    showMessage('As senhas não coincidem', 'error');
+                    return;
+                }
+                
+                const passwordError = validatePassword(newPassword);
+                if (passwordError) {
+                    showMessage(passwordError, 'error');
+                    return;
+                }
+                
+                // Desabilitar botão durante o processo
+                updatePasswordBtn.disabled = true;
+                updatePasswordBtn.textContent = 'Atualizando...';
+                
+                try {
+                    // Atualizar senha no Firebase
+                    await updatePassword(currentUser, newPassword);
+                    
+                    console.log('✅ Senha atualizada com sucesso');
+                    showMessage('✅ Senha atualizada com sucesso!', 'success');
+                    
+                    // Limpar campos
+                    newPasswordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao atualizar senha:', error);
+                    
+                    // Tratamento de erros específicos
+                    let errorMessage = 'Erro ao atualizar senha. Tente novamente.';
+                    
+                    switch (error.code) {
+                        case 'auth/requires-recent-login':
+                            errorMessage = '🔒 Para alterar a senha, você precisa fazer login novamente. Redirecionando...';
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 3000);
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = '🔐 A senha é muito fraca. Use pelo menos 6 caracteres.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = '🌐 Erro de conexão. Verifique sua internet e tente novamente.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = '⏰ Muitas tentativas. Tente novamente em alguns minutos.';
+                            break;
+                        default:
+                            errorMessage = `❌ Erro: ${error.message}`;
+                    }
+                    
+                    showMessage(errorMessage, 'error');
+                } finally {
+                    // Reabilitar botão
+                    updatePasswordBtn.disabled = false;
+                    updatePasswordBtn.textContent = 'Atualizar senha';
+                }
+            }
+            
+            // Event Listeners
+            if (updatePasswordBtn) {
+                updatePasswordBtn.addEventListener('click', changePassword);
+            }
+            
+            // Permitir Enter nos campos de senha
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        changePassword();
+                    }
+                });
+            }
+            
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        changePassword();
+                    }
+                });
+            }
+            
+            // Botão voltar ao chat
+            if (backToChatBtn) {
+                backToChatBtn.addEventListener('click', function() {
+                    window.location.href = 'index.html';
+                });
+            }
+            
+            console.log('🔧 Event listeners configurados');
+        }, 100);
+    </script>
+</body>
+</html>
