@@ -1,4 +1,4 @@
-/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:01 ============ */
+/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:10 ============ */
 /* 🛑 CACHE BUSTING: Forçar reload do navegador */
 // Área de conversa do novo layout
 const chatbox = document.getElementById('chatbotConversationArea');
@@ -698,8 +698,59 @@ function appendMessage(content, className) {
   if (typeof gsap !== 'undefined') {
     gsap.fromTo(messageDiv, 
       { opacity: 0, y: 30, scale: 0.95 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+      { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
     );
+  }
+}
+
+// Função para mostrar mensagens restantes de forma elegante
+function showRemainingMessages(count) {
+  if (count === null || count === undefined) return;
+  
+  try {
+    // Criar ou atualizar indicador de mensagens restantes
+    let indicator = document.getElementById('messages-remaining-indicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'messages-remaining-indicator';
+      indicator.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(147, 51, 234, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(147, 51, 234, 0.3);
+      `;
+      document.body.appendChild(indicator);
+    }
+    
+    indicator.innerHTML = `<i class="fas fa-comment"></i> ${count} mensagem${count !== 1 ? 's' : ''} restante${count !== 1 ? 's' : ''}`;
+    
+    // Mudar cor baseado na quantidade
+    if (count <= 2) {
+      indicator.style.background = 'rgba(239, 68, 68, 0.9)';
+      indicator.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+    } else if (count <= 5) {
+      indicator.style.background = 'rgba(245, 158, 11, 0.9)';
+      indicator.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+    }
+    
+    // Animar se GSAP estiver disponível
+    if (typeof gsap !== 'undefined') {
+      gsap.fromTo(indicator, 
+        { scale: 1.2, opacity: 0.7 },
+        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
+      );
+    }
+  } catch (error) {
+    console.log('⚠️ Erro ao mostrar indicador de mensagens (não crítico):', error.message);
   }
 }
 
@@ -819,6 +870,11 @@ async function processMessage(message) {
       console.log('✅ Exibindo resposta da IA');
       appendMessage(`<strong>Assistente:</strong> ${data.reply}`, 'bot');
       conversationHistory.push({ role: 'assistant', content: data.reply });
+      
+      // Mostrar mensagens restantes se for usuário gratuito
+      if (data.mensagensRestantes !== null && data.mensagensRestantes !== undefined) {
+        showRemainingMessages(data.mensagensRestantes);
+      }
     } else {
       console.error('❌ Resposta inesperada:', data);
       appendMessage(
