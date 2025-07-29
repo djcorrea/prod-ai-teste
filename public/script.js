@@ -1,4 +1,4 @@
-/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:10 ============ */
+/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:11 ============ */
 /* 🛑 CACHE BUSTING: Forçar reload do navegador */
 // Área de conversa do novo layout
 const chatbox = document.getElementById('chatbotConversationArea');
@@ -958,31 +958,6 @@ function initVisualEffects() {
     initHoverEffects();
     
     window.addEventListener('resize', handleResize);
-    
-    // Animar aparição inicial do chatbot
-    setTimeout(() => {
-        const container = document.getElementById('chatbotContainer');
-        if (container && typeof gsap !== 'undefined') {
-            gsap.fromTo(container, 
-                { 
-                    scale: 0.7, 
-                    opacity: 0,
-                    rotationY: 20,
-                    y: 50
-                },
-                { 
-                    scale: 1, 
-                    opacity: 1,
-                    rotationY: 0,
-                    y: 0,
-                    duration: 0.8,
-                    ease: "back.out(1.7)"
-                }
-            );
-        } else if (container) {
-            container.style.opacity = '1';
-        }
-    }, 800);
     
     console.log('✅ Cenário futurista carregado!');
 }
