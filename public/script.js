@@ -1,4 +1,4 @@
-/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:11 ============ */
+/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:12 ============ */
 /* 🛑 CACHE BUSTING: Forçar reload do navegador */
 // Área de conversa do novo layout
 const chatbox = document.getElementById('chatbotConversationArea');
@@ -715,9 +715,9 @@ function showRemainingMessages(count) {
       indicator.id = 'messages-remaining-indicator';
       indicator.style.cssText = `
         position: fixed;
-        bottom: 20px;
+        top: 20px;
         right: 20px;
-        background: rgba(147, 51, 234, 0.9);
+        background: rgba(10, 10, 26, 0.9);
         color: white;
         padding: 8px 12px;
         border-radius: 20px;
@@ -726,7 +726,7 @@ function showRemainingMessages(count) {
         z-index: 1000;
         transition: all 0.3s ease;
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(147, 51, 234, 0.3);
+        border: 1px solid rgba(10, 10, 26, 0.3);
       `;
       document.body.appendChild(indicator);
     }
@@ -735,11 +735,13 @@ function showRemainingMessages(count) {
     
     // Mudar cor baseado na quantidade
     if (count <= 2) {
-      indicator.style.background = 'rgba(239, 68, 68, 0.9)';
-      indicator.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+      indicator.style.background = 'rgba(10, 10, 26, 0.95)';
+      indicator.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      indicator.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.3)';
     } else if (count <= 5) {
-      indicator.style.background = 'rgba(245, 158, 11, 0.9)';
-      indicator.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+      indicator.style.background = 'rgba(10, 10, 26, 0.95)';
+      indicator.style.borderColor = 'rgba(245, 158, 11, 0.5)';
+      indicator.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.3)';
     }
     
     // Animar se GSAP estiver disponível
