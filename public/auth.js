@@ -176,7 +176,38 @@ console.log('🚀 Carregando auth.js...');
           window.location.href = "entrevista.html";
         }
       } catch (error) {
-        showMessage(error, "error");
+        console.error('❌ Erro no login:', error);
+        
+        let errorMessage = "Erro ao fazer login: ";
+        
+        // Tratamento específico de erros Firebase para login
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMessage = "E-mail não encontrado. Verifique o e-mail ou crie uma conta.";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Senha incorreta. Tente novamente ou use 'Esqueci a senha'.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "E-mail inválido. Verifique o formato do e-mail.";
+            break;
+          case 'auth/user-disabled':
+            errorMessage = "Esta conta foi desabilitada. Entre em contato com o suporte.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Muitas tentativas de login. Aguarde alguns minutos.";
+            break;
+          case 'auth/api-key-not-valid':
+            errorMessage = "Erro de configuração. Tente novamente em alguns minutos.";
+            break;
+          case 'auth/invalid-credential':
+            errorMessage = "Credenciais inválidas. Verifique e-mail e senha.";
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        
+        showMessage(errorMessage, "error");
       }
     }
 
@@ -201,8 +232,22 @@ console.log('🚀 Carregando auth.js...');
       const password = document.getElementById("password")?.value?.trim();
       const phone = document.getElementById("phone")?.value?.trim();
 
+      // Validações robustas
       if (!email || !password) {
         showMessage("Preencha e-mail e senha para cadastro.", "error");
+        return;
+      }
+
+      // Validar formato de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage("Digite um e-mail válido.", "error");
+        return;
+      }
+
+      // Validar senha (mínimo 6 caracteres)
+      if (password.length < 6) {
+        showMessage("A senha deve ter pelo menos 6 caracteres.", "error");
         return;
       }
 
@@ -264,6 +309,32 @@ console.log('🚀 Carregando auth.js...');
         console.error('❌ Erro no cadastro direto:', error);
         
         let errorMessage = "Erro ao criar conta: ";
+        
+        // Tratamento específico de erros Firebase
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Este e-mail já está em uso. Tente fazer login ou use outro e-mail.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "E-mail inválido. Verifique o formato do e-mail.";
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage = "Cadastro por e-mail/senha não está habilitado.";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "Senha muito fraca. Use pelo menos 6 caracteres.";
+            break;
+          case 'auth/api-key-not-valid':
+            errorMessage = "Erro de configuração. Tente novamente em alguns minutos.";
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.";
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        
+        showMessage(errorMessage, "error");
         switch (error.code) {
           case 'auth/email-already-in-use':
             errorMessage = "Este e-mail já está cadastrado. Faça login ou use outro e-mail.";
