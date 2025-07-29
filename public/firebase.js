@@ -3,15 +3,14 @@ import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/11.1.
 import { getAuth } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js';
 
-// Configuração do Firebase (substitua pelos seus dados reais se necessário)
+// Configuração do Firebase (configuração correta do projeto)
 const firebaseConfig = {
-  apiKey: "AIzaSyBKby0RdIOGorhrfBRMCWnL25peU3epGTw",
-  authDomain: "prodai-58436.firebaseapp.com",
-  projectId: "prodai-58436",
-  storageBucket: "prodai-58436.appspot.com",
-  messagingSenderId: "801631191322",
-  appId: "1:801631191322:web:80e3d29cf7468331652ca3",
-  measurementId: "G-MBDHDYN6Z0"
+  apiKey: "AIzaSyBwJETlTmROo8wSi_KaasJE7ex_OW2O5yo",
+  authDomain: "prod-ai-teste.firebaseapp.com",
+  projectId: "prod-ai-teste",
+  storageBucket: "prod-ai-teste.firebasestorage.app",
+  messagingSenderId: "590918971714",
+  appId: "1:590918971714:web:ab8afe99a3b9a6e2b82d3f"
 };
 
 // Inicializar Firebase apenas uma vez

@@ -4,10 +4,19 @@ let currentUserPlan = null;
 
 async function checkUserPlanStatus() {
     try {
-        const user = firebase.auth().currentUser;
+        // Aguardar Firebase estar disponível com verificação mais robusta
+        if (!window.auth || !window.db || !window.firebaseReady) {
+            // Log silencioso para evitar spam
+            return;
+        }
+        
+        const user = window.auth.currentUser;
         if (!user) return;
 
-        const userDoc = await firebase.firestore().collection('usuarios').doc(user.uid).get();
+        // Importar getDoc e doc se necessário
+        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+        
+        const userDoc = await getDoc(doc(window.db, 'usuarios', user.uid));
         const userData = userDoc.data();
         
         if (userData && userData.plano !== currentUserPlan) {
@@ -32,15 +41,24 @@ async function checkUserPlanStatus() {
             console.log('🔄 Plano do usuário atualizado:', previousPlan, '->', currentUserPlan);
         }
     } catch (error) {
-        console.error('❌ Erro ao verificar plano do usuário:', error);
+        // Log silencioso - apenas registrar sem causar alarme
+        // console.log('⚠️ Plan monitor aguardando inicialização completa');
     }
 }
 
-// Verificar plano a cada 30 segundos para detectar mudanças
-setInterval(checkUserPlanStatus, 30000);
+// Verificar plano a cada 30 segundos para detectar mudanças (só se estiver na página principal)
+function startPlanMonitoring() {
+    // Verificar se estamos na página principal onde faz sentido monitorar
+    const isMainPage = document.querySelector('.hero') || document.querySelector('#startSendBtn') || window.location.pathname.includes('index.html');
+    
+    if (isMainPage) {
+        console.log('🔄 Iniciando monitoramento de plano...');
+        setInterval(checkUserPlanStatus, 30000);
+        setTimeout(checkUserPlanStatus, 2000); // Verificação inicial
+    } else {
+        console.log('📄 Página secundária - pulando monitoramento de plano');
+    }
+}
 
-// Verificar plano inicial quando a página carrega
-document.addEventListener('DOMContentLoaded', () => {
-    // Aguardar Firebase estar pronto
-    setTimeout(checkUserPlanStatus, 2000);
-});
+// Inicializar quando a página carrega
+document.addEventListener('DOMContentLoaded', startPlanMonitoring);

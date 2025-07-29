@@ -597,12 +597,50 @@
                         
                         console.log('💾 Salvando perfil para usuário:', user.uid);
                         
-                        // Salvar no Firestore usando a API v11
-                        await setDoc(doc(db, 'usuarios', user.uid), {
-                            perfil: perfilData
-                        }, { merge: true });
+                        // Verificar se o documento do usuário já existe
+                        const { getDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                        const userDocRef = doc(db, 'usuarios', user.uid);
+                        const userDocSnap = await getDoc(userDocRef);
+                        
+                        if (!userDocSnap.exists()) {
+                            console.log('⚠️ Documento do usuário não existe, criando...');
+                            // Criar documento base se não existir
+                            await setDoc(userDocRef, {
+                                uid: user.uid,
+                                email: user.email,
+                                plano: 'gratis',
+                                mensagensRestantes: 10,
+                                createdAt: Timestamp.now(),
+                                perfil: perfilData,
+                                entrevistaConcluida: true
+                            });
+                            console.log('✅ Documento completo criado com perfil');
+                        } else {
+                            console.log('✅ Documento existe, fazendo merge do perfil...');
+                            // Atualizar apenas o perfil se documento já existe
+                            await setDoc(userDocRef, {
+                                perfil: perfilData,
+                                entrevistaConcluida: true,
+                                dataUltimaEntrevista: Timestamp.now()
+                            }, { merge: true });
+                            console.log('✅ Perfil atualizado via merge');
+                        }
                         
                         console.log('✅ Perfil salvo com sucesso!', perfilData);
+                        console.log('📊 Documento final no Firestore:', user.uid);
+                        
+                        // Verificar se realmente foi salvo
+                        try {
+                            const verificacao = await getDoc(userDocRef);
+                            if (verificacao.exists()) {
+                                console.log('✅ CONFIRMADO: Documento existe no Firestore:', verificacao.data());
+                            } else {
+                                console.error('❌ ERRO: Documento não foi encontrado após salvamento!');
+                            }
+                        } catch (verificacaoError) {
+                            console.warn('⚠️ Erro na verificação:', verificacaoError);
+                        }
+                        
                         alert('Perfil salvo com sucesso! Redirecionando...');
                         
                         // Redirecionar para página final

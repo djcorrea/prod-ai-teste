@@ -1,4 +1,5 @@
-/* ============ VARIÁVEIS GLOBAIS (Sistema Funcional Existente) ============ */
+/* ============ PROD.AI CHATBOT SCRIPT - VERSÃO 2025.01.28-17:01 ============ */
+/* 🛑 CACHE BUSTING: Forçar reload do navegador */
 // Área de conversa do novo layout
 const chatbox = document.getElementById('chatbotConversationArea');
 // Input principal (welcome state)
@@ -35,9 +36,163 @@ const API_CONFIG = {
 
 console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
 
+/* ============ GARANTIA DE FUNÇÕES GLOBAIS (ANTI-CACHE) ============ */
+// Forçar definição imediata das funções no escopo global
+(function() {
+    'use strict';
+    
+    // Garantir que testAPIConnection existe SEMPRE
+    if (!window.testAPIConnection) {
+        window.testAPIConnection = async function testAPIConnection() {
+            console.log('⚠️ [FALLBACK] testAPIConnection executada via fallback');
+            try {
+                if (!document.querySelector('#startSendBtn') && !document.querySelector('#sendBtn')) {
+                    console.log('📄 Página não requer teste de API');
+                    return;
+                }
+                
+                console.log('🧪 Testando conexão com API...');
+                const response = await fetch(API_CONFIG.chatEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'teste de conexão', userUid: 'test' })
+                });
+                
+                if (response.ok) {
+                    console.log('✅ API funcionando corretamente');
+                } else {
+                    console.log('⚠️ API respondeu com status:', response.status);
+                }
+            } catch (error) {
+                console.log('⚠️ Erro ao testar API (não crítico):', error.message);
+            }
+        };
+    }
+    
+    // Garantir que initParticleEffects existe SEMPRE
+    if (!window.initParticleEffects) {
+        window.initParticleEffects = function initParticleEffects() {
+            console.log('⚠️ [FALLBACK] initParticleEffects executada via fallback');
+            try {
+                console.log('✨ Inicializando efeitos de partículas...');
+                const heroSection = document.querySelector('.hero');
+                const ctaSection = document.querySelector('.cta');
+                
+                if (heroSection) heroSection.classList.add('particles-active');
+                if (ctaSection) ctaSection.classList.add('particles-active');
+                
+                console.log('✅ Efeitos de partículas inicializados');
+            } catch (error) {
+                console.log('⚠️ Efeitos de partículas não disponíveis nesta página:', error.message);
+            }
+        };
+    }
+    
+    // Garantir que setupEventListeners existe SEMPRE
+    if (!window.setupEventListeners) {
+        window.setupEventListeners = function setupEventListeners() {
+            console.log('⚠️ [FALLBACK] setupEventListeners executada via fallback');
+            try {
+                // Configurações básicas de eventos para compatibilidade
+                const startInput = document.getElementById('start-input');
+                const sendBtn = document.getElementById('startSendBtn');
+                
+                if (startInput && sendBtn) {
+                    console.log('✅ Configurando eventos básicos');
+                    // Eventos básicos já serão configurados pelo chatbot quando instanciado
+                } else {
+                    console.log('� Elementos de input não encontrados nesta página');
+                }
+            } catch (error) {
+                console.log('⚠️ Erro ao configurar event listeners (não crítico):', error.message);
+            }
+        };
+    }
+    
+    console.log('�🛡️ [ANTI-CACHE] Funções globais garantidas:', {
+        testAPIConnection: typeof window.testAPIConnection,
+        initParticleEffects: typeof window.initParticleEffects,
+        setupEventListeners: typeof window.setupEventListeners
+    });
+})();
+
+/* ============ FUNÇÕES GLOBAIS (Declaradas no início para evitar erros) ============ */
+// Função testAPIConnection (definição completa no início)
+window.testAPIConnection = async function testAPIConnection() {
+  try {
+    console.log('🔍 [testAPIConnection] Função executada - início');
+    
+    // Verificar se estamos na página principal
+    if (!document.querySelector('#startSendBtn') && !document.querySelector('#sendBtn')) {
+      console.log('📄 Página não requer teste de API');
+      return;
+    }
+    
+    console.log('🧪 Testando conexão com API...');
+    const response = await fetch(API_CONFIG.chatEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'teste de conexão',
+        userUid: 'test'
+      })
+    });
+    
+    if (response.ok) {
+      console.log('✅ API funcionando corretamente');
+    } else {
+      console.log('⚠️ API respondeu com status:', response.status);
+    }
+  } catch (error) {
+    console.log('⚠️ Erro ao testar API (não crítico):', error.message);
+  }
+};
+
+// Função initParticleEffects (definição completa no início)
+window.initParticleEffects = function initParticleEffects() {
+    try {
+        console.log('🔍 [initParticleEffects] Função executada - início');
+        console.log('✨ Inicializando efeitos de partículas...');
+        
+        // Verificar se os elementos existem antes de aplicar efeitos
+        const heroSection = document.querySelector('.hero');
+        const ctaSection = document.querySelector('.cta');
+        
+        if (heroSection) {
+            // Adicionar classe para efeitos de partículas na seção hero
+            heroSection.classList.add('particles-active');
+        }
+        
+        if (ctaSection) {
+            // Adicionar classe para efeitos de partículas na seção CTA
+            ctaSection.classList.add('particles-active');
+        }
+        
+        console.log('✅ Efeitos de partículas inicializados');
+        
+    } catch (error) {
+        console.log('⚠️ Efeitos de partículas não disponíveis nesta página:', error.message);
+        // Não é um erro crítico, apenas log informativo
+    }
+};
+
+console.log('🎯 [DEBUG] Funções globais declaradas:', {
+    testAPIConnection: typeof window.testAPIConnection,
+    initParticleEffects: typeof window.initParticleEffects
+});
+
 /* ============ INICIALIZAÇÃO DO VANTA BACKGROUND (Visual Novo) ============ */
 function initVantaBackground() {
     try {
+        // Verificar se estamos na página principal e se o elemento existe
+        const vantaElement = document.getElementById("vanta-bg");
+        if (!vantaElement) {
+            console.log('📄 Elemento vanta-bg não encontrado - pulando inicialização do Vanta.js');
+            return;
+        }
+        
         if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
             vantaEffect = VANTA.NET({
                 el: "#vanta-bg",
@@ -57,10 +212,10 @@ function initVantaBackground() {
             });
             console.log('✅ Vanta.js carregado com sucesso');
         } else {
-            console.warn('⚠️ Vanta.js ou THREE.js não encontrados, usando fallback');
+            console.log('⚠️ Vanta.js ou THREE.js não encontrados - página não requer este efeito');
         }
     } catch (error) {
-        console.warn('⚠️ Erro ao carregar Vanta.js:', error);
+        console.log('⚠️ Erro ao carregar Vanta.js (não crítico):', error.message);
     }
 }
 
@@ -694,19 +849,31 @@ async function processMessage(message) {
 }
 
 /* ============ INICIALIZAÇÃO DO SISTEMA ============ */
+
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎯 Inicializando sistema...');
+    // Verificar se estamos na página principal antes de inicializar tudo
+    const isMainPage = document.querySelector('.hero') || document.querySelector('#startSendBtn') || window.location.pathname.includes('index.html');
     
-    // Inicializar efeitos visuais
-    initVantaBackground();
-    initParticleEffects();
-    
-    // Aguardar Firebase e inicializar chatbot
-    waitForFirebase().then(() => {
-        console.log('✅ Firebase pronto, inicializando chatbot...');
-        window.prodAIChatbot = new ProdAIChatbot();
-    });
+    if (isMainPage) {
+        console.log('🎯 Inicializando sistema da página principal...');
+        
+        // Inicializar efeitos visuais (agora as funções já estão declaradas)
+        initVantaBackground();
+        if (window.initParticleEffects && typeof window.initParticleEffects === 'function') {
+            window.initParticleEffects();
+        } else {
+            console.log('⚠️ initParticleEffects não disponível');
+        }
+        
+        // Aguardar Firebase e inicializar chatbot
+        waitForFirebase().then(() => {
+            console.log('✅ Firebase pronto, inicializando chatbot...');
+            window.prodAIChatbot = new ProdAIChatbot();
+        });
+    } else {
+        console.log('📄 Página secundária detectada - pulando inicialização completa do script.js');
+    }
 });
 
 function debugVercel() {
@@ -766,8 +933,14 @@ function initVisualEffects() {
 
 /* ============ INICIALIZAÇÃO PRINCIPAL ============ */
 function initializeApp() {
+  console.log('🚀 Inicializando aplicação...');
+  
   // Inicializar visual novo
   initVisualEffects();
+  
+  // Inicializar efeitos visuais
+  optimizeForMobile();
+  initVantaBackground();
   
   // Inicializar sistema antigo com delay para garantir que tudo carregou
   setTimeout(() => {
@@ -779,22 +952,6 @@ function initializeApp() {
     const startInputEl = document.getElementById('start-input');
     if (startInputEl) startInputEl.focus();
   }, 100);
-}
-
-/* ============ LIMPEZA ============ */
-window.addEventListener('beforeunload', () => {
-    if (vantaEffect) {
-        vantaEffect.destroy();
-    }
-});
-
-/* ============ INICIALIZAÇÃO PRINCIPAL ============ */
-function initializeApp() {
-  console.log('🚀 Inicializando aplicação...');
-  
-  // Inicializar efeitos visuais
-  optimizeForMobile();
-  initVantaBackground();
   
   if (typeof gsap !== 'undefined') {
     const tl = gsap.timeline();
@@ -809,34 +966,23 @@ function initializeApp() {
     // Animar todos os elementos com stagger mínimo
     .fromTo(['.mesa', '.caixas', '.notebook', '.teclado', '.robo'], {
         y: 100,
-        opacity: 0,
-        scale: 0.8
+        opacity: 0
     }, {
         y: 0,
         opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-        stagger: 0.05
+        duration: 1.2,
+        ease: "power2.out",
+        stagger: 0.1
     }, "-=0.4");
-    
-    console.log('✅ GSAP animações carregadas');
-  } else {
-    document.body.classList.add('fallback-animation');
-    console.warn('⚠️ GSAP não encontrado, usando animações CSS de fallback');
   }
-  
-  initHoverEffects();
-  initParallaxEffect();
-  
-  // Inicializar chatbot visual
-  setTimeout(() => {
-    window.prodAIChatbot = new ProdAIChatbot();
-    console.log('🤖 PROD.AI Chatbot inicializado!');
-  }, 50);
-  
-  console.log('✅ Aplicação carregada!');
 }
+
+/* ============ LIMPEZA ============ */
+window.addEventListener('beforeunload', () => {
+    if (vantaEffect) {
+        vantaEffect.destroy();
+    }
+});
 
 /* ============ EFEITO PARALLAX ============ */
 function initParallaxEffect() {
@@ -894,22 +1040,6 @@ function initParallaxEffect() {
     });
 }
 
-/* ============ REDIMENSIONAMENTO ============ */
-function handleResize() {
-    const newIsDesktop = window.innerWidth > 768;
-    
-    if (newIsDesktop !== isDesktop) {
-        isDesktop = newIsDesktop;
-        
-        if (vantaEffect) {
-            vantaEffect.destroy();
-            setTimeout(initVantaBackground, 50);
-        }
-        
-        optimizeForMobile();
-    }
-}
-
 /* ============ LIMPEZA ============ */
 window.addEventListener('beforeunload', () => {
     if (vantaEffect) {
@@ -938,12 +1068,17 @@ window.sendMessage = () => {
     window.prodAIChatbot.sendMessage();
   }
 };
-window.testAPIConnection = testAPIConnection;
+// window.testAPIConnection já foi declarado acima
 
-// Debug após carregamento
+// Debug após carregamento - Garantir que a função existe antes de chamar
 setTimeout(() => {
   debugVercel();
-  testAPIConnection();
+  // Verificação mais robusta da função
+  if (window.testAPIConnection && typeof window.testAPIConnection === 'function') {
+    window.testAPIConnection();
+  } else {
+    console.log('📄 testAPIConnection não disponível nesta página');
+  }
 }, 1000);
 
 /* ============ ANIMAÇÕES DE ENTRADA (Visual Novo) ============ */
@@ -982,60 +1117,4 @@ function initEntranceAnimations() {
         console.warn('⚠️ Erro no GSAP:', error);
         document.body.classList.add('fallback-animation');
     }
-}
-
-/* ============ EFEITO PARALLAX (Visual Novo) ============ */
-function initParallaxEffect() {
-    if (!isDesktop) return;
-    
-    document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 2;
-        const y = (e.clientY / window.innerHeight - 0.5) * 2;
-        
-        // Movimento do robô
-        const robo = document.querySelector('.robo');
-        if (robo && typeof gsap !== 'undefined') {
-            gsap.to(robo, {
-                duration: 0.3,
-                rotationY: x * 3,
-                rotationX: -y * 2,
-                x: x * 15,
-                y: y * 10,
-                ease: "power2.out"
-            });
-        }
-        
-        // Controle do Vanta
-        if (vantaEffect) {
-            vantaEffect.setOptions({
-                mouseControls: true,
-                gyroControls: false
-            });
-        }
-        
-        // Movimento dos outros elementos
-        if (typeof gsap !== 'undefined') {
-            gsap.to('.notebook', {
-                duration: 0.4,
-                x: x * 8,
-                y: -y * 5,
-                rotationY: x * 2,
-                ease: "power2.out"
-            });
-            
-            gsap.to('.caixas', {
-                duration: 0.45,
-                x: x * 5,
-                y: -y * 3,
-                ease: "power2.out"
-            });
-            
-            gsap.to('.teclado', {
-                duration: 0.35,
-                x: x * 6,
-                y: -y * 4,
-                ease: "power2.out"
-            });
-        }
-    });
 }

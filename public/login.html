@@ -383,7 +383,10 @@
       <input id="password" type="password" placeholder="Sua senha" autocomplete="current-password" />
     </div>
     <div class="input-group">
-      <input id="phone" type="tel" placeholder="Seu celular (com DDD)" autocomplete="tel" />
+      <input id="phone" type="tel" placeholder="Seu celular (será salvo no perfil)" autocomplete="tel" />
+      <div style="margin-top: 5px; font-size: 12px; color: #888; text-align: center;">
+        💡 <strong>Modo Simplificado:</strong> Cadastro direto sem verificação SMS
+      </div>
     </div>
 
     <div id="recaptcha-container"></div>
@@ -404,8 +407,19 @@
         <input id="smsCode" type="text" placeholder="Código recebido por SMS" autocomplete="one-time-code" />
       </div>
 
-      <div style="display: flex; justify-content: center; margin-top: 20px;">
+      <div style="display: flex; justify-content: center; margin-top: 20px; gap: 10px; flex-wrap: wrap;">
         <button class="btn-plus" id="confirmCodeBtn">Confirmar código</button>
+        <button type="button" id="resetSMSBtn" style="background: transparent; border: 1px solid #7b2cbf; color: #7b2cbf; padding: 15px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.3s;" 
+                onmouseover="this.style.background='#7b2cbf'; this.style.color='white';" 
+                onmouseout="this.style.background='transparent'; this.style.color='#7b2cbf';">
+          🔄 Resetar e Tentar Novamente
+        </button>
+      </div>
+      
+      <div style="margin-top: 15px; text-align: center;">
+        <small style="color: #888; font-size: 12px;">
+          💡 Se estiver com problemas, use o botão "Resetar" acima
+        </small>
       </div>
     </div>
   </div>
@@ -459,6 +473,57 @@
     window.showSMSSuccess = showSMSSuccess;
     window.showError = showError;
     window.hideStatusMessage = hideStatusMessage;
+    
+    // Configurar botão de reset SMS
+    document.addEventListener('DOMContentLoaded', function() {
+      const resetBtn = document.getElementById('resetSMSBtn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          console.log('🔄 Reset manual solicitado pelo usuário');
+          
+          // Resetar estado se a função estiver disponível
+          if (typeof window.resetSMSState === 'function') {
+            window.resetSMSState();
+            
+            // Esconder seção SMS
+            const smsSection = document.getElementById('sms-section');
+            if (smsSection) {
+              smsSection.style.display = 'none';
+            }
+            
+            // Limpar campo de telefone e focar
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+              phoneInput.value = '';
+              phoneInput.focus();
+            }
+            
+            showStatusMessage('✅ Estado resetado! Digite um número diferente e tente novamente.', 'success');
+            
+          } else {
+            // Fallback: recarregar página
+            showStatusMessage('🔄 Recarregando página...', 'success', 2000);
+            setTimeout(() => window.location.reload(), 2000);
+          }
+        });
+      }
+      
+      // Configurar botão "Esqueci a senha" (corrige erro do console)
+      const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+      if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Verificar se a função resetPassword está disponível
+          if (typeof window.resetPassword === 'function') {
+            window.resetPassword();
+          } else {
+            showStatusMessage('⏳ Aguardando sistema carregar...', 'error', 3000);
+            console.log('⚠️ Função resetPassword ainda não carregada');
+          }
+        });
+      }
+    });
   </script>
 
   <!-- Scripts do Firebase e app -->

@@ -11,6 +11,7 @@ console.log('🚀 Carregando auth.js...');
       RecaptchaVerifier, 
       signInWithPhoneNumber, 
       signInWithEmailAndPassword, 
+      createUserWithEmailAndPassword,
       sendPasswordResetEmail, 
       EmailAuthProvider, 
       PhoneAuthProvider, 
@@ -27,9 +28,35 @@ console.log('🚀 Carregando auth.js...');
     let confirmationResult = null;
     let lastPhone = "";
     let isNewUserRegistering = false;
+    // MODO TEMPORÁRIO: Desabilitar verificação SMS e usar cadastro direto por email
+    let SMS_VERIFICATION_ENABLED = false; // ⚡ Mude para true quando quiser reativar SMS
+    
+    // Função para alternar modo SMS (para facilitar reativação)
+    window.toggleSMSMode = function(enable = true) {
+      SMS_VERIFICATION_ENABLED = enable;
+      console.log('🔄 Modo SMS:', enable ? 'ATIVADO' : 'DESATIVADO');
+      showMessage(`Modo SMS ${enable ? 'ativado' : 'desativado'}. Recarregue a página.`, "success");
+    };
+    
     let recaptchaVerifier = null;
 
-    // Mensagens de erro em português
+    // Configuração simplificada (SMS desabilitado temporariamente)
+    try {
+      console.log('🔧 Modo de cadastro direto por email ativado (SMS temporariamente desabilitado)');
+      
+      // Verificar configuração do projeto
+      console.log('🔍 Projeto configurado:', {
+        projectId: auth.app.options.projectId,
+        authDomain: auth.app.options.authDomain,
+        modoSMS: SMS_VERIFICATION_ENABLED ? 'Habilitado' : 'Desabilitado (temporário)'
+      });
+      
+      console.log('✅ Sistema configurado para cadastro direto');
+    } catch (configError) {
+      console.warn('⚠️ Aviso de configuração:', configError);
+    }
+
+    // Mensagens de erro em português (focadas em reCAPTCHA v2)
     const firebaseErrorsPt = {
       'auth/invalid-phone-number': 'Número de telefone inválido. Use o formato: 11987654321',
       'auth/missing-phone-number': 'Digite seu número de telefone.',
@@ -38,9 +65,9 @@ console.log('🚀 Carregando auth.js...');
       'auth/user-disabled': 'Usuário desativado.',
       'auth/code-expired': 'O código expirou. Solicite um novo.',
       'auth/invalid-verification-code': 'Código de verificação inválido.',
-      'auth/captcha-check-failed': 'Falha na verificação. Recarregue a página.',
+      'auth/captcha-check-failed': 'Falha na verificação reCAPTCHA v2. Complete o desafio.',
       'auth/network-request-failed': 'Falha de conexão. Verifique sua internet.',
-      'auth/app-not-authorized': 'Aplicação não autorizada.',
+      'auth/app-not-authorized': 'App não autorizado. Configure domínios no Firebase Console.',
       'auth/session-expired': 'Sessão expirada. Tente novamente.',
       'auth/invalid-verification-id': 'Falha na verificação. Tente novamente.',
       'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
@@ -48,6 +75,12 @@ console.log('🚀 Carregando auth.js...');
       'auth/wrong-password': 'Senha incorreta.',
       'auth/user-not-found': 'Usuário não encontrado.',
       'auth/weak-password': 'A senha deve ter pelo menos 6 caracteres.',
+      'auth/api-key-not-valid': 'API Key inválida. Verifique configuração Firebase.',
+      'auth/invalid-app-credential': 'Configure reCAPTCHA v2 (não Enterprise) no Firebase Console.',
+      'auth/recaptcha-not-enabled': 'reCAPTCHA v2 não habilitado. Configure no Firebase Console.',
+      'auth/missing-recaptcha-token': 'Complete o reCAPTCHA v2.',
+      'auth/invalid-recaptcha-token': 'reCAPTCHA v2 inválido. Tente novamente.',
+      'auth/recaptcha-not-supported': 'Use reCAPTCHA v2 em vez de Enterprise.'
     };
 
     // Função para mostrar mensagens
@@ -162,6 +195,119 @@ console.log('🚀 Carregando auth.js...');
       }
     }
 
+    // Função de cadastro direto por email (substitui SMS temporariamente)
+    async function directEmailSignUp() {
+      const email = document.getElementById("email")?.value?.trim();
+      const password = document.getElementById("password")?.value?.trim();
+      const phone = document.getElementById("phone")?.value?.trim();
+
+      if (!email || !password) {
+        showMessage("Preencha e-mail e senha para cadastro.", "error");
+        return;
+      }
+
+      if (!phone) {
+        showMessage("Digite seu telefone (será salvo no perfil, sem verificação por SMS).", "error");
+        return;
+      }
+
+      try {
+        showMessage("Criando conta...", "success");
+        
+        // Criar conta diretamente com email e senha
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const user = result.user;
+        
+        console.log('✅ Usuário criado:', user.uid);
+        
+        // Salvar telefone no perfil do usuário (sem verificação SMS)
+        try {
+          const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+          
+          await setDoc(doc(db, 'usuarios', user.uid), {
+            uid: user.uid,
+            email: user.email,
+            telefone: phone,
+            plano: 'gratis',
+            mensagensRestantes: 10,
+            createdAt: new Date(),
+            verificadoPorSMS: false, // Indicar que não foi verificado por SMS
+            criadoSemSMS: true, // Indicar que foi criado no modo sem SMS
+            entrevistaConcluida: false // Inicialmente false até fazer entrevista
+          }, { merge: true }); // ✅ ADICIONADO MERGE PARA CONSISTÊNCIA
+          
+          console.log('✅ Perfil do usuário salvo no Firestore com merge');
+        } catch (firestoreError) {
+          console.warn('⚠️ Erro ao salvar no Firestore:', firestoreError);
+        }
+
+        // Obter token
+        const idToken = await user.getIdToken();
+        
+        // Salvar dados localmente
+        localStorage.setItem("user", JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          telefone: phone,
+          idToken: idToken,
+          plano: 'gratis'
+        }));
+
+        showMessage("✅ Conta criada com sucesso! Redirecionando...", "success");
+        
+        // Redirecionar após sucesso
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+
+      } catch (error) {
+        console.error('❌ Erro no cadastro direto:', error);
+        
+        let errorMessage = "Erro ao criar conta: ";
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Este e-mail já está cadastrado. Faça login ou use outro e-mail.";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "Senha muito fraca. Use pelo menos 6 caracteres.";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "E-mail inválido.";
+            break;
+          default:
+            errorMessage += error.message;
+        }
+        
+        showMessage(errorMessage, "error");
+      }
+    }
+    function resetSMSState() {
+      console.log('🔄 Resetando estado do SMS...');
+      
+      // Limpar reCAPTCHA
+      if (recaptchaVerifier) {
+        try {
+          recaptchaVerifier.clear();
+          console.log('🧹 reCAPTCHA limpo');
+        } catch (e) {
+          console.log('⚠️ Erro ao limpar reCAPTCHA:', e);
+        }
+        recaptchaVerifier = null;
+      }
+      
+      // Limpar container DOM
+      const container = document.getElementById('recaptcha-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+      
+      // Resetar variáveis
+      confirmationResult = null;
+      lastPhone = "";
+      
+      console.log('✅ Estado resetado com sucesso');
+    }
+
     // Função para enviar SMS
     async function sendSMS(rawPhone) {
       function formatPhone(phone) {
@@ -195,21 +341,61 @@ console.log('🚀 Carregando auth.js...');
         container.innerHTML = '';
       }
 
-      // Criar reCAPTCHA
-      recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {},
-        'expired-callback': () => {
-          showMessage("Verificação expirou. Tente novamente.", "error");
-        }
-      });
+      // Criar reCAPTCHA v2 normal (NÃO Enterprise) - configuração simples
+      try {
+        console.log('🔄 Criando reCAPTCHA v2 normal...');
+        
+        // Configuração mínima para reCAPTCHA v2
+        recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'normal',
+          'callback': function(response) {
+            console.log('✅ reCAPTCHA v2 resolvido:', response ? 'Token recebido' : 'Sem token');
+          },
+          'expired-callback': function() {
+            console.log('⏰ reCAPTCHA v2 expirou - solicite novo');
+            showMessage("reCAPTCHA expirou. Clique para gerar novo.", "error");
+          },
+          'error-callback': function(error) {
+            console.log('❌ Erro reCAPTCHA v2:', error);
+            showMessage("Erro no reCAPTCHA. Recarregue a página.", "error");
+          }
+        });
 
-      await recaptchaVerifier.render();
+        console.log('🔄 Renderizando reCAPTCHA v2...');
+        await recaptchaVerifier.render();
+        console.log('✅ reCAPTCHA v2 renderizado com sucesso');
+        
+      } catch (renderError) {
+        console.error('❌ Erro no reCAPTCHA v2:', renderError);
+        
+        // Fallback para configuração ultra-simples
+        try {
+          console.log('🔄 Tentando reCAPTCHA v2 simplificado...');
+          if (recaptchaVerifier) {
+            try { recaptchaVerifier.clear(); } catch (e) {}
+          }
+          
+          recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'normal'
+          });
+          
+          await recaptchaVerifier.render();
+          console.log('✅ reCAPTCHA v2 simplificado funcionou');
+          
+        } catch (fallbackError) {
+          console.error('❌ Falha total reCAPTCHA v2:', fallbackError);
+          showMessage(`Erro reCAPTCHA: ${fallbackError.message}. Verifique se reCAPTCHA v2 está habilitado no Firebase Console.`, "error");
+          return false;
+        }
+      }
       // Tenta enviar SMS
       let smsSent = false;
       try {
+        console.log('📱 Enviando SMS para:', phone);
         confirmationResult = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
         lastPhone = phone;
+        
+        console.log('✅ SMS enviado com sucesso');
         
         // Usar função específica para sucesso do SMS
         if (typeof window.showSMSSuccess === 'function') {
@@ -220,14 +406,123 @@ console.log('🚀 Carregando auth.js...');
         
         showSMSSection();
         smsSent = true;
-      } catch (error) {
-        showMessage(error, "error");
+      } catch (smsError) {
+        console.error('❌ Erro ao enviar SMS:', smsError);
+        
+        // Tratamento específico de erros com soluções
+        let errorMessage = "Erro ao enviar SMS. ";
+        let canRetry = false;
+        
+        if (smsError.code) {
+          switch (smsError.code) {
+            case 'auth/invalid-phone-number':
+              errorMessage = "Número inválido. Use formato: +5511987654321";
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = "⚠️ Limite de tentativas atingido. ";
+              canRetry = true;
+              
+              console.log('🔄 Implementando soluções para too-many-requests...');
+              
+              // Resetar estado para permitir nova tentativa
+              resetSMSState();
+              
+              // Estratégias de recuperação
+              errorMessage += "Soluções disponíveis:\n";
+              errorMessage += "1. Aguarde 60 segundos e tente novamente\n";
+              errorMessage += "2. Use um número de telefone diferente\n";
+              errorMessage += "3. Recarregue a página completamente";
+              
+              // Criar interface de recuperação
+              setTimeout(() => {
+                const recoveryDiv = document.createElement('div');
+                recoveryDiv.style.cssText = 'margin: 15px 0; padding: 15px; background: #1a1a2e; border: 1px solid #7b2cbf; border-radius: 8px;';
+                recoveryDiv.innerHTML = `
+                  <h4 style="color: #7b2cbf; margin: 0 0 10px 0;">🔧 Opções de Recuperação:</h4>
+                  <button id="retry-60s" style="margin: 5px; padding: 8px 15px; background: #7b2cbf; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    ⏱️ Aguardar 60s e Tentar Novamente
+                  </button>
+                  <button id="reset-form" style="margin: 5px; padding: 8px 15px; background: #16213e; color: white; border: 1px solid #7b2cbf; border-radius: 4px; cursor: pointer;">
+                    🔄 Limpar e Usar Outro Número
+                  </button>
+                  <button id="reload-page" style="margin: 5px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 Recarregar Página
+                  </button>
+                `;
+                
+                // Adicionar eventos
+                const retryBtn = recoveryDiv.querySelector('#retry-60s');
+                const resetBtn = recoveryDiv.querySelector('#reset-form');
+                const reloadBtn = recoveryDiv.querySelector('#reload-page');
+                
+                let countdown = 60;
+                retryBtn.onclick = () => {
+                  const interval = setInterval(() => {
+                    retryBtn.textContent = `⏱️ Aguarde ${countdown}s...`;
+                    countdown--;
+                    if (countdown < 0) {
+                      clearInterval(interval);
+                      recoveryDiv.remove();
+                      resetSMSState();
+                      sendSMS(document.getElementById('phone').value);
+                    }
+                  }, 1000);
+                };
+                
+                resetBtn.onclick = () => {
+                  resetSMSState();
+                  recoveryDiv.remove();
+                  document.getElementById('phone').value = '';
+                  document.getElementById('phone').focus();
+                  showMessage("✅ Estado limpo. Digite um número diferente.", "success");
+                };
+                
+                reloadBtn.onclick = () => {
+                  window.location.reload();
+                };
+                
+                const container = document.getElementById('sms-section') || document.querySelector('.form-container');
+                if (container) {
+                  container.appendChild(recoveryDiv);
+                }
+                
+              }, 1000);
+              
+              break;
+            case 'auth/captcha-check-failed':
+              errorMessage = "Falha no reCAPTCHA. Recarregue a página e tente novamente.";
+              break;
+            case 'auth/quota-exceeded':
+              errorMessage = "Limite diário de SMS excedido. Tente novamente amanhã ou use email.";
+              break;
+            case 'auth/app-not-authorized':
+              errorMessage = "App não autorizado para este domínio. Configure no Firebase Console.";
+              break;
+            default:
+              errorMessage += `Código: ${smsError.code}`;
+          }
+        } else {
+          errorMessage += smsError.message || "Erro desconhecido.";
+        }
+        
+        showMessage(errorMessage, "error");
       }
       return smsSent;
     }
 
     // Função de cadastro
     async function signUp() {
+      console.log('🔄 Iniciando processo de cadastro...');
+      
+      // Verificar se SMS está habilitado ou usar cadastro direto
+      if (!SMS_VERIFICATION_ENABLED) {
+        console.log('📧 Usando cadastro direto por email (SMS desabilitado)');
+        return await directEmailSignUp();
+      }
+      
+      // Sistema SMS original (quando habilitado)
+      console.log('📱 Usando cadastro com verificação SMS');
+      
       const email = document.getElementById("email")?.value?.trim();
       const password = document.getElementById("password")?.value?.trim();
       const rawPhone = document.getElementById("phone")?.value?.trim();
@@ -274,6 +569,33 @@ console.log('🚀 Carregando auth.js...');
       if (!sent) {
         isNewUserRegistering = false;
         return;
+      }
+    }
+
+    // Função para reset de senha (corrige erro do console)
+    async function resetPassword() {
+      const email = document.getElementById("email")?.value?.trim();
+      
+      if (!email) {
+        showMessage("Digite seu e-mail para recuperar a senha.", "error");
+        return;
+      }
+
+      try {
+        showMessage("Enviando e-mail de recuperação...", "success");
+        await sendPasswordResetEmail(auth, email);
+        showMessage("E-mail de recuperação enviado! Verifique sua caixa de entrada.", "success");
+      } catch (error) {
+        console.error('❌ Erro ao enviar e-mail de recuperação:', error);
+        let errorMessage = "Erro ao enviar e-mail de recuperação.";
+        
+        if (error.code === 'auth/user-not-found') {
+          errorMessage = "E-mail não encontrado. Verifique se digitou corretamente.";
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = "E-mail inválido. Digite um e-mail válido.";
+        }
+        
+        showMessage(errorMessage, "error");
       }
     }
 
@@ -434,7 +756,7 @@ console.log('🚀 Carregando auth.js...');
       if (forgotLink) {
         forgotLink.addEventListener("click", (e) => {
           e.preventDefault();
-          window.forgotPassword();
+          window.resetPassword();
         });
       }
 
@@ -451,7 +773,17 @@ console.log('🚀 Carregando auth.js...');
     // Verificar estado de autenticação
     checkAuthState();
 
-    console.log('✅ Sistema de autenticação carregado com sucesso');
+    // Exportar funções importantes para acesso global
+    window.resetSMSState = resetSMSState;
+    window.sendSMS = sendSMS;
+    window.login = login;
+    window.resetPassword = resetPassword;
+    window.verifySMSCode = confirmSMSCode; // Corrigir referência para função existente
+    window.confirmSMSCode = confirmSMSCode;
+    window.directEmailSignUp = directEmailSignUp;
+    window.signUp = signUp;
+
+    console.log('✅ Sistema de autenticação carregado - Modo:', SMS_VERIFICATION_ENABLED ? 'SMS' : 'Email Direto');
 
   } catch (error) {
     console.error('❌ Erro crítico ao carregar auth.js:', error);
