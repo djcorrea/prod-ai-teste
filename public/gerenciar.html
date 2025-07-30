@@ -197,6 +197,28 @@
                 <div class="support-footer-item">
                     <span class="support-item-icon">⚡</span>
                     <span>Resposta em até 2 horas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Cancelamento -->
+    <div class="cancel-confirmation-overlay" id="cancel-confirmation-overlay">
+        <div class="cancel-confirmation-modal">
+            <div class="cancel-modal-content">
+                <div class="cancel-modal-icon">⚠️</div>
+                <h3 class="cancel-modal-title">Cancelar Assinatura</h3>
+                <p class="cancel-modal-description">
+                    Tem certeza que deseja cancelar sua assinatura? Você continuará com acesso ao Plus até o fim do período atual.
+                </p>
+                <div class="cancel-modal-buttons">
+                    <button class="cancel-modal-btn cancel-modal-btn-cancel" id="cancel-modal-btn-cancel">
+                        <span class="btn-icon">❌</span>
+                        Cancelar
+                    </button>
+                    <button class="cancel-modal-btn cancel-modal-btn-confirm" id="cancel-modal-btn-confirm">
+                        <span class="btn-icon">✅</span>
+                        Confirmar Cancelamento
+                    </button>
                 </div>
             </div>
         </div>
@@ -232,6 +254,7 @@
             const redoInterviewBtn = document.getElementById('redo-interview-btn');
             const backToChatBtn = document.getElementById('back-to-chat-simple');
             const upgradeBtn = document.getElementById('upgrade-plan-btn');
+            const cancelSubscriptionBtn = document.getElementById('cancel-subscription-btn');
             
             // Verificar se o usuário está autenticado
             let currentUser = null;
@@ -717,6 +740,110 @@
                 }, 15000);
             }
             
+            // Função para mostrar o modal de confirmação de cancelamento
+            function showCancelConfirmationModal() {
+                const overlay = document.getElementById('cancel-confirmation-overlay');
+                if (overlay) {
+                    overlay.classList.add('show');
+                    
+                    // Prevenir scroll do body
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            // Função para esconder o modal de confirmação de cancelamento
+            function hideCancelConfirmationModal() {
+                const overlay = document.getElementById('cancel-confirmation-overlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    
+                    // Restaurar scroll do body
+                    document.body.style.overflow = '';
+                }
+            }
+            
+            // Função principal para cancelar assinatura
+            async function cancelSubscription() {
+                if (!currentUser) {
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const confirmBtn = document.getElementById('cancel-modal-btn-confirm');
+                const cancelBtn = document.getElementById('cancel-modal-btn-cancel');
+                
+                // Desabilitar botões durante o processo
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<span class="btn-icon">⏳</span>Cancelando...';
+                }
+                if (cancelBtn) {
+                    cancelBtn.disabled = true;
+                }
+                
+                try {
+                    console.log('🔄 Iniciando cancelamento de assinatura...');
+                    
+                    // Obter token do usuário
+                    const idToken = await currentUser.getIdToken();
+                    
+                    // Fazer requisição para cancelar assinatura
+                    const response = await fetch('/api/cancel-subscription', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${idToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        console.log('✅ Assinatura cancelada com sucesso');
+                        
+                        // Esconder modal
+                        hideCancelConfirmationModal();
+                        
+                        // Mostrar mensagem de sucesso
+                        showMessage('✅ ' + result.message, 'success');
+                        
+                        // Opcional: Atualizar interface para refletir cancelamento
+                        // (pode ser usado para mostrar status "cancelado" em algum lugar)
+                        
+                    } else {
+                        console.error('❌ Erro ao cancelar assinatura:', result);
+                        
+                        // Esconder modal
+                        hideCancelConfirmationModal();
+                        
+                        // Mostrar mensagem de erro
+                        const errorMessage = result.error || 'Erro ao cancelar assinatura. Tente novamente.';
+                        showMessage('❌ ' + errorMessage, 'error');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro de rede ao cancelar assinatura:', error);
+                    
+                    // Esconder modal
+                    hideCancelConfirmationModal();
+                    
+                    // Mostrar mensagem de erro de rede
+                    showMessage('❌ Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+                } finally {
+                    // Reabilitar botões
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = '<span class="btn-icon">✅</span>Confirmar Cancelamento';
+                    }
+                    if (cancelBtn) {
+                        cancelBtn.disabled = false;
+                    }
+                }
+            }
+            
             // Event Listeners
             if (updatePasswordBtn) {
                 updatePasswordBtn.addEventListener('click', changePassword);
@@ -777,6 +904,52 @@
                     window.location.href = 'planos.html';
                 });
             }
+            
+            // Botão cancelar assinatura - mostrar modal de confirmação
+            if (cancelSubscriptionBtn) {
+                cancelSubscriptionBtn.addEventListener('click', function() {
+                    showCancelConfirmationModal();
+                });
+            }
+            
+            // Event listeners para o modal de cancelamento
+            const cancelModalBtnCancel = document.getElementById('cancel-modal-btn-cancel');
+            const cancelModalBtnConfirm = document.getElementById('cancel-modal-btn-confirm');
+            const cancelConfirmationOverlay = document.getElementById('cancel-confirmation-overlay');
+            
+            // Botão "Cancelar" no modal (fechar modal)
+            if (cancelModalBtnCancel) {
+                cancelModalBtnCancel.addEventListener('click', function() {
+                    hideCancelConfirmationModal();
+                });
+            }
+            
+            // Botão "Confirmar Cancelamento" no modal
+            if (cancelModalBtnConfirm) {
+                cancelModalBtnConfirm.addEventListener('click', function() {
+                    cancelSubscription();
+                });
+            }
+            
+            // Fechar modal clicando no overlay (fundo)
+            if (cancelConfirmationOverlay) {
+                cancelConfirmationOverlay.addEventListener('click', function(e) {
+                    // Só fechar se clicou no overlay (não no modal)
+                    if (e.target === cancelConfirmationOverlay) {
+                        hideCancelConfirmationModal();
+                    }
+                });
+            }
+            
+            // Fechar modal com tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const overlay = document.getElementById('cancel-confirmation-overlay');
+                    if (overlay && overlay.classList.contains('show')) {
+                        hideCancelConfirmationModal();
+                    }
+                }
+            });
             
             console.log('🔧 Event listeners configurados');
         }, 100);
