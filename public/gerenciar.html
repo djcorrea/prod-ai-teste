@@ -218,7 +218,7 @@
         // Aguardar um pouco para garantir que o Firebase carregue
         setTimeout(async () => {
             const { auth } = await import('./firebase.js');
-            const { onAuthStateChanged, updatePassword, updateEmail, sendEmailVerification, applyActionCode } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+            const { onAuthStateChanged, updatePassword, updateEmail, verifyBeforeUpdateEmail, applyActionCode } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
             
             console.log('🔧 Gerenciar.js carregado');
             
@@ -521,13 +521,13 @@
                     localStorage.setItem('novoEmailTemp', newEmail);
                     console.log('✅ E-mail salvo no localStorage:', newEmail);
                     
-                    // SEGUNDO: Enviar e-mail de verificação (SEM updateEmail)
+                    // SEGUNDO: Usar verifyBeforeUpdateEmail (método recomendado pelo Firebase)
                     const actionCodeSettings = {
                         url: 'https://prod-ai-teste.vercel.app/gerenciar.html',
                         handleCodeInApp: true
                     };
                     
-                    await sendEmailVerification(currentUser, actionCodeSettings);
+                    await verifyBeforeUpdateEmail(currentUser, newEmail, actionCodeSettings);
                     
                     console.log('✅ E-mail de verificação enviado');
                     showMessage('📧 E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar a alteração.', 'success', 'email');
