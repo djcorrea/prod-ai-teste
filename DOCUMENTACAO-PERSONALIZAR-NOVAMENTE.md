@@ -14,7 +14,8 @@ A funcionalidade "Personalizar Novamente" foi implementada com sucesso no arquiv
 ### 2. **Para Usuários Plus** ✅
 - **Limpa dados antigos**: Remove o campo `perfil` do documento do usuário no Firestore
 - **Reset do status**: Define `entrevistaConcluida: false`
-- **Redirecionamento**: Leva o usuário para `entrevista.html` para refazer a personalização
+- **Redirecionamento inteligente**: Leva o usuário para `entrevista.html?repersonalizando=true`
+- **Fluxo otimizado**: Após refazer a entrevista, vai direto para `index.html` (pula `entrevista-final.html`)
 - **Sem limitações**: Função pode ser usada quantas vezes o usuário quiser
 
 ### 3. **Para Usuários Gratuitos** 🚫
@@ -47,12 +48,24 @@ Assine a versão Plus para refazer sua entrevista e receber respostas 100% perso
 ## 🔧 IMPLEMENTAÇÃO TÉCNICA
 
 ### Arquivos Modificados:
-1. **`gerenciar.html`** - Lógica principal e event listeners
+1. **`gerenciar.html`** - Lógica principal e event listeners + redirecionamento com parâmetro
 2. **`gerenciar.css`** - Estilos do card de bloqueio Plus
+3. **`entrevista.html`** - Detecção de repersonalização e redirecionamento inteligente
+4. **`entrevista.js`** - Mesma lógica de redirecionamento para compatibilidade
 
 ### Funções Principais:
 - **`redoInterview()`** - Função principal que verifica plano e executa ação
 - **`showPlusOnlyMessage()`** - Exibe card de bloqueio para usuários gratuitos
+
+### Lógica de Redirecionamento:
+- **Primeira entrevista**: `entrevista.html` → `entrevista-final.html` → `index.html` 
+- **Repersonalização**: `entrevista.html?repersonalizando=true` → `index.html` (direto)
+
+### Detecção de Repersonalização:
+```javascript
+const urlParams = new URLSearchParams(window.location.search);
+const isRepersonalizando = urlParams.get('repersonalizando') === 'true';
+```
 
 ### Dados Removidos (Usuários Plus):
 - `perfil.nomeArtistico`
@@ -83,8 +96,9 @@ Assine a versão Plus para refazer sua entrevista e receber respostas 100% perso
 1. Clica em "Personalizar novamente" ♻️
 2. Sistema verifica plano ✅
 3. Dados antigos são apagados 🗑️
-4. Redirecionamento para entrevista 🔄
+4. Redirecionamento para entrevista com parâmetro `?repersonalizando=true` 🔄
 5. Nova personalização salva ✅
+6. **Redirecionamento direto para `index.html`** (pula entrevista-final) 🏠
 
 ### Usuário Gratuito:
 1. Clica em "Personalizar novamente" ♻️
@@ -93,14 +107,26 @@ Assine a versão Plus para refazer sua entrevista e receber respostas 100% perso
 4. Opção de assinar Plus ⭐
 5. Permanece na página atual
 
+### Novo Usuário (Primeira vez):
+1. Cadastro/Login → `entrevista.html` 📝
+2. Preenche entrevista → `entrevista-final.html` 🎉
+3. Convite para assinar Plus → `index.html` 🏠
+
 ## 🧪 TESTES VALIDADOS
 
 ### Cenários Testados:
-- ✅ Usuário Plus com dados existentes
+- ✅ Usuário Plus com dados existentes (repersonalização)
 - ✅ Usuário gratuito tentando usar a função
 - ✅ Usuário não autenticado
 - ✅ Erros de conexão
 - ✅ Responsividade do card de bloqueio
+- ✅ **Redirecionamento correto após repersonalização**
+- ✅ **Fluxo original mantido para novos usuários**
+
+### Validações de Redirecionamento:
+- ✅ **Primeira entrevista**: Vai para `entrevista-final.html` (normal)
+- ✅ **Repersonalização**: Pula `entrevista-final.html` e vai direto para `index.html`
+- ✅ **Parâmetro URL**: Detecta corretamente `?repersonalizando=true`
 
 ## 🚀 CARACTERÍSTICAS TÉCNICAS
 
@@ -118,6 +144,42 @@ O card de bloqueio se adapta automaticamente a:
 - **Desktop**: Layout horizontal com botões lado a lado
 - **Tablet**: Layout flexível
 - **Mobile**: Layout vertical com botões empilhados
+
+---
+
+## 🔧 CORREÇÃO DE REDIRECIONAMENTO IMPLEMENTADA
+
+### ❌ Problema Anterior:
+Usuários Plus que faziam repersonalização eram redirecionados para `entrevista-final.html` após refazer a entrevista, assim como novos usuários.
+
+### ✅ Solução Implementada:
+**Redirecionamento Inteligente com Parâmetro URL**
+
+1. **Detecção de Repersonalização**: 
+   - Adicionado parâmetro `?repersonalizando=true` no redirecionamento do `gerenciar.html`
+   - Detectado nos arquivos `entrevista.html` e `entrevista.js`
+
+2. **Lógica Condicional**:
+   ```javascript
+   const urlParams = new URLSearchParams(window.location.search);
+   const isRepersonalizando = urlParams.get('repersonalizando') === 'true';
+   
+   if (isRepersonalizando) {
+       window.location.href = 'index.html';  // Direto ao chat
+   } else {
+       window.location.href = 'entrevista-final.html';  // Página final
+   }
+   ```
+
+3. **Fluxos Preservados**:
+   - **Novos usuários**: `entrevista.html` → `entrevista-final.html` → `index.html`
+   - **Repersonalização**: `entrevista.html?repersonalizando=true` → `index.html`
+
+### 🎯 Benefícios:
+- ✅ Experiência de usuário Plus mais fluida
+- ✅ `entrevista-final.html` mostrada apenas uma vez
+- ✅ Fluxo original de novos usuários mantido
+- ✅ Solução robusta e não-invasiva
 
 ---
 

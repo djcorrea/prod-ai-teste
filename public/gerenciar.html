@@ -632,9 +632,9 @@
                     // Mostrar mensagem de sucesso
                     showMessage('✅ Dados apagados! Redirecionando para nova entrevista...', 'success', 'personalizar');
                     
-                    // Redirecionar após breve pausa
+                    // Redirecionar após breve pausa com parâmetro de repersonalização
                     setTimeout(() => {
-                        window.location.href = 'entrevista.html';
+                        window.location.href = 'entrevista.html?repersonalizando=true';
                     }, 1500);
                     
                 } catch (error) {
