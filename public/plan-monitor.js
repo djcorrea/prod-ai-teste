@@ -19,7 +19,54 @@ async function checkUserPlanStatus() {
         const userDoc = await getDoc(doc(window.db, 'usuarios', user.uid));
         const userData = userDoc.data();
         
-        if (userData && userData.plano !== currentUserPlan) {
+        if (!userData) return;
+
+        // ============ VERIFICAÇÃO DE EXPIRAÇÃO DO PLANO PLUS ============
+        if (userData.planExpiresAt && userData.plano === 'plus') {
+            const currentDate = new Date();
+            let expirationDate;
+            
+            // Converter planExpiresAt para Date (compatível com diferentes formatos)
+            if (userData.planExpiresAt instanceof Date) {
+                expirationDate = userData.planExpiresAt;
+            } else if (userData.planExpiresAt.toDate && typeof userData.planExpiresAt.toDate === 'function') {
+                // Firestore Timestamp
+                expirationDate = userData.planExpiresAt.toDate();
+            } else if (typeof userData.planExpiresAt === 'string' || typeof userData.planExpiresAt === 'number') {
+                expirationDate = new Date(userData.planExpiresAt);
+            } else {
+                console.warn('⚠️ Formato de planExpiresAt não reconhecido:', userData.planExpiresAt);
+                return;
+            }
+            
+            console.log('📅 Verificando expiração do plano:', {
+                atual: currentDate.toISOString(),
+                expira: expirationDate.toISOString(),
+                expirado: expirationDate <= currentDate
+            });
+            
+            // Se o plano já expirou, forçar atualização da página
+            if (expirationDate <= currentDate) {
+                console.log('⏰ PLANO PLUS EXPIRADO DETECTADO NO FRONTEND!');
+                console.log('🔄 Forçando reload para atualizar status...');
+                
+                // Mostrar mensagem ao usuário antes do reload
+                if (typeof addMessageToChat === 'function') {
+                    addMessageToChat('system', '⏰ Seu plano Plus expirou. Atualizando seu acesso...');
+                }
+                
+                // Aguardar um pouco para a mensagem aparecer
+                setTimeout(() => {
+                    // Forçar reload da página para que o backend processe a expiração
+                    location.reload();
+                }, 2000);
+                
+                return; // Não continuar verificação
+            }
+        }
+
+        // ============ VERIFICAÇÃO DE MUDANÇA DE PLANO ============
+        if (userData.plano !== currentUserPlan) {
             const previousPlan = currentUserPlan;
             currentUserPlan = userData.plano;
             
@@ -35,6 +82,13 @@ async function checkUserPlanStatus() {
                     } else {
                         addMessageToChat('system', '💡 Dica: Complete sua entrevista de perfil para respostas ainda mais personalizadas! <a href="entrevista.html" target="_blank">Clique aqui</a>');
                     }
+                }
+            }
+            
+            // Se mudou de plus para gratuito (por expiração)
+            if (previousPlan === 'plus' && currentUserPlan === 'gratis') {
+                if (typeof addMessageToChat === 'function') {
+                    addMessageToChat('system', '⏰ Seu plano Plus expirou. Você agora tem acesso ao plano gratuito com limite de 10 mensagens diárias. <a href="planos.html" target="_blank">Renovar Plus</a>');
                 }
             }
             

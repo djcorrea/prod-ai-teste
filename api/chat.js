@@ -106,6 +106,36 @@ async function handleUserLimits(db, uid, email) {
         userData = snap.data();
         const lastReset = userData.dataUltimoReset?.toDate().toDateString();
 
+        // VERIFICAÇÃO AUTOMÁTICA DE EXPIRAÇÃO DO PLANO PLUS
+        if (userData.plano === 'plus' && userData.planExpiresAt) {
+          const currentDate = new Date();
+          const expirationDate = userData.planExpiresAt instanceof Date ? 
+            userData.planExpiresAt : 
+            userData.planExpiresAt.toDate ? userData.planExpiresAt.toDate() : new Date(userData.planExpiresAt);
+          
+          if (expirationDate <= currentDate) {
+            console.log('⏰ Plano Plus expirado, convertendo para gratuito:', uid);
+            
+            // Dados para converter plano expirado
+            const expiredPlanData = {
+              plano: 'gratis',
+              isPlus: false,
+              mensagensRestantes: 10,
+              planExpiredAt: now,
+              previousPlan: 'plus',
+              dataUltimoReset: now
+            };
+            
+            // Atualizar no Firestore
+            tx.update(userRef, expiredPlanData);
+            
+            // Atualizar userData local para refletir as mudanças
+            userData = { ...userData, ...expiredPlanData };
+            
+            console.log('✅ Usuário convertido de Plus expirado para gratuito:', uid);
+          }
+        }
+
         if (lastReset !== today) {
           userData.mensagensRestantes = 10;
           tx.update(userRef, {
