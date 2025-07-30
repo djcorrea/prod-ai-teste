@@ -229,6 +229,7 @@
             const newEmailInput = document.getElementById('new-email');
             const confirmEmailInput = document.getElementById('confirm-email');
             const updateEmailBtn = document.getElementById('update-email-btn');
+            const redoInterviewBtn = document.getElementById('redo-interview-btn');
             const backToChatBtn = document.getElementById('back-to-chat-simple');
             
             // Verificar se o usuário está autenticado
@@ -277,6 +278,8 @@
                     targetCard = updatePasswordBtn.closest('.function-card');
                 } else if (cardSelector === 'email') {
                     targetCard = updateEmailBtn.closest('.function-card');
+                } else if (cardSelector === 'personalizar') {
+                    targetCard = redoInterviewBtn.closest('.function-card');
                 } else {
                     targetCard = document.querySelector(cardSelector);
                 }
@@ -573,6 +576,146 @@
                 }
             }
             
+            // Função para personalizar novamente (exclusiva para usuários Plus)
+            async function redoInterview() {
+                if (!currentUser) {
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error', 'personalizar');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                try {
+                    console.log('🔄 Verificando plano do usuário...');
+                    
+                    // Importar Firestore necessário
+                    const { doc, getDoc, deleteField, updateDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                    const { db } = await import('./firebase.js');
+                    
+                    // Verificar plano do usuário no Firestore
+                    const userDocRef = doc(db, 'usuarios', currentUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    if (!userDoc.exists()) {
+                        showMessage('❌ Dados do usuário não encontrados.', 'error', 'personalizar');
+                        return;
+                    }
+                    
+                    const userData = userDoc.data();
+                    const isPlus = userData.plano === 'plus' || userData.isPlus === true;
+                    
+                    console.log('📊 Plano do usuário:', userData.plano, 'isPlus:', userData.isPlus);
+                    
+                    if (!isPlus) {
+                        // Usuário não é Plus - mostrar card de bloqueio
+                        showPlusOnlyMessage();
+                        return;
+                    }
+                    
+                    // Usuário é Plus - prosseguir com redirecionamento e limpeza
+                    console.log('✅ Usuário Plus confirmado - prosseguindo...');
+                    
+                    // Desabilitar botão durante o processo
+                    redoInterviewBtn.disabled = true;
+                    redoInterviewBtn.innerHTML = '<span class="btn-icon">⏳</span>Apagando dados...';
+                    
+                    // Apagar dados antigos da entrevista
+                    await updateDoc(userDocRef, {
+                        perfil: deleteField(),
+                        entrevistaConcluida: false,
+                        dataUltimaEntrevista: deleteField()
+                    });
+                    
+                    console.log('✅ Dados da entrevista apagados com sucesso');
+                    
+                    // Mostrar mensagem de sucesso
+                    showMessage('✅ Dados apagados! Redirecionando para nova entrevista...', 'success', 'personalizar');
+                    
+                    // Redirecionar após breve pausa
+                    setTimeout(() => {
+                        window.location.href = 'entrevista.html';
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao processar personalização:', error);
+                    
+                    let errorMessage = 'Erro ao processar solicitação. Tente novamente.';
+                    
+                    switch (error.code) {
+                        case 'auth/requires-recent-login':
+                            errorMessage = '🔒 Para esta ação, você precisa fazer login novamente. Redirecionando...';
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 3000);
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = '🌐 Erro de conexão. Verifique sua internet e tente novamente.';
+                            break;
+                        default:
+                            errorMessage = `❌ Erro: ${error.message}`;
+                    }
+                    
+                    showMessage(errorMessage, 'error', 'personalizar');
+                } finally {
+                    // Reabilitar botão
+                    redoInterviewBtn.disabled = false;
+                    redoInterviewBtn.innerHTML = '<span class="btn-icon">♻️</span>Personalizar novamente';
+                }
+            }
+            
+            // Função para mostrar mensagem exclusiva para Plus
+            function showPlusOnlyMessage() {
+                // Remover mensagem anterior se existir
+                const existingCard = document.querySelector('.plus-only-card');
+                if (existingCard) {
+                    existingCard.remove();
+                }
+                
+                // Criar card de bloqueio
+                const plusCard = document.createElement('div');
+                plusCard.className = 'plus-only-card';
+                plusCard.innerHTML = `
+                    <div class="plus-card-content">
+                        <div class="plus-card-icon">🔒</div>
+                        <h3 class="plus-card-title">Personalização disponível somente para usuários Plus</h3>
+                        <p class="plus-card-description">
+                            Assine a versão Plus para refazer sua entrevista e receber respostas 100% personalizadas com base no seu perfil.
+                        </p>
+                        <div class="plus-card-buttons">
+                            <a href="planos.html" class="btn-plus-upgrade">
+                                <span class="btn-icon">⭐</span>
+                                Assinar Plus
+                            </a>
+                            <button class="btn-plus-close" onclick="this.closest('.plus-only-card').remove()">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Adicionar após o card de personalizar
+                const personalizeCard = redoInterviewBtn.closest('.function-card');
+                personalizeCard.insertAdjacentElement('afterend', plusCard);
+                
+                // Animar entrada
+                setTimeout(() => {
+                    plusCard.classList.add('show');
+                }, 10);
+                
+                // Auto-remover após 15 segundos
+                setTimeout(() => {
+                    if (plusCard.parentNode) {
+                        plusCard.classList.remove('show');
+                        setTimeout(() => {
+                            if (plusCard.parentNode) {
+                                plusCard.remove();
+                            }
+                        }, 300);
+                    }
+                }, 15000);
+            }
+            
             // Event Listeners
             if (updatePasswordBtn) {
                 updatePasswordBtn.addEventListener('click', changePassword);
@@ -580,6 +723,10 @@
             
             if (updateEmailBtn) {
                 updateEmailBtn.addEventListener('click', changeEmail);
+            }
+            
+            if (redoInterviewBtn) {
+                redoInterviewBtn.addEventListener('click', redoInterview);
             }
             
             // Permitir Enter nos campos de senha

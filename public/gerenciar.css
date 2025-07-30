@@ -975,3 +975,151 @@ body {
         min-width: 18px;
     }
 }
+
+/* ============ CARD EXCLUSIVO PLUS ============ */
+.plus-only-card {
+    background: linear-gradient(135deg, 
+        rgba(123, 44, 191, 0.15) 0%, 
+        rgba(64, 123, 255, 0.15) 100%);
+    border: 1px solid rgba(123, 44, 191, 0.3);
+    border-radius: 16px;
+    padding: 0;
+    margin: 1.5rem 0;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.plus-only-card.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.plus-only-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #7b2cbf 0%, #407bff 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+.plus-card-content {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.plus-card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+    display: inline-block;
+    background: linear-gradient(135deg, #7b2cbf 0%, #407bff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.plus-card-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #f0f0f0;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.plus-card-description {
+    font-size: 1rem;
+    color: rgba(240, 240, 240, 0.8);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.plus-card-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.btn-plus-upgrade {
+    background: linear-gradient(135deg, #7b2cbf 0%, #407bff 100%);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(123, 44, 191, 0.3);
+}
+
+.btn-plus-upgrade:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(123, 44, 191, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-plus-close {
+    background: transparent;
+    color: rgba(240, 240, 240, 0.6);
+    border: 1px solid rgba(240, 240, 240, 0.2);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-plus-close:hover {
+    color: rgba(240, 240, 240, 0.8);
+    border-color: rgba(240, 240, 240, 0.3);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsividade do card Plus */
+@media (max-width: 768px) {
+    .plus-only-card {
+        margin: 1rem 0;
+    }
+    
+    .plus-card-content {
+        padding: 1.5rem;
+    }
+    
+    .plus-card-title {
+        font-size: 1.2rem;
+    }
+    
+    .plus-card-description {
+        font-size: 0.9rem;
+    }
+    
+    .plus-card-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn-plus-upgrade,
+    .btn-plus-close {
+        width: 100%;
+        justify-content: center;
+    }
+}
