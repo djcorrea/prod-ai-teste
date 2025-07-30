@@ -218,7 +218,7 @@
         // Aguardar um pouco para garantir que o Firebase carregue
         setTimeout(async () => {
             const { auth } = await import('./firebase.js');
-            const { onAuthStateChanged, updatePassword } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+            const { onAuthStateChanged, updatePassword, updateEmail, sendEmailVerification, applyActionCode } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
             
             console.log('🔧 Gerenciar.js carregado');
             
@@ -226,6 +226,9 @@
             const newPasswordInput = document.getElementById('new-password');
             const confirmPasswordInput = document.getElementById('confirm-password');
             const updatePasswordBtn = document.getElementById('update-password-btn');
+            const newEmailInput = document.getElementById('new-email');
+            const confirmEmailInput = document.getElementById('confirm-email');
+            const updateEmailBtn = document.getElementById('update-email-btn');
             const backToChatBtn = document.getElementById('back-to-chat-simple');
             
             // Verificar se o usuário está autenticado
@@ -238,6 +241,9 @@
                     
                     // Atualizar informações do usuário na página
                     updateUserInfo(user);
+                    
+                    // Verificar se há código de verificação na URL
+                    checkEmailVerificationCode();
                 } else {
                     console.log('❌ Usuário não autenticado - redirecionando...');
                     // Redirecionar usuários não autenticados
@@ -253,7 +259,7 @@
             }
             
             // Função para mostrar mensagens de feedback
-            function showMessage(message, type = 'success') {
+            function showMessage(message, type = 'success', cardSelector = '.function-card') {
                 // Remove mensagem anterior se existir
                 const existingMessage = document.querySelector('.feedback-message');
                 if (existingMessage) {
@@ -265,9 +271,19 @@
                 messageDiv.className = `feedback-message ${type}`;
                 messageDiv.textContent = message;
                 
-                // Adicionar ao card de alterar senha
-                const passwordCard = updatePasswordBtn.closest('.function-card');
-                passwordCard.insertBefore(messageDiv, passwordCard.querySelector('.card-body'));
+                // Determinar qual card adicionar a mensagem
+                let targetCard;
+                if (cardSelector === 'password') {
+                    targetCard = updatePasswordBtn.closest('.function-card');
+                } else if (cardSelector === 'email') {
+                    targetCard = updateEmailBtn.closest('.function-card');
+                } else {
+                    targetCard = document.querySelector(cardSelector);
+                }
+                
+                if (targetCard) {
+                    targetCard.insertBefore(messageDiv, targetCard.querySelector('.card-body'));
+                }
                 
                 // Auto-remover após 5 segundos
                 setTimeout(() => {
@@ -285,10 +301,73 @@
                 return null;
             }
             
+            // Função para validar e-mail
+            function validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    return 'Por favor, insira um e-mail válido';
+                }
+                return null;
+            }
+            
+            // Função para verificar código de verificação de e-mail na URL
+            async function checkEmailVerificationCode() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const oobCode = urlParams.get('oobCode');
+                const mode = urlParams.get('mode');
+                
+                if (oobCode && mode === 'verifyEmail') {
+                    console.log('🔍 Código de verificação encontrado na URL');
+                    
+                    try {
+                        // Aplicar o código de verificação
+                        await applyActionCode(auth, oobCode);
+                        
+                        console.log('✅ E-mail verificado com sucesso');
+                        showMessage('✅ E-mail verificado e atualizado com sucesso!', 'success', 'email');
+                        
+                        // Limpar a URL removendo os parâmetros
+                        const newUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                        
+                        // Recarregar o usuário para obter as informações atualizadas
+                        if (currentUser) {
+                            await currentUser.reload();
+                            updateUserInfo(currentUser);
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ Erro ao verificar e-mail:', error);
+                        
+                        let errorMessage = 'Erro ao verificar e-mail. Tente novamente.';
+                        
+                        switch (error.code) {
+                            case 'auth/expired-action-code':
+                                errorMessage = '⏰ Link de verificação expirado. Solicite um novo.';
+                                break;
+                            case 'auth/invalid-action-code':
+                                errorMessage = '❌ Link de verificação inválido.';
+                                break;
+                            case 'auth/user-disabled':
+                                errorMessage = '🚫 Conta desabilitada. Entre em contato com o suporte.';
+                                break;
+                            default:
+                                errorMessage = `❌ Erro: ${error.message}`;
+                        }
+                        
+                        showMessage(errorMessage, 'error', 'email');
+                        
+                        // Limpar a URL mesmo em caso de erro
+                        const newUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                    }
+                }
+            }
+            
             // Função principal para alterar senha
             async function changePassword() {
                 if (!currentUser) {
-                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error');
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error', 'password');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
@@ -300,18 +379,18 @@
                 
                 // Validações
                 if (!newPassword || !confirmPassword) {
-                    showMessage('Por favor, preencha todos os campos', 'error');
+                    showMessage('Por favor, preencha todos os campos', 'error', 'password');
                     return;
                 }
                 
                 if (newPassword !== confirmPassword) {
-                    showMessage('As senhas não coincidem', 'error');
+                    showMessage('As senhas não coincidem', 'error', 'password');
                     return;
                 }
                 
                 const passwordError = validatePassword(newPassword);
                 if (passwordError) {
-                    showMessage(passwordError, 'error');
+                    showMessage(passwordError, 'error', 'password');
                     return;
                 }
                 
@@ -324,7 +403,7 @@
                     await updatePassword(currentUser, newPassword);
                     
                     console.log('✅ Senha atualizada com sucesso');
-                    showMessage('✅ Senha atualizada com sucesso!', 'success');
+                    showMessage('✅ Senha atualizada com sucesso!', 'success', 'password');
                     
                     // Limpar campos
                     newPasswordInput.value = '';
@@ -356,7 +435,7 @@
                             errorMessage = `❌ Erro: ${error.message}`;
                     }
                     
-                    showMessage(errorMessage, 'error');
+                    showMessage(errorMessage, 'error', 'password');
                 } finally {
                     // Reabilitar botão
                     updatePasswordBtn.disabled = false;
@@ -364,9 +443,111 @@
                 }
             }
             
+            // Função principal para alterar e-mail
+            async function changeEmail() {
+                if (!currentUser) {
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error', 'email');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const newEmail = newEmailInput.value.trim();
+                const confirmEmail = confirmEmailInput.value.trim();
+                
+                // Validações
+                if (!newEmail || !confirmEmail) {
+                    showMessage('Por favor, preencha todos os campos', 'error', 'email');
+                    return;
+                }
+                
+                if (newEmail !== confirmEmail) {
+                    showMessage('Os e-mails não coincidem', 'error', 'email');
+                    return;
+                }
+                
+                const emailError = validateEmail(newEmail);
+                if (emailError) {
+                    showMessage(emailError, 'error', 'email');
+                    return;
+                }
+                
+                // Verificar se o e-mail é diferente do atual
+                if (newEmail === currentUser.email) {
+                    showMessage('O novo e-mail deve ser diferente do atual', 'error', 'email');
+                    return;
+                }
+                
+                // Desabilitar botão durante o processo
+                updateEmailBtn.disabled = true;
+                updateEmailBtn.textContent = 'Enviando verificação...';
+                
+                try {
+                    // Atualizar e-mail no Firebase
+                    await updateEmail(currentUser, newEmail);
+                    
+                    console.log('✅ E-mail atualizado no Firebase');
+                    
+                    // Enviar e-mail de verificação
+                    const actionCodeSettings = {
+                        url: `${window.location.protocol}//${window.location.host}/gerenciar.html`,
+                        handleCodeInApp: true
+                    };
+                    
+                    await sendEmailVerification(currentUser, actionCodeSettings);
+                    
+                    console.log('✅ E-mail de verificação enviado');
+                    showMessage('📧 E-mail de verificação enviado! Verifique sua caixa de entrada e clique no link para confirmar a alteração.', 'success', 'email');
+                    
+                    // Limpar campos
+                    newEmailInput.value = '';
+                    confirmEmailInput.value = '';
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao alterar e-mail:', error);
+                    
+                    // Tratamento de erros específicos
+                    let errorMessage = 'Erro ao alterar e-mail. Tente novamente.';
+                    
+                    switch (error.code) {
+                        case 'auth/requires-recent-login':
+                            errorMessage = '🔒 Para alterar o e-mail, você precisa fazer login novamente. Redirecionando...';
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 3000);
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = '📧 E-mail inválido. Verifique o formato.';
+                            break;
+                        case 'auth/email-already-in-use':
+                            errorMessage = '📧 Este e-mail já está sendo usado por outra conta.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = '🌐 Erro de conexão. Verifique sua internet e tente novamente.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = '⏰ Muitas tentativas. Tente novamente em alguns minutos.';
+                            break;
+                        default:
+                            errorMessage = `❌ Erro: ${error.message}`;
+                    }
+                    
+                    showMessage(errorMessage, 'error', 'email');
+                } finally {
+                    // Reabilitar botão
+                    updateEmailBtn.disabled = false;
+                    updateEmailBtn.textContent = 'Atualizar e-mail';
+                }
+            }
+            
             // Event Listeners
             if (updatePasswordBtn) {
                 updatePasswordBtn.addEventListener('click', changePassword);
+            }
+            
+            if (updateEmailBtn) {
+                updateEmailBtn.addEventListener('click', changeEmail);
             }
             
             // Permitir Enter nos campos de senha
@@ -382,6 +563,23 @@
                 confirmPasswordInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         changePassword();
+                    }
+                });
+            }
+            
+            // Permitir Enter nos campos de e-mail
+            if (newEmailInput) {
+                newEmailInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        changeEmail();
+                    }
+                });
+            }
+            
+            if (confirmEmailInput) {
+                confirmEmailInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        changeEmail();
                     }
                 });
             }
