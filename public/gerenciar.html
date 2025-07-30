@@ -314,17 +314,41 @@
             async function checkEmailVerificationCode() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const oobCode = urlParams.get('oobCode');
-                const mode = urlParams.get('mode');
                 
-                if (oobCode && mode === 'verifyEmail') {
+                if (oobCode) {
                     console.log('🔍 Código de verificação encontrado na URL');
                     
-                    try {
-                        // Aplicar o código de verificação
-                        await applyActionCode(auth, oobCode);
+                    // Recuperar o novo e-mail salvo temporariamente
+                    const novoEmailTemp = localStorage.getItem('novoEmailTemp');
+                    
+                    if (!novoEmailTemp) {
+                        console.error('❌ Novo e-mail não encontrado no localStorage');
+                        showMessage('❌ Erro: novo e-mail não encontrado. Tente o processo novamente.', 'error', 'email');
                         
-                        console.log('✅ E-mail verificado com sucesso');
-                        showMessage('✅ E-mail verificado e atualizado com sucesso!', 'success', 'email');
+                        // Limpar a URL
+                        const newUrl = window.location.origin + window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                        return;
+                    }
+                    
+                    try {
+                        // Primeiro aplicar o código de verificação
+                        await applyActionCode(auth, oobCode);
+                        console.log('✅ Código de verificação aplicado com sucesso');
+                        
+                        // Aguardar um momento para garantir que o usuário está atualizado
+                        if (currentUser) {
+                            await currentUser.reload();
+                        }
+                        
+                        // Agora sim atualizar o e-mail no Firebase
+                        await updateEmail(currentUser, novoEmailTemp);
+                        console.log('✅ E-mail atualizado no Firebase');
+                        
+                        showMessage('✅ E-mail verificado e alterado com sucesso!', 'success', 'email');
+                        
+                        // Limpar o localStorage
+                        localStorage.removeItem('novoEmailTemp');
                         
                         // Limpar a URL removendo os parâmetros
                         const newUrl = window.location.origin + window.location.pathname;
@@ -337,9 +361,9 @@
                         }
                         
                     } catch (error) {
-                        console.error('❌ Erro ao verificar e-mail:', error);
+                        console.error('❌ Erro ao confirmar o novo e-mail:', error);
                         
-                        let errorMessage = 'Erro ao verificar e-mail. Tente novamente.';
+                        let errorMessage = 'Erro ao confirmar o novo e-mail. Tente novamente.';
                         
                         switch (error.code) {
                             case 'auth/expired-action-code':
@@ -351,11 +375,20 @@
                             case 'auth/user-disabled':
                                 errorMessage = '🚫 Conta desabilitada. Entre em contato com o suporte.';
                                 break;
+                            case 'auth/email-already-in-use':
+                                errorMessage = '📧 Este e-mail já está sendo usado por outra conta.';
+                                break;
+                            case 'auth/invalid-email':
+                                errorMessage = '📧 E-mail inválido.';
+                                break;
                             default:
                                 errorMessage = `❌ Erro: ${error.message}`;
                         }
                         
                         showMessage(errorMessage, 'error', 'email');
+                        
+                        // Limpar o localStorage em caso de erro
+                        localStorage.removeItem('novoEmailTemp');
                         
                         // Limpar a URL mesmo em caso de erro
                         const newUrl = window.location.origin + window.location.pathname;
@@ -484,14 +517,13 @@
                 updateEmailBtn.textContent = 'Enviando verificação...';
                 
                 try {
-                    // Atualizar e-mail no Firebase
-                    await updateEmail(currentUser, newEmail);
+                    // PRIMEIRO: Salvar o novo e-mail no localStorage
+                    localStorage.setItem('novoEmailTemp', newEmail);
+                    console.log('✅ E-mail salvo no localStorage:', newEmail);
                     
-                    console.log('✅ E-mail atualizado no Firebase');
-                    
-                    // Enviar e-mail de verificação
+                    // SEGUNDO: Enviar e-mail de verificação (SEM updateEmail)
                     const actionCodeSettings = {
-                        url: `${window.location.protocol}//${window.location.host}/gerenciar.html`,
+                        url: 'https://prod-ai-teste.vercel.app/gerenciar.html',
                         handleCodeInApp: true
                     };
                     
@@ -505,10 +537,13 @@
                     confirmEmailInput.value = '';
                     
                 } catch (error) {
-                    console.error('❌ Erro ao alterar e-mail:', error);
+                    console.error('❌ Erro ao enviar verificação de e-mail:', error);
+                    
+                    // Limpar localStorage em caso de erro
+                    localStorage.removeItem('novoEmailTemp');
                     
                     // Tratamento de erros específicos
-                    let errorMessage = 'Erro ao alterar e-mail. Tente novamente.';
+                    let errorMessage = 'Erro ao enviar verificação de e-mail. Tente novamente.';
                     
                     switch (error.code) {
                         case 'auth/requires-recent-login':
@@ -519,9 +554,6 @@
                             break;
                         case 'auth/invalid-email':
                             errorMessage = '📧 E-mail inválido. Verifique o formato.';
-                            break;
-                        case 'auth/email-already-in-use':
-                            errorMessage = '📧 Este e-mail já está sendo usado por outra conta.';
                             break;
                         case 'auth/network-request-failed':
                             errorMessage = '🌐 Erro de conexão. Verifique sua internet e tente novamente.';
