@@ -831,9 +831,32 @@
                         // Esconder modal
                         hideCancelConfirmationModal();
                         
-                        // Mostrar mensagem de erro
-                        const errorMessage = result.error || result.message || 'Erro ao cancelar assinatura. Tente novamente.';
-                        showMessage('❌ ' + errorMessage, 'error');
+                        // Tratamento específico para diferentes tipos de erro
+                        let errorMessage = 'Erro ao cancelar assinatura. Tente novamente.';
+                        let messageType = 'error';
+                        
+                        if (response.status === 400) {
+                            // Erro de validação (ex: assinatura já cancelada)
+                            errorMessage = result.error || result.message || 'Assinatura já foi cancelada ou não é válida.';
+                            messageType = 'warning'; // Usar warning em vez de error para casos menos críticos
+                        } else if (response.status === 401) {
+                            // Erro de autenticação
+                            errorMessage = 'Sessão expirada. Faça login novamente.';
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 2000);
+                        } else if (response.status === 404) {
+                            // Usuário não encontrado
+                            errorMessage = 'Usuário não encontrado. Tente fazer login novamente.';
+                        } else if (response.status >= 500) {
+                            // Erro do servidor
+                            errorMessage = 'Erro interno do servidor. Tente novamente em alguns minutos.';
+                        } else {
+                            // Outros erros
+                            errorMessage = result.error || result.message || errorMessage;
+                        }
+                        
+                        showMessage('❌ ' + errorMessage, messageType);
                     }
                     
                 } catch (error) {

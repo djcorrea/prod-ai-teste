@@ -45,6 +45,13 @@ export default async function handler(req, res) {
     }
 
     const userId = decodedToken.uid;
+    
+    // Validação adicional de segurança
+    if (!userId || typeof userId !== 'string' || userId.length === 0) {
+      console.error('❌ UID inválido no token:', userId);
+      return res.status(401).json({ error: 'Token não contém UID válido' });
+    }
+    
     console.log('🔧 Iniciando cancelamento de assinatura para usuário:', userId);
 
     // Buscar dados do usuário no Firestore
@@ -56,25 +63,42 @@ export default async function handler(req, res) {
     }
 
     const userData = userDoc.data();
+    
+    // Proteção contra dados ausentes ou corrompidos
+    if (!userData || typeof userData !== 'object') {
+      console.log('❌ Dados do usuário ausentes ou inválidos');
+      return res.status(404).json({ error: 'Dados do usuário não encontrados' });
+    }
+    
     console.log('👤 Dados do usuário encontrados:', {
       plano: userData.plano,
       isPlus: userData.isPlus,
       subscriptionStatus: userData.subscriptionStatus,
-      planExpiresAt: userData.planExpiresAt
+      planExpiresAt: userData.planExpiresAt,
+      upgradedAt: userData.upgradedAt
     });
     
-    // Verificar se o usuário tem plano Plus
-    if (userData.plano !== 'plus' && !userData.isPlus) {
+    // Verificar se o usuário tem plano Plus REAL
+    const hasValidPlusPlan = (userData.plano === 'plus' || userData.isPlus === true);
+    
+    if (!hasValidPlusPlan) {
       console.log('❌ Usuário não possui plano Plus');
       return res.status(400).json({ error: 'Usuário não possui assinatura ativa para cancelar' });
+    }
+    
+    // Para contas reais que pagaram, deve ter planExpiresAt
+    // Se não tem, mas tem Plus, provavelmente é conta de teste manual
+    if (!userData.planExpiresAt && hasValidPlusPlan) {
+      console.log('⚠️ Usuário Plus sem data de expiração - pode ser conta de teste');
+      // Continuar mesmo assim, mas adicionar data de expiração
     }
 
     // Verificar se já foi cancelado
     if (userData.subscriptionStatus === 'cancelled') {
       console.log('⚠️ Assinatura já estava cancelada');
-      return res.status(200).json({ 
-        success: true, 
-        message: 'Sua assinatura já estava cancelada. Você continuará com acesso ao Plus até o fim do período atual.' 
+      return res.status(400).json({ 
+        error: 'Assinatura já foi cancelada.',
+        message: 'Esta assinatura já foi cancelada anteriormente.' 
       });
     }
 
@@ -85,18 +109,23 @@ export default async function handler(req, res) {
     console.log('ℹ️ Cancelando assinatura (pagamento único) - apenas no sistema interno');
     
     // Atualizar status no Firestore
-    // IMPORTANTE: Não remover o plano Plus imediatamente
+    // IMPORTANTE: NUNCA remover o plano Plus ou planExpiresAt imediatamente
     // Apenas marcar como cancelado e parar renovações futuras
     const updateData = {
       subscriptionStatus: 'cancelled',
       cancelledAt: FieldValue.serverTimestamp(),
-      shouldRenew: false,
-      // Manter o plano ativo até uma data de expiração
-      // Se não há data de expiração, define para 30 dias a partir de agora
-      ...((!userData.planExpiresAt) && {
-        planExpiresAt: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) // 30 dias
-      })
+      shouldRenew: false
     };
+    
+    // Para contas de teste que não têm planExpiresAt, adicionar uma data
+    // Para contas reais, PRESERVAR a data existente
+    if (!userData.planExpiresAt) {
+      console.log('📅 Adicionando data de expiração para conta sem data prévia');
+      updateData.planExpiresAt = new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)); // 30 dias
+    } else {
+      console.log('📅 Preservando data de expiração existente:', userData.planExpiresAt);
+      // NÃO adicionar planExpiresAt ao updateData para preservar o valor existente
+    }
 
     console.log('📝 Dados a serem atualizados:', updateData);
     await db.collection('usuarios').doc(userId).update(updateData);
