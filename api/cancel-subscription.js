@@ -75,7 +75,8 @@ export default async function handler(req, res) {
       isPlus: userData.isPlus,
       subscriptionStatus: userData.subscriptionStatus,
       planExpiresAt: userData.planExpiresAt,
-      upgradedAt: userData.upgradedAt
+      upgradedAt: userData.upgradedAt,
+      shouldRenew: userData.shouldRenew
     });
     
     // Verificar se o usuário tem plano Plus REAL
@@ -86,11 +87,34 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Usuário não possui assinatura ativa para cancelar' });
     }
     
-    // Para contas reais que pagaram, deve ter planExpiresAt
-    // Se não tem, mas tem Plus, provavelmente é conta de teste manual
-    if (!userData.planExpiresAt && hasValidPlusPlan) {
-      console.log('⚠️ Usuário Plus sem data de expiração - pode ser conta de teste');
-      // Continuar mesmo assim, mas adicionar data de expiração
+    // VALIDAÇÃO ESPECÍFICA PARA CONTAS REAIS
+    // Para contas que pagaram via Mercado Pago, devem ter planExpiresAt
+    const isRealAccount = userData.planExpiresAt && userData.upgradedAt;
+    const isTestAccount = !userData.planExpiresAt && hasValidPlusPlan;
+    
+    if (isRealAccount) {
+      console.log('✅ Conta real detectada com data de expiração:', userData.planExpiresAt);
+      
+      // Verificar se o plano ainda está ativo (não expirou)
+      const now = new Date();
+      const expirationDate = userData.planExpiresAt instanceof Date ? 
+        userData.planExpiresAt : 
+        userData.planExpiresAt.toDate ? userData.planExpiresAt.toDate() : new Date(userData.planExpiresAt);
+      
+      if (expirationDate <= now) {
+        console.log('❌ Plano já expirou em:', expirationDate);
+        return res.status(400).json({ 
+          error: 'Não é possível cancelar uma assinatura já expirada.',
+          message: 'Seu plano já expirou. Não há assinatura ativa para cancelar.' 
+        });
+      }
+      
+      console.log('✅ Plano ativo até:', expirationDate);
+    } else if (isTestAccount) {
+      console.log('⚠️ Conta de teste detectada (Plus sem data de expiração)');
+    } else {
+      console.log('❌ Conta inválida - nem real nem teste válido');
+      return res.status(400).json({ error: 'Usuário não possui assinatura ativa para cancelar' });
     }
 
     // Verificar se já foi cancelado
