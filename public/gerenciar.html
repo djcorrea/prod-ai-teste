@@ -231,6 +231,7 @@
             const updateEmailBtn = document.getElementById('update-email-btn');
             const redoInterviewBtn = document.getElementById('redo-interview-btn');
             const backToChatBtn = document.getElementById('back-to-chat-simple');
+            const upgradeBtn = document.getElementById('upgrade-plan-btn');
             
             // Verificar se o usuário está autenticado
             let currentUser = null;
@@ -767,6 +768,13 @@
             if (backToChatBtn) {
                 backToChatBtn.addEventListener('click', function() {
                     window.location.href = 'index.html';
+                });
+            }
+
+            // Botão upgrade para planos
+            if (upgradeBtn) {
+                upgradeBtn.addEventListener('click', function() {
+                    window.location.href = 'planos.html';
                 });
             }
             
