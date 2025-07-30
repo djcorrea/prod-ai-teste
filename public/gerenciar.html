@@ -224,6 +224,29 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão de Conta -->
+    <div class="delete-account-confirmation-overlay" id="delete-account-confirmation-overlay">
+        <div class="delete-account-confirmation-modal">
+            <div class="delete-account-modal-content">
+                <div class="delete-account-modal-icon">⚠️</div>
+                <h3 class="delete-account-modal-title">⚠️ Tem certeza que deseja excluir sua conta?</h3>
+                <p class="delete-account-modal-description">
+                    Essa ação é irreversível e todos os seus dados, incluindo e-mail e senha, serão permanentemente apagados.
+                </p>
+                <div class="delete-account-modal-buttons">
+                    <button class="delete-account-modal-btn delete-account-modal-btn-cancel" id="delete-account-modal-btn-cancel">
+                        <span class="btn-icon">❌</span>
+                        Cancelar
+                    </button>
+                    <button class="delete-account-modal-btn delete-account-modal-btn-confirm" id="delete-account-modal-btn-confirm">
+                        <span class="btn-icon">🗑️</span>
+                        Sim, excluir minha conta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="background-effects">
         <div class="grid-pattern"></div>
         <div class="glow-effect glow-1"></div>
@@ -255,6 +278,7 @@
             const backToChatBtn = document.getElementById('back-to-chat-simple');
             const upgradeBtn = document.getElementById('upgrade-plan-btn');
             const cancelSubscriptionBtn = document.getElementById('cancel-subscription-btn');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
             
             // Verificar se o usuário está autenticado
             let currentUser = null;
@@ -597,6 +621,155 @@
                     // Reabilitar botão
                     updateEmailBtn.disabled = false;
                     updateEmailBtn.textContent = 'Atualizar e-mail';
+                }
+            }
+            
+            // ═══════════════════════════════════════════════════════
+            // 🗑️ FUNÇÕES DO MODAL DE EXCLUSÃO DE CONTA
+            // ═══════════════════════════════════════════════════════
+            
+            // Função para mostrar o modal de confirmação de exclusão de conta
+            function showDeleteAccountConfirmationModal() {
+                const overlay = document.getElementById('delete-account-confirmation-overlay');
+                if (overlay) {
+                    overlay.classList.add('show');
+                    
+                    // Prevenir scroll do body
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            // Função para esconder o modal de confirmação de exclusão de conta
+            function hideDeleteAccountConfirmationModal() {
+                const overlay = document.getElementById('delete-account-confirmation-overlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    
+                    // Restaurar scroll do body
+                    document.body.style.overflow = '';
+                }
+            }
+            
+            // Função principal para excluir conta permanentemente
+            async function deleteAccountPermanently() {
+                if (!currentUser) {
+                    showMessage('Usuário não autenticado. Redirecionando para login...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                const confirmBtn = document.getElementById('delete-account-modal-btn-confirm');
+                const cancelBtn = document.getElementById('delete-account-modal-btn-cancel');
+                
+                // Desabilitar botões durante o processo
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<span class="btn-icon">⏳</span>Excluindo...';
+                }
+                if (cancelBtn) {
+                    cancelBtn.disabled = true;
+                }
+                
+                try {
+                    console.log('🗑️ Iniciando exclusão permanente da conta...');
+                    
+                    // Obter token do usuário
+                    const idToken = await currentUser.getIdToken();
+                    
+                    // Fazer requisição para excluir conta
+                    const response = await fetch('/api/delete-account', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        console.log('✅ Conta excluída com sucesso:', result.message);
+                        
+                        // Esconder modal
+                        hideDeleteAccountConfirmationModal();
+                        
+                        // Mostrar mensagem de sucesso
+                        showMessage('✅ ' + result.message, 'success');
+                        
+                        // Aguardar um momento para mostrar a mensagem
+                        setTimeout(async () => {
+                            try {
+                                // Fazer logout do Firebase
+                                const { signOut } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+                                await signOut(auth);
+                                console.log('✅ Logout realizado com sucesso');
+                            } catch (logoutError) {
+                                console.log('⚠️ Erro no logout (normal após exclusão):', logoutError);
+                            }
+                            
+                            // Redirecionar para a página inicial
+                            window.location.href = 'landing.html';
+                        }, 2000);
+                        
+                    } else {
+                        console.error('❌ Erro do servidor ao excluir conta:', result);
+                        
+                        // Esconder modal
+                        hideDeleteAccountConfirmationModal();
+                        
+                        // Determinar tipo de mensagem e texto
+                        let messageType = 'error';
+                        let errorMessage = 'Erro ao excluir conta. Tente novamente.';
+                        
+                        if (response.status === 401) {
+                            messageType = 'error';
+                            errorMessage = 'Sessão expirada. Faça login novamente.';
+                            setTimeout(() => {
+                                window.location.href = 'login.html';
+                            }, 3000);
+                        } else if (response.status === 400) {
+                            messageType = 'error';
+                            errorMessage = result.error || 'Dados inválidos para exclusão.';
+                        } else if (response.status >= 500) {
+                            messageType = 'error';
+                            errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
+                        }
+                        
+                        if (result.error || result.message) {
+                            errorMessage = result.error || result.message || errorMessage;
+                        }
+                        
+                        showMessage('❌ ' + errorMessage, messageType);
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro completo ao excluir conta:', error);
+                    console.error('❌ Stack trace:', error.stack);
+                    
+                    // Esconder modal
+                    hideDeleteAccountConfirmationModal();
+                    
+                    // Mostrar mensagem de erro de rede
+                    let errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                    if (error.message && error.message.includes('Failed to fetch')) {
+                        errorMessage = 'Erro de conexão com o servidor. Tente novamente.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    showMessage('❌ ' + errorMessage, 'error');
+                    
+                } finally {
+                    // Reabilitar botões (se ainda existirem)
+                    if (confirmBtn && !confirmBtn.disabled) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = '<span class="btn-icon">🗑️</span>Sim, excluir minha conta';
+                    }
+                    if (cancelBtn && !cancelBtn.disabled) {
+                        cancelBtn.disabled = false;
+                    }
                 }
             }
             
@@ -955,6 +1128,13 @@
                 });
             }
             
+            // Botão excluir conta - mostrar modal de confirmação
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', function() {
+                    showDeleteAccountConfirmationModal();
+                });
+            }
+            
             // Event listeners para o modal de cancelamento
             const cancelModalBtnCancel = document.getElementById('cancel-modal-btn-cancel');
             const cancelModalBtnConfirm = document.getElementById('cancel-modal-btn-confirm');
@@ -984,12 +1164,47 @@
                 });
             }
             
+            // Event listeners para o modal de confirmação de exclusão de conta
+            const deleteAccountModalBtnCancel = document.getElementById('delete-account-modal-btn-cancel');
+            const deleteAccountModalBtnConfirm = document.getElementById('delete-account-modal-btn-confirm');
+            const deleteAccountConfirmationOverlay = document.getElementById('delete-account-confirmation-overlay');
+            
+            // Botão "Cancelar" no modal de exclusão (fechar modal)
+            if (deleteAccountModalBtnCancel) {
+                deleteAccountModalBtnCancel.addEventListener('click', function() {
+                    hideDeleteAccountConfirmationModal();
+                });
+            }
+            
+            // Botão "Sim, excluir minha conta" no modal de exclusão
+            if (deleteAccountModalBtnConfirm) {
+                deleteAccountModalBtnConfirm.addEventListener('click', function() {
+                    deleteAccountPermanently();
+                });
+            }
+            
+            // Fechar modal de exclusão clicando no overlay (fundo)
+            if (deleteAccountConfirmationOverlay) {
+                deleteAccountConfirmationOverlay.addEventListener('click', function(e) {
+                    // Só fechar se clicou no overlay (não no modal)
+                    if (e.target === deleteAccountConfirmationOverlay) {
+                        hideDeleteAccountConfirmationModal();
+                    }
+                });
+            }
+            
             // Fechar modal com tecla ESC
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    const overlay = document.getElementById('cancel-confirmation-overlay');
-                    if (overlay && overlay.classList.contains('show')) {
+                    const cancelOverlay = document.getElementById('cancel-confirmation-overlay');
+                    const deleteOverlay = document.getElementById('delete-account-confirmation-overlay');
+                    
+                    if (cancelOverlay && cancelOverlay.classList.contains('show')) {
                         hideCancelConfirmationModal();
+                    }
+                    
+                    if (deleteOverlay && deleteOverlay.classList.contains('show')) {
+                        hideDeleteAccountConfirmationModal();
                     }
                 }
             });
