@@ -55,68 +55,24 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Usuário não possui assinatura ativa para cancelar' });
     }
 
-    // Verificar se há subscription_id do Mercado Pago
-    if (!userData.subscription_id) {
-      console.log('⚠️ Usuário Plus sem subscription_id - cancelando apenas no sistema');
-      
-      // Marcar como cancelado apenas no sistema interno
-      await admin.firestore().collection('usuarios').doc(userId).update({
-        subscriptionStatus: 'cancelled',
-        cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
-        shouldRenew: false
-      });
-
-      return res.status(200).json({ 
-        success: true, 
-        message: 'Assinatura cancelada com sucesso no sistema interno' 
-      });
-    }
-
-    // Cancelar no Mercado Pago se há subscription_id
-    const subscriptionId = userData.subscription_id;
-    console.log('🔄 Cancelando assinatura no Mercado Pago:', subscriptionId);
-
-    try {
-      const mpResponse = await fetch(`https://api.mercadopago.com/preapproval/${subscriptionId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          status: 'cancelled'
-        })
-      });
-
-      if (!mpResponse.ok) {
-        const errorText = await mpResponse.text();
-        console.error('❌ Erro do Mercado Pago:', mpResponse.status, errorText);
-        
-        // Se falhou no MP mas queremos cancelar no sistema mesmo assim
-        if (mpResponse.status === 404) {
-          console.log('⚠️ Assinatura não encontrada no MP - cancelando apenas no sistema');
-        } else {
-          throw new Error(`Erro do Mercado Pago: ${mpResponse.status} - ${errorText}`);
-        }
-      } else {
-        console.log('✅ Assinatura cancelada no Mercado Pago com sucesso');
-      }
-
-    } catch (mpError) {
-      console.error('❌ Erro ao cancelar no Mercado Pago:', mpError);
-      
-      // Continuar com o cancelamento no sistema mesmo se falhou no MP
-      // para garantir que o usuário não seja cobrado novamente
-      console.log('⚠️ Continuando com cancelamento no sistema...');
-    }
-
+    // NOTA: Este projeto usa pagamentos únicos (preferences), não assinaturas recorrentes
+    // Portanto, não há subscription_id real do Mercado Pago para cancelar
+    // O cancelamento é feito apenas no sistema interno
+    
+    console.log('ℹ️ Cancelando assinatura (pagamento único) - apenas no sistema interno');
+    
     // Atualizar status no Firestore
     // IMPORTANTE: Não remover o plano Plus imediatamente
     // Apenas marcar como cancelado e parar renovações futuras
     const updateData = {
       subscriptionStatus: 'cancelled',
       cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
-      shouldRenew: false
+      shouldRenew: false,
+      // Manter o plano ativo até uma data de expiração
+      // Se não há data de expiração, define para 30 dias a partir de agora
+      ...((!userData.planExpiresAt) && {
+        planExpiresAt: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) // 30 dias
+      })
     };
 
     await admin.firestore().collection('usuarios').doc(userId).update(updateData);
