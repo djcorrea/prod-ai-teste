@@ -1,28 +1,36 @@
-import admin from 'firebase-admin';
+import { auth, db } from './firebaseAdmin.js';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export const config = { api: { bodyParser: true } };
 
-// Inicializar Firebase Admin se não já inicializado
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }),
-  });
-}
-
 export default async function handler(req, res) {
+  // Adicionar headers CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Responder a preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  console.log('🚀 API cancel-subscription chamada');
+  console.log('📋 Método:', req.method);
+  console.log('📋 Headers:', req.headers);
+  
   // Permitir apenas POST
   if (req.method !== 'POST') {
+    console.log('❌ Método não permitido:', req.method);
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
     // Verificar token de autenticação
     const authHeader = req.headers.authorization || '';
+    console.log('🔐 Auth header presente:', !!authHeader);
+    
     if (!authHeader.startsWith('Bearer ')) {
+      console.log('❌ Token Bearer não encontrado');
       return res.status(401).json({ error: 'Token de autorização não fornecido' });
     }
 
@@ -30,7 +38,7 @@ export default async function handler(req, res) {
     let decodedToken;
     
     try {
-      decodedToken = await admin.auth().verifyIdToken(idToken);
+      decodedToken = await auth.verifyIdToken(idToken);
     } catch (error) {
       console.error('❌ Token inválido:', error);
       return res.status(401).json({ error: 'Token inválido' });
@@ -40,7 +48,7 @@ export default async function handler(req, res) {
     console.log('🔧 Iniciando cancelamento de assinatura para usuário:', userId);
 
     // Buscar dados do usuário no Firestore
-    const userDoc = await admin.firestore().collection('usuarios').doc(userId).get();
+    const userDoc = await db.collection('usuarios').doc(userId).get();
     
     if (!userDoc.exists) {
       console.log('❌ Usuário não encontrado no Firestore');
@@ -48,11 +56,26 @@ export default async function handler(req, res) {
     }
 
     const userData = userDoc.data();
+    console.log('👤 Dados do usuário encontrados:', {
+      plano: userData.plano,
+      isPlus: userData.isPlus,
+      subscriptionStatus: userData.subscriptionStatus,
+      planExpiresAt: userData.planExpiresAt
+    });
     
     // Verificar se o usuário tem plano Plus
     if (userData.plano !== 'plus' && !userData.isPlus) {
       console.log('❌ Usuário não possui plano Plus');
       return res.status(400).json({ error: 'Usuário não possui assinatura ativa para cancelar' });
+    }
+
+    // Verificar se já foi cancelado
+    if (userData.subscriptionStatus === 'cancelled') {
+      console.log('⚠️ Assinatura já estava cancelada');
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Sua assinatura já estava cancelada. Você continuará com acesso ao Plus até o fim do período atual.' 
+      });
     }
 
     // NOTA: Este projeto usa pagamentos únicos (preferences), não assinaturas recorrentes
@@ -66,7 +89,7 @@ export default async function handler(req, res) {
     // Apenas marcar como cancelado e parar renovações futuras
     const updateData = {
       subscriptionStatus: 'cancelled',
-      cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+      cancelledAt: FieldValue.serverTimestamp(),
       shouldRenew: false,
       // Manter o plano ativo até uma data de expiração
       // Se não há data de expiração, define para 30 dias a partir de agora
@@ -75,7 +98,8 @@ export default async function handler(req, res) {
       })
     };
 
-    await admin.firestore().collection('usuarios').doc(userId).update(updateData);
+    console.log('📝 Dados a serem atualizados:', updateData);
+    await db.collection('usuarios').doc(userId).update(updateData);
 
     console.log('✅ Assinatura cancelada com sucesso para usuário:', userId);
 
@@ -85,10 +109,13 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao cancelar assinatura:', error);
+    console.error('❌ Erro completo ao cancelar assinatura:', error);
+    console.error('❌ Stack trace:', error.stack);
+    
     return res.status(500).json({ 
       error: 'Erro interno do servidor ao cancelar assinatura',
-      details: error.message 
+      details: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 }

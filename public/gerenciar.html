@@ -799,7 +799,19 @@
                         }
                     });
                     
-                    const result = await response.json();
+                    console.log('📊 Response status:', response.status);
+                    console.log('📊 Response ok:', response.ok);
+                    
+                    let result;
+                    try {
+                        result = await response.json();
+                        console.log('📊 Response JSON:', result);
+                    } catch (jsonError) {
+                        console.error('❌ Erro ao fazer parse do JSON:', jsonError);
+                        const responseText = await response.text();
+                        console.error('📄 Response text:', responseText);
+                        throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}...`);
+                    }
                     
                     if (response.ok && result.success) {
                         console.log('✅ Assinatura cancelada com sucesso');
@@ -820,18 +832,26 @@
                         hideCancelConfirmationModal();
                         
                         // Mostrar mensagem de erro
-                        const errorMessage = result.error || 'Erro ao cancelar assinatura. Tente novamente.';
+                        const errorMessage = result.error || result.message || 'Erro ao cancelar assinatura. Tente novamente.';
                         showMessage('❌ ' + errorMessage, 'error');
                     }
                     
                 } catch (error) {
-                    console.error('❌ Erro de rede ao cancelar assinatura:', error);
+                    console.error('❌ Erro completo ao cancelar assinatura:', error);
+                    console.error('❌ Stack trace:', error.stack);
                     
                     // Esconder modal
                     hideCancelConfirmationModal();
                     
                     // Mostrar mensagem de erro de rede
-                    showMessage('❌ Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+                    let errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                    if (error.message && error.message.includes('Failed to fetch')) {
+                        errorMessage = 'Erro de conexão com o servidor. Tente novamente.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    showMessage('❌ ' + errorMessage, 'error');
                 } finally {
                     // Reabilitar botões
                     if (confirmBtn) {
