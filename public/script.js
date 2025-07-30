@@ -376,7 +376,7 @@ class ProdAIChatbot {
                 window.location.href = 'planos.html';
                 break;
             case 'manage':
-                console.log('Abrindo gerenciamento de conta...');
+                window.location.href = 'gerenciar.html';
                 break;
             case 'logout':
                 if (typeof window.logout === "function") {
