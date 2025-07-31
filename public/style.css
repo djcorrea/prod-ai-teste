@@ -61,7 +61,7 @@ body {
     height: auto;
     max-height: 86.1vh;
     z-index: 3;
-    filter: drop-shadow(0 0 20px rgba(166, 0, 255, 0.3));
+    filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
     animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 2s ease-in-out infinite 1s;
 }
 
@@ -101,7 +101,7 @@ body {
     height: auto;
     max-height: 115vh;
     z-index: 2;
-    filter: drop-shadow(0 0 18px rgba(166, 0, 255, 0.4));
+    filter: drop-shadow(0 0 18px rgba(138, 43, 226, 0.4));
     animation: subtleGlowOptimized 3.5s ease-in-out infinite 1s;
 }
 
@@ -114,7 +114,7 @@ body {
     height: 100%;
     z-index: 4;
     pointer-events: none;
-    background: radial-gradient(circle at 50% 50%, rgba(166, 0, 255, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08) 0%, transparent 70%);
     animation: particleFloatOptimized 10s ease-in-out infinite;
     will-change: transform;
 }
@@ -286,7 +286,7 @@ body {
     object-fit: contain;
     filter: 
         drop-shadow(0 0 25px rgba(0, 150, 255, 0.6))
-        drop-shadow(0 0 50px rgba(166, 0, 255, 0.4));
+        drop-shadow(0 0 50px rgba(138, 43, 226, 0.4));
     animation: chatbotMainRobotFloatOptimized 2s ease-in-out infinite;
     will-change: transform;
 }
@@ -342,7 +342,7 @@ body {
     gap: 12px;
     background: linear-gradient(135deg, 
         rgba(0, 150, 255, 0.1), 
-        rgba(166, 0, 255, 0.1)
+        rgba(138, 43, 226, 0.1)
     );
     border: 2px solid rgba(0, 150, 255, 0.3);
     border-radius: 50px;
@@ -355,7 +355,7 @@ body {
     box-shadow: 0 0 25px rgba(0, 150, 255, 0.4);
     background: linear-gradient(135deg, 
         rgba(0, 150, 255, 0.15), 
-        rgba(166, 0, 255, 0.15)
+        rgba(138, 43, 226, 0.15)
     );
 }
 
@@ -437,7 +437,7 @@ body {
     padding: 25px 30px;
     background: linear-gradient(135deg, 
         rgba(0, 150, 255, 0.15), 
-        rgba(166, 0, 255, 0.15)
+        rgba(138, 43, 226, 0.15)
     );
     border-bottom: 1px solid rgba(0, 150, 255, 0.3);
     display: flex;
@@ -551,7 +551,7 @@ body {
 .chatbot-message-assistant .chatbot-message-bubble {
     background: linear-gradient(135deg, 
         rgba(0, 150, 255, 0.15), 
-        rgba(166, 0, 255, 0.1)
+        rgba(138, 43, 226, 0.1)
     );
     color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(0, 150, 255, 0.3);
@@ -560,11 +560,11 @@ body {
 
 .chatbot-message-user .chatbot-message-bubble {
     background: linear-gradient(135deg, 
-        rgba(166, 0, 255, 0.15), 
+        rgba(138, 43, 226, 0.15), 
         rgba(0, 150, 255, 0.1)
     );
     color: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(166, 0, 255, 0.3);
+    border: 1px solid rgba(138, 43, 226, 0.3);
     border-radius: 20px 20px 5px 20px;
     margin-left: auto;
 }
@@ -777,36 +777,32 @@ body {
         visibility: hidden;
     }
 
-    /* Permitir scroll vertical no mobile e remover margens */
+    /* Permitir scroll vertical no mobile */
     body {
         overflow: auto;
         overflow-x: hidden;
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 0 !important;
+        top: 50%;
         left: 50%;
-        transform: translateX(-50%) !important;
-        width: calc(100vw - 20px) !important;
-        max-width: none !important;
+        transform: translate(-50%, -50%);
+        width: calc(100vw - 30px) !important;
+        max-width: 400px !important;
         min-width: auto !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
-        min-height: 100vh !important;
-        margin: 0 !important;
-        padding-top: 10px !important;
+        height: 60vh !important;
+        max-height: 60vh !important;
+        min-height: 50vh !important;
+        margin-bottom: 0;
         overflow: hidden !important;
     }
 
     /* Ajustar estado welcome no mobile */
     .chatbot-welcome-state {
-        padding: 20px 20px 20px !important;
+        padding: 40px 20px 20px;
         overflow: hidden;
-        height: 100% !important;
     }
 
     /* Corrigir input field para mobile */
