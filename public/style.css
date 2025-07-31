@@ -786,7 +786,7 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 7.5vh;
+        top: 5%;
         left: 50%;
         transform: translateX(-50%);
         width: calc(100vw - 30px) !important;
@@ -966,7 +966,8 @@ body {
         flex: 1;
         min-height: 300px;
         max-height: calc(85vh - 200px);
-        overflow: hidden auto;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     /* Ajustar mensagens no mobile */
