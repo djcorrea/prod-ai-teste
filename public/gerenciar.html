@@ -263,7 +263,7 @@
         // Aguardar um pouco para garantir que o Firebase carregue
         setTimeout(async () => {
             const { auth } = await import('./firebase.js');
-            const { onAuthStateChanged, updatePassword, updateEmail, verifyBeforeUpdateEmail, applyActionCode } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
+            const { onAuthStateChanged, updatePassword, updateEmail, verifyBeforeUpdateEmail, applyActionCode, signOut } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js');
             
             console.log('🔧 Gerenciar.js carregado');
             
@@ -611,11 +611,30 @@
                     await updatePassword(currentUser, newPassword);
                     
                     console.log('✅ Senha atualizada com sucesso');
-                    showMessage('✅ Senha atualizada com sucesso!', 'success', 'password');
+                    
+                    // Mostrar mensagem de sucesso
+                    showMessage('✅ Senha atualizada com sucesso! Você será redirecionado para o login.', 'success', 'password');
                     
                     // Limpar campos
                     newPasswordInput.value = '';
                     confirmPasswordInput.value = '';
+                    
+                    // Aguardar um momento para que o usuário veja a mensagem
+                    setTimeout(async () => {
+                        try {
+                            // Fazer logout automático
+                            console.log('🔐 Fazendo logout automático após alteração de senha...');
+                            await signOut(auth);
+                            console.log('✅ Logout realizado com sucesso');
+                            
+                            // Redirecionar para login
+                            window.location.href = 'login.html';
+                        } catch (logoutError) {
+                            console.error('❌ Erro ao fazer logout:', logoutError);
+                            // Mesmo com erro no logout, redirecionar para login
+                            window.location.href = 'login.html';
+                        }
+                    }, 2000); // 2 segundos para o usuário ler a mensagem
                     
                 } catch (error) {
                     console.error('❌ Erro ao atualizar senha:', error);
