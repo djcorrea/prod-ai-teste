@@ -786,14 +786,14 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 20%;
+        top: 40%;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translate(-50%, -50%);
         width: calc(100vw - 30px) !important;
         max-width: 400px !important;
         min-width: auto !important;
-        height: 65vh !important;
-        max-height: 65vh !important;
+        height: 70vh !important;
+        max-height: 70vh !important;
         min-height: 60vh !important;
         margin-bottom: 0;
         overflow: hidden !important;
@@ -964,8 +964,8 @@ body {
     .chatbot-conversation-area {
         padding: 20px 25px;
         flex: 1;
-        min-height: 200px;
-        max-height: 50vh;
+        min-height: 250px;
+        max-height: 60vh;
         overflow: hidden auto;
     }
 
