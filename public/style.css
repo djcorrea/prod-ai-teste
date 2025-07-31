@@ -632,8 +632,8 @@ body {
 }
 
 .chatbot-typing-indicator span {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: rgba(0, 150, 255, 0.7);
     border-radius: 50%;
     animation: chatbotTypingAnimationOptimized 0.8s ease-in-out infinite;
@@ -741,7 +741,7 @@ body {
         opacity: 0.4;
     }
     30% {
-        transform: translateY(-12px);
+        transform: translateY(-8px);
         opacity: 1;
     }
 }
