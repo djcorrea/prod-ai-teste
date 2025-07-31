@@ -801,7 +801,7 @@ body {
 
     /* Ajustar estado welcome no mobile */
     .chatbot-welcome-state {
-        padding: 40px 20px 20px;
+        padding: 25px 20px 15px;
         overflow: hidden;
     }
 
@@ -816,7 +816,7 @@ body {
 
     /* Ajustar input section no mobile */
     .chatbot-input-section {
-        margin-top: 15px;
+        margin-top: 10px;
         width: 100%;
         max-width: 100%;
         padding: 0 10px;
@@ -835,29 +835,29 @@ body {
 
     /* Ajustar robô principal no mobile */
     .chatbot-main-robot {
-        width: 180px;
-        height: 130px;
-        top: 35px;
+        width: 160px;
+        height: 115px;
+        top: 20px;
     }
 
     /* Ajustar branding no mobile */
     .chatbot-branding {
-        margin: 15px 0;
-        margin-top: -70px;
+        margin: 10px 0;
+        margin-top: -50px;
     }
 
     /* Ajustar título no mobile */
     .chatbot-main-title {
-        top: 10px;
-        font-size: 2.2rem;
-        margin-bottom: 8px;
-        margin-top: 4px;
+        top: 5px;
+        font-size: 1.9rem;
+        margin-bottom: 5px;
+        margin-top: 2px;
     }
 
     /* Ajustar subtítulo no mobile */
     .chatbot-main-subtitle {
-        font-size: 1rem;
-        margin-top: 8px;
+        font-size: 0.9rem;
+        margin-top: 5px;
     }
 
     /* Ajustar input no mobile */
@@ -949,7 +949,7 @@ body {
 
     /* Ajustar header do chatbot no mobile */
     .chatbot-header-bar {
-        padding: 20px 25px;
+        padding: 15px 20px;
     }
 
     .chatbot-header-name {
@@ -997,7 +997,7 @@ body {
 
     /* Ajustar input ativo no mobile */
     .chatbot-input-area {
-        padding: 15px 20px;
+        padding: 12px 18px;
         overflow: hidden;
     }
 
