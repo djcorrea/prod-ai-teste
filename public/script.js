@@ -707,6 +707,11 @@ function appendMessage(content, className) {
 function showRemainingMessages(count) {
   if (count === null || count === undefined) return;
   
+  // Não exibir no mobile (largura menor que 768px)
+  if (window.innerWidth <= 767) {
+    return;
+  }
+  
   try {
     // Criar ou atualizar indicador de mensagens restantes
     let indicator = document.getElementById('messages-remaining-indicator');
@@ -1146,6 +1151,16 @@ function initEntranceAnimations() {
             document.body.classList.add('fallback-animation');
             console.warn('⚠️ GSAP não encontrado, usando animações CSS de fallback');
         }
+
+// Listener para ocultar indicador de mensagens no mobile quando redimensionar
+window.addEventListener('resize', function() {
+    const indicator = document.getElementById('messages-remaining-indicator');
+    if (indicator && window.innerWidth <= 767) {
+        indicator.style.display = 'none';
+    } else if (indicator && window.innerWidth > 767) {
+        indicator.style.display = 'block';
+    }
+});
     } catch (error) {
         console.warn('⚠️ Erro no GSAP:', error);
         document.body.classList.add('fallback-animation');
