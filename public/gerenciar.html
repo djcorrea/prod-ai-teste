@@ -301,10 +301,134 @@
             });
             
             // Função para atualizar informações do usuário
-            function updateUserInfo(user) {
-                // Você pode expandir isso para mostrar mais informações do usuário
+            async function updateUserInfo(user) {
                 console.log('📧 Email do usuário:', user.email);
                 console.log('🆔 UID do usuário:', user.uid);
+                
+                // Buscar dados do usuário no Firestore para determinar o plano
+                await updateUserPlanDisplay(user.uid);
+            }
+            
+            // Função para buscar e atualizar a exibição do plano do usuário
+            async function updateUserPlanDisplay(userId) {
+                try {
+                    console.log('🔍 Buscando dados do plano do usuário...');
+                    
+                    // Importar Firestore necessário
+                    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                    const { db } = await import('./firebase.js');
+                    
+                    // Buscar documento do usuário
+                    const userDocRef = doc(db, 'usuarios', userId);
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    // Elementos do DOM para atualizar
+                    const planTypeElement = document.getElementById('plan-type');
+                    const planNameElement = planTypeElement?.querySelector('.plan-name');
+                    const planIconElement = planTypeElement?.querySelector('.plan-icon');
+                    
+                    if (!planTypeElement || !planNameElement || !planIconElement) {
+                        console.error('❌ Elementos do plano não encontrados no DOM');
+                        return;
+                    }
+                    
+                    let isPlus = false;
+                    let planStatus = 'free'; // Default para gratuito
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        
+                        // Verificar se é usuário Plus
+                        // Considera tanto 'plano' quanto 'isPlus' para compatibilidade
+                        isPlus = userData.plano === 'plus' || userData.isPlus === true;
+                        
+                        console.log('� Dados do usuário:', {
+                            plano: userData.plano,
+                            isPlus: userData.isPlus,
+                            planExpiresAt: userData.planExpiresAt,
+                            subscriptionStatus: userData.subscriptionStatus
+                        });
+                        
+                        // Verificar se o plano Plus ainda está ativo (não expirou)
+                        if (isPlus && userData.planExpiresAt) {
+                            const now = new Date();
+                            const expirationDate = userData.planExpiresAt instanceof Date ? 
+                                userData.planExpiresAt : 
+                                userData.planExpiresAt.toDate ? userData.planExpiresAt.toDate() : new Date(userData.planExpiresAt);
+                            
+                            if (expirationDate <= now) {
+                                console.log('⏰ Plano Plus expirou em:', expirationDate);
+                                isPlus = false; // Plano expirado, considerar como gratuito
+                            } else {
+                                console.log('✅ Plano Plus ativo até:', expirationDate);
+                            }
+                        }
+                        
+                        planStatus = isPlus ? 'plus' : 'free';
+                    } else {
+                        console.log('⚠️ Documento do usuário não encontrado, usando plano gratuito como padrão');
+                    }
+                    
+                    // Atualizar a exibição do plano
+                    if (isPlus) {
+                        // Usuário Plus
+                        planTypeElement.className = 'plan-type plus';
+                        planNameElement.textContent = 'PLUS';
+                        planIconElement.textContent = '✅';
+                        console.log('✅ Exibindo plano PLUS');
+                        
+                        // Esconder card de upgrade e mostrar card de cancelamento
+                        const upgradeCard = document.getElementById('upgrade-card');
+                        const cancelCard = document.querySelector('.card-perigo'); // Card de cancelar assinatura
+                        
+                        if (upgradeCard) {
+                            upgradeCard.style.display = 'none';
+                        }
+                        if (cancelCard) {
+                            cancelCard.style.display = 'block';
+                        }
+                    } else {
+                        // Usuário Gratuito
+                        planTypeElement.className = 'plan-type free';
+                        planNameElement.textContent = 'GRÁTIS';
+                        planIconElement.textContent = '❌';
+                        console.log('📱 Exibindo plano GRATUITO');
+                        
+                        // Mostrar card de upgrade e esconder card de cancelamento
+                        const upgradeCard = document.getElementById('upgrade-card');
+                        const cancelCard = document.querySelector('.card-perigo'); // Card de cancelar assinatura
+                        
+                        if (upgradeCard) {
+                            upgradeCard.style.display = 'block';
+                        }
+                        if (cancelCard) {
+                            cancelCard.style.display = 'none';
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao buscar dados do plano:', error);
+                    
+                    // Em caso de erro, mostrar como gratuito por segurança
+                    const planTypeElement = document.getElementById('plan-type');
+                    const planNameElement = planTypeElement?.querySelector('.plan-name');
+                    const planIconElement = planTypeElement?.querySelector('.plan-icon');
+                    
+                    if (planTypeElement && planNameElement && planIconElement) {
+                        planTypeElement.className = 'plan-type free';
+                        planNameElement.textContent = 'GRÁTIS';
+                        planIconElement.textContent = '❌';
+                        console.log('⚠️ Erro ao carregar plano, exibindo GRATUITO como padrão');
+                    }
+                }
+            }
+            
+            // Função para forçar atualização do plano (útil após upgrade)
+            async function refreshUserPlan() {
+                if (currentUser) {
+                    console.log('🔄 Atualizando exibição do plano...');
+                    await updateUserPlanDisplay(currentUser.uid);
+                }
             }
             
             // Função para mostrar mensagens de feedback
@@ -1206,6 +1330,23 @@
                     if (deleteOverlay && deleteOverlay.classList.contains('show')) {
                         hideDeleteAccountConfirmationModal();
                     }
+                }
+            });
+            
+            // Configurar verificação periódica do plano (a cada 30 segundos)
+            // Isso permite detectar mudanças caso o usuário faça upgrade em outra aba
+            setInterval(async () => {
+                if (currentUser) {
+                    await updateUserPlanDisplay(currentUser.uid);
+                }
+            }, 30000); // 30 segundos
+            
+            // Configurar listener para mudanças de visibilidade da página
+            // Atualiza o plano quando o usuário volta para a aba
+            document.addEventListener('visibilitychange', async () => {
+                if (!document.hidden && currentUser) {
+                    console.log('👁️ Página voltou ao foco, atualizando plano...');
+                    await updateUserPlanDisplay(currentUser.uid);
                 }
             });
             
