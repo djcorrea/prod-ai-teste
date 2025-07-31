@@ -786,15 +786,15 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 45%;
+        top: 42%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: calc(100vw - 30px) !important;
         max-width: 400px !important;
         min-width: auto !important;
-        height: 70vh !important;
-        max-height: 70vh !important;
-        min-height: 60vh !important;
+        height: 75vh !important;
+        max-height: 75vh !important;
+        min-height: 65vh !important;
         margin-bottom: 0;
         overflow: hidden !important;
     }
@@ -964,8 +964,8 @@ body {
     .chatbot-conversation-area {
         padding: 15px 20px;
         flex: 1;
-        min-height: 300px;
-        max-height: 70vh;
+        min-height: 320px;
+        max-height: 75vh;
         overflow: hidden auto;
     }
 
