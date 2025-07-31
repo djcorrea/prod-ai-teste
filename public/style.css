@@ -837,7 +837,7 @@ body {
     .chatbot-main-robot {
         width: 160px;
         height: 115px;
-        top: -10px;
+        top: 60px;
     }
 
     /* Ajustar branding no mobile */
