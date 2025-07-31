@@ -786,17 +786,19 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 5%;
+        top: 5vh;
         left: 50%;
         transform: translateX(-50%);
         width: calc(100vw - 30px) !important;
         max-width: 400px !important;
         min-width: auto !important;
-        height: 85vh !important;
-        max-height: 85vh !important;
-        min-height: 80vh !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
+        min-height: 85vh !important;
         margin-bottom: 0;
         overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
     }
 
     /* Ajustar estado welcome no mobile */
@@ -892,7 +894,7 @@ body {
     /* Reposicionar botões de ação para mobile */
     .chatbot-action-buttons {
         position: fixed;
-        bottom: 30px;
+        bottom: 80px;
         left: 50%;
         transform: translateX(-50%);
         right: auto;
@@ -945,6 +947,9 @@ body {
     .chatbot-active-state {
         height: 100%;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 80px;
     }
 
     /* Ajustar header do chatbot no mobile */
@@ -963,11 +968,12 @@ body {
     /* Ajustar área de conversa no mobile */
     .chatbot-conversation-area {
         padding: 20px 25px;
-        flex: 1;
+        flex-grow: 1;
         min-height: 300px;
-        max-height: calc(85vh - 200px);
+        max-height: none;
         overflow-y: auto;
         overflow-x: hidden;
+        padding-bottom: 120px;
     }
 
     /* Ajustar mensagens no mobile */
@@ -998,8 +1004,20 @@ body {
 
     /* Ajustar input ativo no mobile */
     .chatbot-input-area {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 30px);
+        max-width: 400px;
         padding: 15px 20px;
         overflow: hidden;
+        background: linear-gradient(135deg, 
+            rgba(10, 15, 35, 0.95), 
+            rgba(20, 10, 45, 0.95)
+        );
+        border-top: 1px solid rgba(0, 150, 255, 0.3);
+        z-index: 1000;
     }
 
     .chatbot-active-input-field {
