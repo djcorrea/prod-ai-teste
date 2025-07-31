@@ -786,15 +786,15 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 35%;
+        top: 50%;
         left: 50%;
-         transform: translateX(-50%);
+        transform: translate(-50%, -50%);
         width: calc(100vw - 30px) !important;
         max-width: 400px !important;
         min-width: auto !important;
         height: 60vh !important;
-        max-height: 70vh !important;
-        min-height: 70vh !important;
+        max-height: 60vh !important;
+        min-height: 50vh !important;
         margin-bottom: 0;
         overflow: hidden !important;
     }
