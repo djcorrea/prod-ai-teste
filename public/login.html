@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Prod.AI – Login</title>
   
+  <!-- Three.js - Biblioteca 3D -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <!-- Vanta.js - Efeitos de fundo avançados -->
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
+  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
@@ -16,7 +23,9 @@
     
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0f0f23 0%, #1a0d2e 25%, #16213e 50%, #1a0d2e 75%, #0f0f23 100%);
+      background: linear-gradient(-45deg, #0a0a1a, #1a1a3a, #0f1535, #1a0a2e, #0a0a1a);
+      background-size: 600% 600%;
+      animation: gradientShift 25s ease-in-out infinite;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -26,60 +35,136 @@
       position: relative;
     }
     
-    /* Partículas flutuantes no fundo */
-    body::before {
-      content: '';
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+      20% {
+        background-position: 25% 25%;
+      }
+      40% {
+        background-position: 75% 75%;
+      }
+      60% {
+        background-position: 100% 25%;
+      }
+      80% {
+        background-position: 25% 100%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    
+    /* Container para o efeito Vanta.js */
+    #vanta-bg {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
-        radial-gradient(2px 2px at 20px 30px, rgba(138, 43, 226, 0.8), transparent),
-        radial-gradient(2px 2px at 40px 70px, rgba(0, 191, 255, 0.6), transparent),
-        radial-gradient(1px 1px at 90px 40px, rgba(168, 85, 247, 0.7), transparent),
-        radial-gradient(1px 1px at 130px 80px, rgba(59, 130, 246, 0.5), transparent),
-        radial-gradient(2px 2px at 160px 30px, rgba(147, 51, 234, 0.6), transparent);
-      background-repeat: repeat;
-      background-size: 200px 100px;
-      animation: particlesFloat 20s linear infinite;
       z-index: 1;
       pointer-events: none;
     }
     
-    @keyframes particlesFloat {
-      0% { transform: translateY(0px) translateX(0px); }
-      33% { transform: translateY(-20px) translateX(10px); }
-      66% { transform: translateY(-10px) translateX(-5px); }
-      100% { transform: translateY(0px) translateX(0px); }
+    /* Overlay de degradê animado para misturar com Vanta */
+    #vanta-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(90, 0, 160, 0.08),     /* Roxo */
+        rgba(0, 94, 255, 0.12),     /* Azul dos botões */
+        rgba(90, 0, 160, 0.06),     /* Roxo */
+        rgba(0, 94, 255, 0.10),     /* Azul dos botões */
+        rgba(90, 0, 160, 0.08),     /* Roxo */
+        rgba(0, 94, 255, 0.15),     /* Azul dos botões */
+        rgba(90, 0, 160, 0.05)      /* Roxo */
+      );
+      background-size: 500% 500%;
+      animation: colorFade 30s ease-in-out infinite;
+      opacity: 0.7;
+      mix-blend-mode: soft-light;
+      z-index: 2;
+    }
+    
+    @keyframes colorFade {
+      0% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+      }
+      14.3% {
+        background-position: 25% 25%;
+        opacity: 0.8;
+      }
+      28.6% {
+        background-position: 50% 0%;
+        opacity: 0.6;
+      }
+      42.9% {
+        background-position: 75% 50%;
+        opacity: 0.9;
+      }
+      57.2% {
+        background-position: 100% 25%;
+        opacity: 0.7;
+      }
+      71.5% {
+        background-position: 75% 75%;
+        opacity: 0.8;
+      }
+      85.8% {
+        background-position: 25% 100%;
+        opacity: 0.6;
+      }
+      100% {
+        background-position: 0% 0%;
+        opacity: 0.5;
+      }
     }
     
     .container {
-      background: rgba(15, 15, 35, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(88, 28, 135, 0.4);
+      background: rgba(10, 10, 20, 0.9);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(90, 0, 160, 0.5);
       border-radius: 24px;
       padding: 48px;
       width: 100%;
       max-width: 420px;
       box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(88, 28, 135, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(90, 0, 160, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
       position: relative;
       z-index: 10;
+      transition: border-color 3s ease-in-out, box-shadow 3s ease-in-out;
     }
     
     .logo {
       font-size: 3.2rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #00F0FF 0%, #5A00A0 50%, #00F0FF 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       text-align: center;
       margin-bottom: 12px;
       letter-spacing: -0.02em;
+      animation: logoShine 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes logoShine {
+      0% {
+        filter: brightness(1);
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      }
+      100% {
+        filter: brightness(1.2);
+        text-shadow: 0 0 20px rgba(90, 0, 160, 0.5);
+      }
     }
     
     .subtitle {
@@ -131,7 +216,7 @@
     
     .btn-plus {
       flex: 1;
-      background: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #8b5cf6 100%);
+      background: linear-gradient(135deg, #5A00A0 0%, #005eff 100%);
       color: #ffffff;
       padding: 16px 24px;
       border: none;
@@ -142,7 +227,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 
-        0 4px 14px rgba(88, 28, 135, 0.4),
+        0 4px 14px rgba(90, 0, 160, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
       position: relative;
       overflow: hidden;
@@ -162,9 +247,10 @@
     .btn-plus:hover {
       transform: translateY(-2px);
       box-shadow: 
-        0 8px 25px rgba(88, 28, 135, 0.6),
+        0 8px 25px rgba(90, 0, 160, 0.8),
+        0 0 30px rgba(90, 0, 160, 0.5),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      background: linear-gradient(135deg, #6b21a8 0%, #8b5cf6 50%, #a855f7 100%);
+      background: linear-gradient(135deg, #7a20c0 0%, #2080ff 100%);
     }
     
     .btn-plus:hover::before {
@@ -181,7 +267,7 @@
     }
     
     .forgot-password a {
-      color: #a855f7;
+      color: #888;
       text-decoration: underline;
       font-size: 15px;
       font-weight: 500;
@@ -189,7 +275,7 @@
     }
     
     .forgot-password a:hover {
-      color: #c084fc;
+      color: #aaa;
     }
     
     .error-message {
@@ -367,6 +453,9 @@
 </head>
 
 <body>
+  <!-- Container para efeitos Vanta.js -->
+  <div id="vanta-bg"></div>
+  
   <div class="container">
     <h1 class="logo">Prod.AI</h1>
     <p class="subtitle">Acesse sua conta</p>
@@ -528,5 +617,215 @@
 
   <!-- Scripts do Firebase e app -->
   <script type="module" src="auth.js?v=20250128-1710"></script>
+  
+  <!-- Inicialização dos efeitos Vanta.js -->
+  <script>
+    // Aguarda o carregamento completo da página
+    window.addEventListener('DOMContentLoaded', function() {
+      // Efeito principal - NET (rede neural)
+      const vantaNet = VANTA.NET({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x5A00A0,        // Roxo nas linhas da rede
+        backgroundColor: 0x0a0a1a, // Fundo escuro (preto)
+        points: 15.00,           // Número de pontos da rede
+        maxDistance: 25.00,      // Distância máxima das conexões
+        spacing: 18.00,          // Espaçamento entre pontos
+        showDots: true          // Mostrar os pontos
+      });
+      
+      // Animação de mudança de cores do Vanta.js - transições suaves
+      const colors = [
+        0x5A00A0,  // Roxo
+        0x005eff,  // Azul dos botões
+        0x5A00A0,  // Roxo
+        0x005eff   // Azul dos botões
+      ];
+      let colorIndex = 0;
+      let isTransitioning = false;
+      
+      function smoothColorTransition() {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        
+        const nextIndex = (colorIndex + 1) % colors.length;
+        const currentColor = colors[colorIndex];
+        const nextColor = colors[nextIndex];
+        
+        // Sincronizar bordas do container e botões com as cores do Vanta
+        const container = document.querySelector('.container');
+        const buttons = document.querySelectorAll('.btn-plus');
+        
+        if (nextColor === 0x5A00A0) { // Roxo
+          // Container roxo com bordas mais finas e menos opacidade
+          if (container) {
+            container.style.borderColor = 'rgba(90, 0, 160, 0.5)';
+            container.style.boxShadow = `
+              0 8px 32px rgba(0, 0, 0, 0.8),
+              0 0 40px rgba(90, 0, 160, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+            `;
+          }
+          // Botões roxos
+          buttons.forEach(button => {
+            button.style.background = 'linear-gradient(135deg, #5A00A0 0%, #5A00A0 100%)';
+            button.style.boxShadow = `
+              0 4px 14px rgba(90, 0, 160, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            `;
+          });
+        } else { // Azul
+          // Container azul com bordas mais finas e menos opacidade
+          if (container) {
+            container.style.borderColor = 'rgba(0, 94, 255, 0.6)';
+            container.style.boxShadow = `
+              0 8px 32px rgba(0, 0, 0, 0.8),
+              0 0 50px rgba(0, 94, 255, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1)
+            `;
+          }
+          // Botões azuis
+          buttons.forEach(button => {
+            button.style.background = 'linear-gradient(135deg, #005eff 0%, #005eff 100%)';
+            button.style.boxShadow = `
+              0 4px 14px rgba(0, 94, 255, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            `;
+          });
+        }
+        
+        // Transição gradual por 3 segundos
+        const steps = 60; // 60 steps para transição suave
+        let step = 0;
+        
+        const transitionInterval = setInterval(() => {
+          const progress = step / steps;
+          const interpolatedColor = interpolateColors(currentColor, nextColor, progress);
+          
+          if (vantaNet && vantaNet.setOptions) {
+            vantaNet.setOptions({
+              color: interpolatedColor
+            });
+          }
+          
+          step++;
+          
+          if (step >= steps) {
+            clearInterval(transitionInterval);
+            colorIndex = nextIndex;
+            isTransitioning = false;
+          }
+        }, 50); // 50ms por step = 3 segundos total
+      }
+      
+      // Função para interpolar cores suavemente
+      function interpolateColors(color1, color2, factor) {
+        const r1 = (color1 >> 16) & 0xff;
+        const g1 = (color1 >> 8) & 0xff;
+        const b1 = color1 & 0xff;
+        
+        const r2 = (color2 >> 16) & 0xff;
+        const g2 = (color2 >> 8) & 0xff;
+        const b2 = color2 & 0xff;
+        
+        const r = Math.round(r1 + (r2 - r1) * factor);
+        const g = Math.round(g1 + (g2 - g1) * factor);
+        const b = Math.round(b1 + (b2 - b1) * factor);
+        
+        return (r << 16) | (g << 8) | b;
+      }
+      
+      // Inicia transições a cada 12 segundos
+      setInterval(smoothColorTransition, 12000);
+      
+      // Adicionar partículas flutuantes extras com Three.js
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true });
+      
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 0); // Transparente
+      
+      // Criar container para as partículas extras
+      const particlesContainer = document.createElement('div');
+      particlesContainer.style.position = 'fixed';
+      particlesContainer.style.top = '0';
+      particlesContainer.style.left = '0';
+      particlesContainer.style.width = '100%';
+      particlesContainer.style.height = '100%';
+      particlesContainer.style.zIndex = '2';
+      particlesContainer.style.pointerEvents = 'none';
+      particlesContainer.appendChild(renderer.domElement);
+      document.body.appendChild(particlesContainer);
+      
+      // Criar geometria das partículas
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlesCount = 100;
+      const posArray = new Float32Array(particlesCount * 3);
+      
+      for(let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+      }
+      
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      
+      // Material das partículas
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.01,
+        color: 0x00F0FF, // Azul elétrico ciano
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      // Criar o sistema de partículas
+      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particlesMesh);
+      
+      camera.position.z = 2;
+      
+      // Animação das partículas
+      function animateParticles() {
+        requestAnimationFrame(animateParticles);
+        
+        // Rotacionar partículas
+        particlesMesh.rotation.x += 0.001;
+        particlesMesh.rotation.y += 0.002;
+        
+        // Movimento flutuante
+        const positions = particlesMesh.geometry.attributes.position.array;
+        for(let i = 0; i < positions.length; i += 3) {
+          positions[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.001;
+        }
+        particlesMesh.geometry.attributes.position.needsUpdate = true;
+        
+        renderer.render(scene, camera);
+      }
+      
+      animateParticles();
+      
+      // Redimensionar ao mudar o tamanho da janela
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Redimensionar Vanta também
+        if (vantaNet) {
+          vantaNet.resize();
+        }
+      });
+      
+      // Limpar ao sair da página
+      window.addEventListener('beforeunload', () => {
+        if (vantaNet) vantaNet.destroy();
+      });
+    });
+  </script>
 </body>
 </html>
