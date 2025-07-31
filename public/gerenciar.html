@@ -247,6 +247,25 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação Após Cancelamento -->
+    <div class="success-confirmation-overlay" id="success-confirmation-overlay">
+        <div class="success-confirmation-modal">
+            <div class="success-modal-content">
+                <div class="success-modal-icon">✅</div>
+                <h3 class="success-modal-title">Assinatura Cancelada com Sucesso!</h3>
+                <p class="success-modal-description" id="success-modal-description">
+                    Sua assinatura foi cancelada. Você continuará com acesso ao Plus até o fim do período atual.
+                </p>
+                <div class="success-modal-buttons">
+                    <button class="success-modal-btn" id="success-modal-btn-ok">
+                        <span class="btn-icon">👍</span>
+                        Entendi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="background-effects">
         <div class="grid-pattern"></div>
         <div class="glow-effect glow-1"></div>
@@ -916,6 +935,75 @@
                 }
             }
             
+            // ═══════════════════════════════════════════════════════
+            // ✅ FUNÇÕES DO MODAL DE CONFIRMAÇÃO APÓS CANCELAMENTO
+            // ═══════════════════════════════════════════════════════
+            
+            // Função para mostrar o modal de confirmação após cancelamento
+            async function showSuccessModal(planExpiresAt) {
+                const overlay = document.getElementById('success-confirmation-overlay');
+                const description = document.getElementById('success-modal-description');
+                
+                if (!overlay || !description) {
+                    console.error('❌ Elementos do modal de sucesso não encontrados');
+                    return;
+                }
+                
+                // Determinar a mensagem baseada na data de expiração
+                let message = 'Sua assinatura foi cancelada com sucesso.';
+                
+                if (planExpiresAt) {
+                    try {
+                        // Converter a data de expiração
+                        const expirationDate = planExpiresAt instanceof Date ? 
+                            planExpiresAt : 
+                            planExpiresAt.toDate ? planExpiresAt.toDate() : new Date(planExpiresAt);
+                        
+                        // Formatear a data em português
+                        const options = { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            timeZone: 'America/Sao_Paulo'
+                        };
+                        const formattedDate = expirationDate.toLocaleDateString('pt-BR', options);
+                        
+                        message = `Sua assinatura foi cancelada com sucesso. Você continuará com acesso ao Plus até ${formattedDate}.`;
+                        
+                        console.log('📅 Data de expiração formatada:', formattedDate);
+                    } catch (error) {
+                        console.error('❌ Erro ao formatar data de expiração:', error);
+                        message = 'Sua assinatura foi cancelada com sucesso. Você continuará com acesso ao Plus até o fim do período atual.';
+                    }
+                } else {
+                    message = 'Sua assinatura foi cancelada com sucesso. O acesso será mantido até o fim do período atual.';
+                }
+                
+                // Atualizar a descrição do modal
+                description.textContent = message;
+                
+                // Mostrar o modal com animação
+                overlay.classList.add('show');
+                
+                // Prevenir scroll do body
+                document.body.style.overflow = 'hidden';
+                
+                console.log('✅ Modal de sucesso exibido com a mensagem:', message);
+            }
+            
+            // Função para esconder o modal de confirmação após cancelamento
+            function hideSuccessModal() {
+                const overlay = document.getElementById('success-confirmation-overlay');
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    
+                    // Restaurar scroll do body
+                    document.body.style.overflow = '';
+                    
+                    console.log('✅ Modal de sucesso fechado');
+                }
+            }
+            
             // Função para personalizar novamente (exclusiva para usuários Plus)
             async function redoInterview() {
                 if (!currentUser) {
@@ -1132,14 +1220,38 @@
                     if (response.ok && result.success) {
                         console.log('✅ Assinatura cancelada com sucesso');
                         
-                        // Esconder modal
+                        // Esconder modal de confirmação
                         hideCancelConfirmationModal();
                         
-                        // Mostrar mensagem de sucesso
-                        showMessage('✅ ' + result.message, 'success');
+                        // Buscar dados do usuário para obter planExpiresAt
+                        try {
+                            // Importar Firestore necessário
+                            const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js');
+                            const { db } = await import('./firebase.js');
+                            
+                            // Buscar documento do usuário
+                            const userDocRef = doc(db, 'usuarios', currentUser.uid);
+                            const userDoc = await getDoc(userDocRef);
+                            
+                            let planExpiresAt = null;
+                            
+                            if (userDoc.exists()) {
+                                const userData = userDoc.data();
+                                planExpiresAt = userData.planExpiresAt;
+                                console.log('📅 Data de expiração do plano:', planExpiresAt);
+                            }
+                            
+                            // Mostrar modal de confirmação após cancelamento
+                            await showSuccessModal(planExpiresAt);
+                            
+                        } catch (firestoreError) {
+                            console.error('❌ Erro ao buscar dados do usuário:', firestoreError);
+                            // Se não conseguir buscar dados, mostrar modal sem data específica
+                            await showSuccessModal(null);
+                        }
                         
-                        // Opcional: Atualizar interface para refletir cancelamento
-                        // (pode ser usado para mostrar status "cancelado" em algum lugar)
+                        // Atualizar exibição do plano para refletir cancelamento
+                        await refreshUserPlan();
                         
                     } else {
                         console.error('❌ Erro ao cancelar assinatura:', result);
@@ -1336,11 +1448,33 @@
                 });
             }
             
+            // Event listeners para o modal de confirmação após cancelamento
+            const successModalBtnOk = document.getElementById('success-modal-btn-ok');
+            const successConfirmationOverlay = document.getElementById('success-confirmation-overlay');
+            
+            // Botão "Entendi" no modal de sucesso
+            if (successModalBtnOk) {
+                successModalBtnOk.addEventListener('click', function() {
+                    hideSuccessModal();
+                });
+            }
+            
+            // Fechar modal de sucesso clicando no overlay (fundo)
+            if (successConfirmationOverlay) {
+                successConfirmationOverlay.addEventListener('click', function(e) {
+                    // Só fechar se clicou no overlay (não no modal)
+                    if (e.target === successConfirmationOverlay) {
+                        hideSuccessModal();
+                    }
+                });
+            }
+            
             // Fechar modal com tecla ESC
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     const cancelOverlay = document.getElementById('cancel-confirmation-overlay');
                     const deleteOverlay = document.getElementById('delete-account-confirmation-overlay');
+                    const successOverlay = document.getElementById('success-confirmation-overlay');
                     
                     if (cancelOverlay && cancelOverlay.classList.contains('show')) {
                         hideCancelConfirmationModal();
@@ -1348,6 +1482,10 @@
                     
                     if (deleteOverlay && deleteOverlay.classList.contains('show')) {
                         hideDeleteAccountConfirmationModal();
+                    }
+                    
+                    if (successOverlay && successOverlay.classList.contains('show')) {
+                        hideSuccessModal();
                     }
                 }
             });
