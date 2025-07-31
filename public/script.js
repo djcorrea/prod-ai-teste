@@ -784,7 +784,7 @@ function startTypingEffect(bubbleElement, content, messageDiv) {
   bubbleElement.innerHTML = '';
   
   let currentIndex = 0;
-  const typingSpeed = 35; // Velocidade de digitação em milissegundos
+  const typingSpeed = 10; // Velocidade de digitação em milissegundos
   
   // Função recursiva para adicionar caracteres
   function typeNextCharacter() {
