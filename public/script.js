@@ -674,8 +674,15 @@ function appendMessage(content, className) {
   
   // Criar bubble da mensagem
   const bubble = document.createElement('div');
-  bubble.className = 'chatbot-message-bubble';
-  bubble.innerHTML = content.replace(/\n/g, '<br>');
+  bubble.className = 'chatbot-message-bubble ia-response';
+  
+  // Para mensagens do usuário, mostrar imediatamente
+  if (className === 'user') {
+    bubble.innerHTML = content.replace(/\n/g, '<br>');
+  } else {
+    // Para mensagens do bot, iniciar vazio para efeito de digitação
+    bubble.innerHTML = '';
+  }
   
   // Criar timestamp
   const timestamp = document.createElement('div');
@@ -700,6 +707,11 @@ function appendMessage(content, className) {
       { opacity: 0, y: 30, scale: 0.95 },
       { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
     );
+  }
+
+  // Se for mensagem do bot, aplicar efeito de digitação
+  if (className === 'bot') {
+    startTypingEffect(bubble, content, messageDiv);
   }
 }
 
@@ -759,6 +771,53 @@ function showRemainingMessages(count) {
   } catch (error) {
     console.log('⚠️ Erro ao mostrar indicador de mensagens (não crítico):', error.message);
   }
+}
+
+// Função para efeito de digitação nas respostas do bot
+function startTypingEffect(bubbleElement, content, messageDiv) {
+  // Extrair texto limpo do HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = content;
+  const cleanText = tempDiv.textContent || tempDiv.innerText || '';
+  
+  // Limpar o conteúdo inicial
+  bubbleElement.innerHTML = '';
+  
+  let currentIndex = 0;
+  const typingSpeed = 35; // Velocidade de digitação em milissegundos
+  
+  // Função recursiva para adicionar caracteres
+  function typeNextCharacter() {
+    if (currentIndex < cleanText.length) {
+      // Adicionar próximo caractere
+      bubbleElement.textContent = cleanText.substring(0, currentIndex + 1);
+      currentIndex++;
+      
+      // Fazer scroll suave para acompanhar a digitação
+      const chatboxEl = document.getElementById('chatbotConversationArea');
+      if (chatboxEl) {
+        chatboxEl.scrollTop = chatboxEl.scrollHeight;
+      }
+      
+      // Continuar digitando
+      setTimeout(typeNextCharacter, typingSpeed);
+    } else {
+      // Quando terminar de digitar, aplicar formatação HTML se necessário
+      bubbleElement.innerHTML = content.replace(/\n/g, '<br>');
+      
+      // Fazer scroll automático para o início da resposta após terminar
+      setTimeout(() => {
+        messageDiv.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }, 500);
+    }
+  }
+  
+  // Iniciar o efeito de digitação após um pequeno delay
+  setTimeout(typeNextCharacter, 300);
 }
 
 function showTypingIndicator() {
