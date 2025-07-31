@@ -786,21 +786,17 @@ body {
     /* Ajustar container do chatbot para mobile */
     .chatbot-container {
         position: fixed;
-        top: 3vh;
+        top: 80%;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translate(-50%, -50%);
         width: calc(100vw - 30px) !important;
         max-width: 400px !important;
         min-width: auto !important;
-        height: 85vh !important;
-        max-height: 85vh !important;
-        min-height: 80vh !important;
-        margin-top: 3vh;
+        height: 60vh !important;
+        max-height: 60vh !important;
+        min-height: 50vh !important;
         margin-bottom: 0;
         overflow: hidden !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
     }
 
     /* Ajustar estado welcome no mobile */
