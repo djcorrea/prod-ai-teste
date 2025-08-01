@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compressor de Imagens - PROD.AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a1a;
+            color: white;
+        }
+        .container {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #8a2be2;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #8a2be2;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #ff6b6b;
+            background: rgba(138, 43, 226, 0.1);
+        }
+        .settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .setting-group {
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8a2be2;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .compress-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #8a2be2, #ff6b6b);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .compress-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        .progress {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #8a2be2, #ff6b6b);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .results {
+            background: #0f0f23;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .file-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #1a1a2e;
+            border-radius: 5px;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-name {
+            font-weight: bold;
+            color: #8a2be2;
+        }
+        .file-size {
+            font-size: 12px;
+            color: #999;
+        }
+        .download-btn {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .stats {
+            text-align: center;
+            padding: 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗜️ Compressor de Imagens PROD.AI</h1>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>📁 Clique aqui ou arraste suas imagens</p>
+            <p style="font-size: 12px; color: #999;">PNG, JPG, JPEG, WEBP</p>
+            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+        </div>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label>🎯 Qualidade (0.1 - 1.0):</label>
+                <input type="number" id="quality" value="0.8" min="0.1" max="1.0" step="0.1">
+            </div>
+            <div class="setting-group">
+                <label>📐 Largura Máxima (px):</label>
+                <input type="number" id="maxWidth" value="1920" min="100" max="4000">
+            </div>
+            <div class="setting-group">
+                <label>📏 Altura Máxima (px):</label>
+                <input type="number" id="maxHeight" value="1080" min="100" max="4000">
+            </div>
+            <div class="setting-group">
+                <label>🎨 Formato de Saída:</label>
+                <select id="outputFormat">
+                    <option value="webp">WebP (Mais Compacto)</option>
+                    <option value="jpeg">JPEG (Compatível)</option>
+                    <option value="png">PNG (Transparência)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="compress-btn" onclick="compressImages()">
+            🗜️ COMPRIMIR IMAGENS
+        </button>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            updateUploadArea();
+        });
+
+        function updateUploadArea() {
+            const uploadArea = document.querySelector('.upload-area');
+            if (selectedFiles.length > 0) {
+                uploadArea.innerHTML = `
+                    <p>✅ ${selectedFiles.length} arquivo(s) selecionado(s)</p>
+                    <p style="font-size: 12px; color: #999;">Clique para selecionar outros</p>
+                `;
+            }
+        }
+
+        async function compressImages() {
+            if (selectedFiles.length === 0) {
+                alert('Selecione pelo menos uma imagem!');
+                return;
+            }
+
+            const quality = parseFloat(document.getElementById('quality').value);
+            const maxWidth = parseInt(document.getElementById('maxWidth').value);
+            const maxHeight = parseInt(document.getElementById('maxHeight').value);
+            const outputFormat = document.getElementById('outputFormat').value;
+
+            const progressBar = document.getElementById('progressBar');
+            const results = document.getElementById('results');
+            
+            results.innerHTML = '';
+            results.style.display = 'block';
+
+            let totalOriginalSize = 0;
+            let totalCompressedSize = 0;
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const progress = ((i + 1) / selectedFiles.length) * 100;
+                progressBar.style.width = progress + '%';
+
+                try {
+                    const compressed = await compressImage(file, quality, maxWidth, maxHeight, outputFormat);
+                    totalOriginalSize += file.size;
+                    totalCompressedSize += compressed.size;
+
+                    displayResult(file, compressed);
+                } catch (error) {
+                    console.error('Erro ao comprimir:', file.name, error);
+                }
+            }
+
+            // Mostrar estatísticas finais
+            displayStats(totalOriginalSize, totalCompressedSize);
+        }
+
+        function compressImage(file, quality, maxWidth, maxHeight, format) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = function() {
+                    // Calcular novas dimensões mantendo proporção
+                    let { width, height } = calculateDimensions(img.width, img.height, maxWidth, maxHeight);
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Desenhar imagem redimensionada
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Converter para blob
+                    canvas.toBlob((blob) => {
+                        const newFile = new File([blob], `compressed_${file.name.split('.')[0]}.${format}`, {
+                            type: `image/${format}`,
+                            lastModified: Date.now()
+                        });
+                        resolve(newFile);
+                    }, `image/${format}`, quality);
+                };
+
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function calculateDimensions(originalWidth, originalHeight, maxWidth, maxHeight) {
+            let width = originalWidth;
+            let height = originalHeight;
+
+            // Redimensionar se necessário
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+
+            if (height > maxHeight) {
+                width = (width * maxHeight) / height;
+                height = maxHeight;
+            }
+
+            return { width: Math.round(width), height: Math.round(height) };
+        }
+
+        function displayResult(originalFile, compressedFile) {
+            const results = document.getElementById('results');
+            const compressionRatio = ((originalFile.size - compressedFile.size) / originalFile.size * 100).toFixed(1);
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'file-result';
+            resultDiv.innerHTML = `
+                <div class="file-info">
+                    <div class="file-name">${originalFile.name}</div>
+                    <div class="file-size">
+                        ${formatFileSize(originalFile.size)} → ${formatFileSize(compressedFile.size)} 
+                        (-${compressionRatio}%)
+                    </div>
+                </div>
+                <a href="${URL.createObjectURL(compressedFile)}" 
+                   download="${compressedFile.name}" 
+                   class="download-btn">
+                   ⬇️ Download
+                </a>
+            `;
+            results.appendChild(resultDiv);
+        }
+
+        function displayStats(originalSize, compressedSize) {
+            const results = document.getElementById('results');
+            const totalReduction = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
+            
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'stats';
+            statsDiv.innerHTML = `
+                <h3>📊 Estatísticas Finais</h3>
+                <p><strong>Tamanho Original:</strong> ${formatFileSize(originalSize)}</p>
+                <p><strong>Tamanho Comprimido:</strong> ${formatFileSize(compressedSize)}</p>
+                <p><strong>Redução Total:</strong> ${totalReduction}% (${formatFileSize(originalSize - compressedSize)} economizados)</p>
+            `;
+            results.insertBefore(statsDiv, results.firstChild);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Drag and drop
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ff6b6b';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#8a2be2';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#8a2be2';
+            
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            selectedFiles = files;
+            updateUploadArea();
+        });
+    </script>
+</body>
+</html>

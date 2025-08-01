@@ -1,0 +1,96 @@
+/* OTIMIZAÇÕES CSS EMERGENCIAIS */
+
+/* ============ 1. REDUZIR ANIMAÇÕES ============ */
+.cenario img {
+    will-change: auto; /* Remover will-change desnecessário */
+    transform: translateY(0) scale(1); /* Remover transformações iniciais */
+    transition: opacity 0.3s ease; /* Simplificar transições */
+}
+
+/* ============ 2. OTIMIZAR IMAGENS ============ */
+.cenario img {
+    image-rendering: optimizeSpeed; /* Priorizar velocidade */
+    object-fit: cover; /* Melhor performance que contain */
+}
+
+/* ============ 3. BACKGROUND FIXO ============ */
+.fundo {
+    position: fixed; /* Usar fixed ao invés de absolute */
+    background-attachment: fixed;
+    transform: none; /* Remover transforms desnecessários */
+}
+
+/* ============ 4. REDUZIR BLUR E SHADOWS ============ */
+.container {
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.2); /* Reduzir de 20px para 10px */
+}
+
+/* ============ 5. PERFORMANCE MODE ============ */
+.performance-mode * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+}
+
+.performance-mode .vanta-background {
+    display: none !important;
+}
+
+.performance-mode .cenario img {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ 6. MOBILE OPTIMIZATIONS ============ */
+@media (max-width: 768px) {
+    .vanta-background {
+        display: none; /* Desabilitar completamente em mobile */
+    }
+    
+    .cenario img {
+        max-width: 100%;
+        height: auto;
+        image-rendering: optimizeSpeed;
+    }
+    
+    .fundo {
+        width: 100vw; /* Reduzir de 200vw para 100vw */
+        height: 100vh; /* Reduzir de 1500px para 100vh */
+        top: 0; /* Remover offset negativo */
+    }
+}
+
+/* ============ 7. LAZY LOADING STYLES ============ */
+img[data-src] {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+img[data-src].loaded {
+    opacity: 1;
+}
+
+/* ============ 8. REDUCE REPAINTS ============ */
+.chatbot-container {
+    transform: translateZ(0); /* Force hardware acceleration only where needed */
+    backface-visibility: hidden;
+}
+
+/* ============ 9. SIMPLIFY GRADIENTS ============ */
+.compress-btn {
+    background: #8a2be2; /* Usar cor sólida ao invés de gradient */
+}
+
+.compress-btn:hover {
+    background: #9932cc;
+    transform: none; /* Remover transform no hover */
+}
+
+/* ============ 10. DISABLE SMOOTH SCROLLING ============ */
+html {
+    scroll-behavior: auto;
+}
+
+* {
+    scroll-behavior: auto;
+}
