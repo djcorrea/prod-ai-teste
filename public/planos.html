@@ -12,6 +12,15 @@
             box-sizing: border-box;
         }
 
+        html {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%);
+            min-height: 100vh;
+            /* Força o fundo em todos os dispositivos */
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%);
@@ -262,6 +271,27 @@
 
         /* Responsividade */
         @media (max-width: 768px) {
+            /* Garantir que o fundo seja mantido em mobile */
+            body {
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%) !important;
+                background-attachment: fixed;
+                min-height: 100vh;
+            }
+            
+            /* Garantir que o efeito de partículas funcione em mobile */
+            body::before {
+                background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                            radial-gradient(circle at 40% 80%, rgba(119, 198, 255, 0.1) 0%, transparent 50%) !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                z-index: -1 !important;
+                pointer-events: none !important;
+            }
+            
             .container {
                 padding: 30px 15px;
                 gap: 35px;
@@ -308,6 +338,16 @@
         }
 
         @media (max-width: 480px) {
+            /* Manter fundo consistente em telas pequenas */
+            body {
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%) !important;
+                background-attachment: fixed;
+            }
+            
+            html {
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%) !important;
+            }
+            
             .container {
                 padding: 20px 10px;
                 gap: 30px;
@@ -375,6 +415,12 @@
         }
 
         @media (max-width: 375px) {
+            /* Força fundo em telas muito pequenas */
+            body, html {
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%) !important;
+                background-attachment: fixed !important;
+            }
+            
             .container {
                 padding: 15px 8px;
             }
