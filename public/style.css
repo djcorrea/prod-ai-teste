@@ -791,30 +791,11 @@ body {
 
 /* ============ RESPONSIVIDADE MOBILE ============ */
 @media (max-width: 767px) {
-    /* Ocultar apenas alguns elementos do cenário no mobile */
-    .robo, .mesa, .caixas, .fundo {
+    /* Ocultar elementos do cenário no mobile */
+    .robo, .mesa, .caixas, .fundo, .notebook, .teclado {
         opacity: 0 !important;
         pointer-events: none;
         visibility: hidden;
-    }
-    
-    /* Manter notebook e teclado visíveis, mas reposicionar */
-    .notebook {
-        bottom: -20%;
-        left: -15%;
-        max-height: 80vh;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto;
-    }
-    
-    .teclado {
-        bottom: -15%;
-        left: 20%;
-        max-height: 60vh;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: auto;
     }
 
     /* Permitir scroll vertical no mobile */
