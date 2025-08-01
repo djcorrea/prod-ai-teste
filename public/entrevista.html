@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PROD.AI - Configuração do Perfil</title>
     
     <style>
@@ -208,7 +208,7 @@
             border: 1px solid rgba(74, 144, 226, 0.5);
             border-radius: 16px;
             color: var(--text-primary);
-            font-size: 0.95rem;
+            font-size: 16px; /* Previne zoom em iOS */
             font-family: 'Space Grotesk', sans-serif;
             transition: all 0.3s ease;
             outline: none;
@@ -322,6 +322,10 @@
         @media (max-width: 768px) {
             body {
                 padding: 60px 15px 30px;
+                /* Prevenir zoom em mobile */
+                touch-action: manipulation;
+                -webkit-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
             }
             
             .interview-container {
@@ -338,6 +342,10 @@
             .form-input,
             .form-select,
             .form-textarea {
+                font-size: 16px !important; /* Força 16px para prevenir zoom */
+                transform: translateZ(0); /* Force hardware acceleration */
+                -webkit-appearance: none; /* Remove estilo nativo iOS */
+                appearance: none; /* Remove estilo nativo */
                 padding: 14px 18px;
                 font-size: 0.9rem;
             }
@@ -668,6 +676,56 @@
                 alert('Erro ao carregar o sistema. Recarregue a página.');
             }
         })();
+    </script>
+    
+    <!-- Script para prevenir zoom em mobile -->
+    <script>
+        // Prevenir zoom em dispositivos móveis
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // Prevenir zoom com duplo toque
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Garantir que inputs não causem zoom
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    // Força scroll suave ao focar no input
+                    setTimeout(() => {
+                        this.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'center',
+                            inline: 'nearest'
+                        });
+                    }, 100);
+                });
+            });
+        });
+
+        // Prevenir zoom com gestos de pinch
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>

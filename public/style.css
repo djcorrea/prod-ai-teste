@@ -76,23 +76,44 @@ body {
 }
 
 .notebook {
-    bottom: -75%;
-    left: -32%;
+    bottom: -45%;
+    left: -20%;
     height: auto;
-    max-height: 180vh;
+    max-height: 120vh;
     z-index: 2;
     filter: drop-shadow(0 0 15px rgba(0, 150, 255, 0.3));
     animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 3s ease-in-out infinite 1.2s;
 }
 
 .teclado {
-    bottom: -64%;
-    left: 16%;
+    bottom: -48%;
+    left: 23%;
     height: auto;
     max-height: 150vh;
     z-index: 2;
     filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.25));
     animation: subtleGlowOptimized 2.5s ease-in-out infinite 0.5s;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ GARANTIR VISIBILIDADE DO NOTEBOOK E TECLADO ============ */
+.notebook {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.teclado {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ ANIMAÇÃO DE ENTRADA PARA DESKTOP ============ */
+@media (min-width: 768px) {
+    .notebook, .teclado {
+        animation-delay: 0.8s;
+        animation-fill-mode: forwards;
+    }
 }
 
 .caixas {
@@ -770,11 +791,30 @@ body {
 
 /* ============ RESPONSIVIDADE MOBILE ============ */
 @media (max-width: 767px) {
-    /* Ocultar elementos do cenário no mobile */
-    .robo, .mesa, .notebook, .teclado, .caixas, .fundo {
+    /* Ocultar apenas alguns elementos do cenário no mobile */
+    .robo, .mesa, .caixas, .fundo {
         opacity: 0 !important;
         pointer-events: none;
         visibility: hidden;
+    }
+    
+    /* Manter notebook e teclado visíveis, mas reposicionar */
+    .notebook {
+        bottom: -20%;
+        left: -15%;
+        max-height: 80vh;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto;
+    }
+    
+    .teclado {
+        bottom: -15%;
+        left: 20%;
+        max-height: 60vh;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto;
     }
 
     /* Permitir scroll vertical no mobile */

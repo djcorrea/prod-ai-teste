@@ -699,7 +699,15 @@ function appendMessage(content, className) {
   messageDiv.appendChild(messageContent);
   
   chatboxEl.appendChild(messageDiv);
-  chatboxEl.scrollTop = chatboxEl.scrollHeight;
+  
+  // ✅ SCROLL INICIAL: Role até a nova mensagem uma única vez
+  setTimeout(() => {
+    messageDiv.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start',
+      inline: 'nearest'
+    });
+  }, 100);
 
   // Animar entrada da mensagem com GSAP
   if (typeof gsap !== 'undefined') {
@@ -773,51 +781,507 @@ function showRemainingMessages(count) {
   }
 }
 
+// Função para formatar respostas da IA com estilo bonito e emojis significativos
+function formatarRespostaEstilosa(textoPuro) {
+  // Remover prefixo "Assistente:" se existir
+  let texto = textoPuro.replace(/<strong>Assistente:<\/strong>\s*/, '').trim();
+  
+  // Aplicar formatação de emojis significativos no início de blocos
+  texto = aplicarEmojiDireto(texto);
+  
+  // Detectar e formatar títulos com emojis significativos
+  texto = texto.replace(/^([🔥💡❌✅⚙️⚠️🎯🚀📊🎨��🌟🎵🎪]+)\s*([A-Za-zÀ-ÿ0-9\s]{3,50}):\s*/gm, 
+    '<p><strong>$1 $2:</strong></p>');
+  
+  // Detectar listas e transformar em HTML
+  const linhas = texto.split('\n');
+  let htmlFormatado = '';
+  let dentroLista = false;
+  
+  for (let i = 0; i < linhas.length; i++) {
+    let linha = linhas[i].trim();
+    
+    if (!linha) {
+      if (dentroLista) {
+        htmlFormatado += '</ul>';
+        dentroLista = false;
+      }
+      htmlFormatado += '<br>';
+      continue;
+    }
+    
+    // Detectar itens de lista (números, emojis significativos, bullets)
+    const regexLista = /^(\d+[\.\)]|[🔥�❌✅⚙️⚠️🎯🚀�🎨����🎪]+|\-|\•)\s+(.+)$/;
+    
+    if (regexLista.test(linha)) {
+      if (!dentroLista) {
+        htmlFormatado += '<ul>';
+        dentroLista = true;
+      }
+      
+      // Extrair emoji/número e conteúdo
+      const match = linha.match(regexLista);
+      if (match) {
+        const icone = match[1];
+        let conteudo = match[2];
+        
+        // Detectar texto em negrito (primeira parte até os dois pontos)
+        conteudo = conteudo.replace(/^([^:]+):\s*(.+)$/, '<strong>$1:</strong> $2');
+        
+        // Aplicar formatação adicional
+        conteudo = conteudo.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        conteudo = conteudo.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        
+        htmlFormatado += `<li>${icone} ${conteudo}</li>`;
+      }
+    } else {
+      if (dentroLista) {
+        htmlFormatado += '</ul>';
+        dentroLista = false;
+      }
+      
+      // Linha normal - aplicar formatações
+      linha = linha.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      linha = linha.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      
+      // Se não foi formatado como título, envolver em parágrafo
+      if (!linha.startsWith('<p><strong>') && linha.length > 0) {
+        htmlFormatado += `<p>${linha}</p>`;
+      } else {
+        htmlFormatado += linha;
+      }
+    }
+  }
+  
+  // Fechar lista se ainda estiver aberta
+  if (dentroLista) {
+    htmlFormatado += '</ul>';
+  }
+  
+  return `<div class="chatbot-message-estilosa">${htmlFormatado}</div>`;
+}
+
+// Função para aplicar emojis significativos no início de blocos de conteúdo
+function aplicarEmojisSignificativos(texto) {
+  // Mapeamento de tipos de conteúdo para emojis significativos
+  const emojiMap = [
+    // Dicas e sugestões
+    {
+      patterns: ['dica', 'sugestão', 'recomendação', 'tip', 'sugestão', 'conselho'],
+      emoji: '💡',
+      format: 'Dica'
+    },
+    
+    // Coisas a evitar ou problemas
+    {
+      patterns: ['evite', 'não faça', 'cuidado', 'problema', 'erro', 'atenção', 'avoid'],
+      emoji: '❌',
+      format: 'Evite'
+    },
+    
+    // Coisas importantes ou poderosas
+    {
+      patterns: ['importante', 'crucial', 'essencial', 'fundamental', 'chave', 'destaque'],
+      emoji: '�',
+      format: 'IMPORTANTE'
+    },
+    
+    // Configurações técnicas
+    {
+      patterns: ['configuração', 'setup', 'ajuste', 'parâmetro', 'settings', 'config'],
+      emoji: '⚙️',
+      format: 'Configuração'
+    },
+    
+    // Resultados positivos ou aprovação
+    {
+      patterns: ['resultado', 'sucesso', 'funcionou', 'correto', 'perfeito', 'aprovado'],
+      emoji: '✅',
+      format: 'Resultado'
+    },
+    
+    // Alertas e avisos
+    {
+      patterns: ['alerta', 'aviso', 'warning', 'cuidado', 'observação', 'nota'],
+      emoji: '⚠️',
+      format: 'Atenção'
+    },
+    
+    // Objetivos e foco
+    {
+      patterns: ['objetivo', 'meta', 'foco', 'alvo', 'propósito', 'goal'],
+      emoji: '🎯',
+      format: 'Objetivo'
+    },
+    
+    // Performance e otimização
+    {
+      patterns: ['performance', 'otimização', 'velocidade', 'melhoria', 'boost'],
+      emoji: '🚀',
+      format: 'Performance'
+    },
+    
+    // Análise e dados
+    {
+      patterns: ['análise', 'dados', 'estatística', 'métrica', 'relatório'],
+      emoji: '📊',
+      format: 'Análise'
+    },
+    
+    // Design e criatividade
+    {
+      patterns: ['design', 'criativo', 'visual', 'estilo', 'aparência'],
+      emoji: '🎨',
+      format: 'Design'
+    },
+    
+    // Ferramentas e recursos
+    {
+      patterns: ['ferramenta', 'recurso', 'tool', 'funcionalidade', 'feature'],
+      emoji: '�',
+      format: 'Ferramenta'
+    },
+    
+    // Qualidade premium
+    {
+      patterns: ['premium', 'plus', 'pro', 'avançado', 'superior', 'qualidade'],
+      emoji: '💎',
+      format: 'Premium'
+    },
+    
+    // Destaque especial
+    {
+      patterns: ['destaque', 'especial', 'exclusivo', 'único', 'diferencial'],
+      emoji: '�',
+      format: 'Destaque'
+    }
+  ];
+  
+  // Aplicar formatação por parágrafo
+  const paragrafos = texto.split('\n\n');
+  let textoFormatado = '';
+  
+  for (let paragrafo of paragrafos) {
+    paragrafo = paragrafo.trim();
+    if (!paragrafo) continue;
+    
+    // Verificar se já tem emoji no início
+    if (/^[🔥💡❌✅⚙️⚠️🎯🚀📊🎨🔧💎🌟]/.test(paragrafo)) {
+      textoFormatado += paragrafo + '\n\n';
+      continue;
+    }
+    
+    // Procurar padrões no início do parágrafo
+    let emojiAplicado = false;
+    for (const { patterns, emoji, format } of emojiMap) {
+      const regex = new RegExp(`^(${patterns.join('|')})\\b`, 'i');
+      
+      if (regex.test(paragrafo)) {
+        // Aplicar emoji e formatação no início
+        paragrafo = paragrafo.replace(/^([^:]*?):\s*/, `**${emoji} ${format.toUpperCase()}:** `);
+        
+        // Se não tinha dois pontos, adicionar formatação
+        if (!paragrafo.includes('**')) {
+          paragrafo = `**${emoji} ${format.toUpperCase()}:** ${paragrafo}`;
+        }
+        
+        emojiAplicado = true;
+        break;
+      }
+    }
+    
+    // Se é um título sem emoji (termina com dois pontos), aplicar emoji genérico
+    if (!emojiAplicado && /^[A-Z][^:]*:$/.test(paragrafo.trim())) {
+      paragrafo = `**� ${paragrafo.replace(':', '').toUpperCase()}:**`;
+    }
+    
+    textoFormatado += paragrafo + '\n\n';
+  }
+  
+  return textoFormatado.trim();
+}
+
+// ✅ NOVA FUNÇÃO: Aplicar emoji de forma mais direta e simples
+function aplicarEmojiDireto(texto) {
+  // Detectar palavras-chave e aplicar emoji no início
+  const palavrasChave = {
+    'dica': '💡 DICA',
+    'sugestão': '💡 DICA', 
+    'recomenda': '💡 DICA',
+    'importante': '🔥 IMPORTANTE',
+    'crucial': '🔥 IMPORTANTE',
+    'essencial': '🔥 IMPORTANTE',
+    'evite': '❌ EVITE',
+    'não': '❌ EVITE',
+    'cuidado': '❌ EVITE',
+    'resultado': '✅ RESULTADO',
+    'sucesso': '✅ RESULTADO',
+    'correto': '✅ RESULTADO',
+    'configuração': '⚙️ CONFIGURAÇÃO',
+    'config': '⚙️ CONFIGURAÇÃO',
+    'setup': '⚙️ CONFIGURAÇÃO',
+    'alerta': '⚠️ ATENÇÃO',
+    'aviso': '⚠️ ATENÇÃO',
+    'objetivo': '🎯 OBJETIVO',
+    'meta': '🎯 OBJETIVO',
+    'performance': '🚀 PERFORMANCE',
+    'velocidade': '🚀 PERFORMANCE',
+    'análise': '📊 ANÁLISE',
+    'dados': '📊 ANÁLISE',
+    'design': '🎨 DESIGN',
+    'visual': '🎨 DESIGN'
+  };
+  
+  // Procurar a primeira palavra-chave encontrada
+  for (const [palavra, emoji] of Object.entries(palavrasChave)) {
+    if (texto.toLowerCase().includes(palavra)) {
+      return `**${emoji}:** ${texto}`;
+    }
+  }
+  
+  // Se não encontrou palavra-chave específica, usar emoji genérico
+  return `**🌟 RESPOSTA:** ${texto}`;
+}
+
+// Função para injetar estilos CSS da resposta estilosa
+function injetarEstilosRespostaEstilosa() {
+  const style = document.createElement('style');
+  style.textContent = `
+    .chatbot-message-estilosa {
+      background: linear-gradient(135deg, rgba(20, 26, 48, 0.7), rgba(28, 34, 58, 0.8));
+      border: 1px solid rgba(80, 100, 150, 0.2);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin: 15px 0;
+      color: #ffffff;
+      font-size: 16px;
+      line-height: 1.7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      box-shadow: 0 6px 25px rgba(20, 26, 48, 0.3);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chatbot-message-estilosa::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #4a90e2, #5aa3f0, #6bb6ff);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .chatbot-message-estilosa p {
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #e3f2fd;
+      line-height: 1.6;
+    }
+
+    .chatbot-message-estilosa p:last-child {
+      margin-bottom: 0;
+    }
+
+    .chatbot-message-estilosa ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 16px 0 8px 0;
+      background: rgba(20, 26, 48, 0.4);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .chatbot-message-estilosa li {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 3px solid rgba(106, 182, 255, 0.6);
+      transition: all 0.2s ease;
+    }
+
+    .chatbot-message-estilosa li:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-left-color: #6ab6ff;
+    }
+
+    .chatbot-message-estilosa li:last-child {
+      margin-bottom: 0;
+    }
+
+    .chatbot-message-estilosa strong {
+      color: #ffffff;
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      font-size: 16px;
+    }
+
+    .chatbot-message-estilosa em {
+      color: #90caf9;
+      font-style: italic;
+      background: rgba(144, 202, 249, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .chatbot-message-estilosa br {
+      line-height: 2;
+    }
+
+    /* Efeito de brilho sutil */
+    .chatbot-message-estilosa {
+      animation: subtle-glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes subtle-glow {
+      from {
+        box-shadow: 0 6px 25px rgba(20, 26, 48, 0.3);
+      }
+      to {
+        box-shadow: 0 8px 30px rgba(74, 144, 226, 0.2);
+      }
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .chatbot-message-estilosa {
+        font-size: 14px;
+        padding: 16px 18px;
+        border-radius: 12px;
+        margin: 12px 0;
+      }
+      
+      .chatbot-message-estilosa p {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .chatbot-message-estilosa ul {
+        padding: 8px;
+        margin: 12px 0 6px 0;
+      }
+
+      .chatbot-message-estilosa li {
+        padding: 8px 10px;
+        margin-bottom: 8px;
+      }
+    }
+
+    /* Animação de entrada */
+    .chatbot-message-estilosa {
+      animation: slideInFromBottom 0.6s ease-out, subtle-glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes slideInFromBottom {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Função avançada para digitar HTML formatado mantendo a estrutura
+function typeFormattedHTML(element, html, speed = 15) {
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+  const nodes = Array.from(temp.childNodes);
+  element.innerHTML = ""; // Limpa o destino
+
+  let nodeIndex = 0;
+  let isTyping = true;
+
+  function typeNode() {
+    if (nodeIndex >= nodes.length || !isTyping) {
+      // Finalizar digitação e fazer scroll final
+      setTimeout(() => {
+        const messageDiv = element.closest('.chatbot-message');
+        if (messageDiv) {
+          messageDiv.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+          });
+        }
+      }, 500);
+      return;
+    }
+
+    const node = nodes[nodeIndex++];
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      // Nó de texto - digitar caractere por caractere
+      const text = node.textContent;
+      let charIndex = 0;
+      const span = document.createElement("span");
+      element.appendChild(span);
+
+      function typeCharacter() {
+        if (charIndex < text.length && isTyping) {
+          span.textContent += text[charIndex++];
+          
+          // ❌ REMOVIDO: Scroll automático durante digitação
+          // const chatboxEl = document.getElementById('chatbotConversationArea');
+          // if (chatboxEl) {
+          //   chatboxEl.scrollTop = chatboxEl.scrollHeight;
+          // }
+          
+          setTimeout(typeCharacter, speed);
+        } else {
+          // Texto completo, passar para próximo nó
+          setTimeout(typeNode, speed * 2);
+        }
+      }
+
+      typeCharacter();
+
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      // Nó elemento - clonar e continuar com conteúdo interno
+      const clone = node.cloneNode(false); // Não clonar filhos
+      element.appendChild(clone);
+
+      if (node.childNodes.length > 0) {
+        // Se tem filhos, digitar o conteúdo interno
+        typeFormattedHTML(clone, node.innerHTML, speed);
+        // Aguardar um pouco antes do próximo nó
+        setTimeout(typeNode, speed * 3);
+      } else {
+        // Sem filhos, continuar
+        setTimeout(typeNode, speed);
+      }
+    } else {
+      // Outros tipos de nó, continuar
+      setTimeout(typeNode, speed);
+    }
+  }
+
+  typeNode();
+  
+  // Retornar função para parar a digitação se necessário
+  return () => { isTyping = false; };
+}
+
 // Função para efeito de digitação nas respostas do bot
 function startTypingEffect(bubbleElement, content, messageDiv) {
-  // Extrair texto limpo do HTML
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = content;
-  const cleanText = tempDiv.textContent || tempDiv.innerText || '';
+  // Aplicar formatação estilosa ao conteúdo primeiro
+  const conteudoFormatado = formatarRespostaEstilosa(content);
   
   // Limpar o conteúdo inicial
   bubbleElement.innerHTML = '';
   
-  let currentIndex = 0;
-  const typingSpeed = 10; // Velocidade de digitação em milissegundos
-  
-  // Função recursiva para adicionar caracteres
-  function typeNextCharacter() {
-    if (currentIndex < cleanText.length) {
-      // Adicionar próximo caractere
-      bubbleElement.textContent = cleanText.substring(0, currentIndex + 1);
-      currentIndex++;
-      
-      // Fazer scroll suave para acompanhar a digitação
-      const chatboxEl = document.getElementById('chatbotConversationArea');
-      if (chatboxEl) {
-        chatboxEl.scrollTop = chatboxEl.scrollHeight;
-      }
-      
-      // Continuar digitando
-      setTimeout(typeNextCharacter, typingSpeed);
-    } else {
-      // Quando terminar de digitar, aplicar formatação HTML se necessário
-      bubbleElement.innerHTML = content.replace(/\n/g, '<br>');
-      
-      // Fazer scroll automático para o início da resposta após terminar
-      setTimeout(() => {
-        messageDiv.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
-        });
-      }, 500);
-    }
-  }
-  
-  // Iniciar o efeito de digitação após um pequeno delay
-  setTimeout(typeNextCharacter, 300);
+  // Iniciar digitação formatada após um pequeno delay
+  setTimeout(() => {
+    typeFormattedHTML(bubbleElement, conteudoFormatado, 15);
+  }, 300);
 }
 
 function showTypingIndicator() {
@@ -974,6 +1438,9 @@ async function processMessage(message) {
 
 // Aguardar carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
+    // Injetar estilos CSS para respostas estilosas
+    injetarEstilosRespostaEstilosa();
+    
     // Verificar se estamos na página principal antes de inicializar tudo
     const isMainPage = document.querySelector('.hero') || document.querySelector('#startSendBtn') || window.location.pathname.includes('index.html');
     
