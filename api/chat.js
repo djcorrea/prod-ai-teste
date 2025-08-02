@@ -283,8 +283,23 @@ Responda sempre com excelência técnica e conhecimento profissional aplicado ao
 
 // Função para chamar a API da OpenAI
 async function callOpenAI(messages, userData) {
-  const systemPrompt = "Você é um assistente de produção musical que responde de forma direta e técnica.";
+  let systemPrompt;
   
+  if (userData.plano === 'plus') {
+    // Para usuários Plus, usar prompt personalizado baseado no perfil
+    systemPrompt = generatePersonalizedSystemPrompt(userData.perfil);
+  } else {
+    // Para usuários gratuitos, usar prompt básico existente
+    systemPrompt = `Você é o Prod.AI 🎵, especialista em produção musical. Ajude com dúvidas sobre produção, mixagem e masterização de forma técnica e direta.
+
+INSTRUÇÕES:
+- Seja técnico mas acessível
+- Use exemplos práticos
+- Mantenha respostas concisas
+- Foque em soluções aplicáveis
+
+Sua missão é ajudar produtores musicais com excelência técnica.`;
+  }
   const requestBody = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
