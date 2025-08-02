@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prod.AI - Mentor Virtual</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="performance-fix.css">
+    <link rel="stylesheet" href="performance-subtle.css">
     
     <!-- Fontes e ícones -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas para efeitos visuais - TEMPORARIAMENTE DESABILITADO PARA PERFORMANCE -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> -->
+    <!-- Bibliotecas para efeitos visuais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
 
     <!-- Firebase e FingerprintJS -->
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
@@ -23,7 +23,7 @@
     <script type="module" src="firebase.js"></script>
     <script src="auth.js" defer></script>
 </head>
-<body class="performance-mode">
+<body>
     <!-- Cenário 3D -->
     <div class="cenario">
         <!-- Container para o fundo animado Vanta.js -->
@@ -33,11 +33,11 @@
         <img src="fundo.webp" alt="Fundo futurista" class="fundo" />
 
         <!-- Elementos do cenário -->
-        <img src="robo.webp" alt="Robô futurista" class="robo" />
-        <img src="mesa.webp" alt="Mesa" class="mesa" />
-        <img src="caixas.webp" alt="Caixas de som principais" class="caixas" />
-        <img src="notebook.webp" alt="Notebook" class="notebook" />
-        <img src="teclado.webp" alt="teclado" class="teclado" />
+        <img src="robo.webp" alt="Robô futurista" class="robo" loading="lazy" />
+        <img src="mesa.webp" alt="Mesa" class="mesa" loading="lazy" />
+        <img src="caixas.webp" alt="Caixas de som principais" class="caixas" loading="lazy" />
+        <img src="notebook.webp" alt="Notebook" class="notebook" loading="lazy" />
+        <img src="teclado.webp" alt="teclado" class="teclado" loading="lazy" />
         
         <!-- Overlay de partículas extras -->
         <div class="particles-overlay"></div>
