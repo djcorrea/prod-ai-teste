@@ -467,6 +467,58 @@ Responda com excelência absoluta.`;
 `;
   }
 
+  // 🎯 Detectar estilos específicos na mensagem do usuário
+  const isFunkMandela = /(mandelao|mandelão|funk mandela|mandela|mandela sp)/i.test(userMessage);
+  const isFunkBruxaria = /(funk bruxaria|bruxaria|bruxo|dark funk)/i.test(userMessage);
+  const isFunkSP = /(funk sp|funk de sp|batida sp|batidão paulista|funk paulistano)/i.test(userMessage);
+
+  // 🎵 Instruções específicas para cada subgênero
+  const instrucaoFunkMandela = `
+📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+- 🔊 Batidas brutais, com **kicks longos e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
+- 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
+- 🎛️ Mixagem:
+  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Saturação pesada, compressão leve e coloração ruidosa
+- 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, fora do tom propositalmente para criar choque sonoro.
+- 🧪 Variações rítmicas com grid 1/6, deslocamento de notas e técnicas "antimusicais" para dar identidade crua ao som.
+`;
+
+  const instrucaoFunkSP = `
+📚 INSTRUÇÕES AVANÇADAS — FUNK SP / BATIDÃO PAULISTA
+- 🥁 Base marcada, BPM entre 140–150, estilo direto, reto, batidão mesmo.
+- 🔥 Kicks pesados e sintéticos, com poucos elementos melódicos.
+- 🎤 Vocais com muito efeito (pitch, reverb, delay), muitas vezes com levada seca e falada.
+- 🔊 Estilo pensado pro carro, com ênfase em **grave recortado** e batida de presença.
+- 🧠 Simplicidade proposital: refrão repetitivo e beat minimalista, mas forte.
+- 💡 Priorize mix com subgraves reforçados no centro e compressão paralela nos kicks.
+`;
+
+  const instrucaoFunkBruxaria = `
+📚 INSTRUÇÕES AVANÇADAS — FUNK BRUXARIA
+- 🧙‍♂️ Estilo sombrio e esotérico, com ambiências escuras, reverses, vozes distorcidas e batidas hipnóticas.
+- 🌑 Samples de risadas demoníacas, vozes sussurradas, tons graves e loops invertidos.
+- 🎧 Use escalas menores, notas dissonantes e ambiência estéreo para criar uma vibe assustadora.
+- 🎛️ Técnicas:
+  - Reverses em snares, FX e vocais
+  - Delay e reverb com automação
+  - Vozes com pitch + distorção + chorus
+- 🔊 Equalização focada em criar um "espaço sombrio" com destaque para subgraves e médios escuros.
+- 🔁 Estrutura repetitiva e hipnótica para induzir a vibe "ritualística".
+`;
+
+  // ✅ Inserir dinamicamente no systemPrompt se a mensagem contiver os termos
+  if (isFunkMandela) {
+    systemPrompt += instrucaoFunkMandela;
+  }
+  if (isFunkSP) {
+    systemPrompt += instrucaoFunkSP;
+  }
+  if (isFunkBruxaria) {
+    systemPrompt += instrucaoFunkBruxaria;
+  }
+
   const requestBody = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
