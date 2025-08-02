@@ -174,13 +174,27 @@ async function handleUserLimits(db, uid, email) {
 // 🧠 Bases técnicas por estilo (instrução base)
 const instrucoesBase = {
   funkMandela: `
-🧠 INSTRUÇÃO BASE - FUNK MANDELA / MANDELÃO:
-- Batidas brutais, com **kicks fortes e distorcidos**, focando nas regiões graves.
-- Samples sujos e recortados, muitas vezes com ambiências carregadas.
-- Estrutura com fade manual no final, delay agressivo.
-- Grid comum: 4x3x3x1. Evite kick e bass juntos, use sidechain.
-- Compressão leve, saturação pesada e coloração ruidosa. 
-- Vocais podem ser cortados ou picotados.
+📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+🔥BEAT:
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
+- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+- 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
+Diretrizes técnicas:
+- 🕒 **BPM** entre 130 e 135.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
+- 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
+- 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
+🎛️ Mixagem:
+  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Saturação pesada, compressão leve e coloração ruidosa
+  - Dar mais clareza nos agudos do beat para destacar mais
+  - Mixagem não tão limpa, mas com punch e presença.
+🎙️ Acapella, vocal: 
+  - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
+  - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
+  - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
 `,
 
   funkSP: `
@@ -468,28 +482,27 @@ function detectarEstiloNaMensagem(mensagem) {
 function gerarPromptDoEstilo(estilo) {
   const promptsEspecificos = {
     'funk mandela': `
-📚 CONTEXTO TÉCNICO ATIVO — FUNK MANDELA / MANDELÃO
-- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, focando nas regiões graves. É o funk de paredão, que "explode o ouvido".
-- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
-- 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
-- 🎛️ Mixagem:
+📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+🔥BEAT:
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
+- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+- 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
+Diretrizes técnicas:
+- 🕒 **BPM** entre 130 e 135.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
+- 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
+- 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
+🎛️ Mixagem:
   - EQ para tirar grave dos beats e deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
   - Dar mais clareza nos agudos do beat para destacar mais
-- 🎙️ Vocais cortados de falas polêmicas, com destaque nos agudos.
-- 🥁 Grid comum: 4x3x3x1. Use sidechain entre kick e bass.
-- 🔥 Plugins de reverb e delay para profundidade e ambiência.
-`,
-
-    'funk bh': `
-📚 CONTEXTO TÉCNICO ATIVO — FUNK BH
-- 🔢 BPM 130, percussões marcantes (chocalho, agogô, palmas, timbres metálicos).
-- 🎹 Escalas menores harmônicas, duas notas com meio tom para tensão.
-- 🎼 Violões acústicos dedilhados como base harmônica.
-- 🎻 Instrumentos: baixo orgânico, violinos metálicos, flautas, bells, sinos.
-- 🔀 Variação rítmica constante, elementos alternando a cada 2 compassos.
-- 🥁 Grid 1/2 step, sequência: 5, 4, 4, 1.
-- 💡 Progressões: Lá menor ➝ Ré menor ➝ Sol (1° ➝ 4° grau menor harmônica).
+  - Mixagem não tão limpa, mas com punch e presença.
+🎙️ Acapella, vocal: 
+  - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
+  - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
+  - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
 `,
 
     'funk bruxaria': `
