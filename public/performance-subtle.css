@@ -1,47 +1,48 @@
-/* OTIMIZAÇÕES SUTIS - MANTÉM VISUAL, MELHORA PERFORMANCE */
+/* OTIMIZAÇÕES AGRESSIVAS - TESTE DE PERFORMANCE */
 
-/* ============ 1. REDUZIR ANIMAÇÕES MAIS PESADAS ============ */
-.robo {
-    animation-duration: 4s !important; /* De 2s para 4s */
+/* ============ 1. DESABILITAR ANIMAÇÕES PESADAS ============ */
+.robo, .notebook, .caixas, .teclado, .mesa {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
 }
 
-.notebook {
-    animation-duration: 6s !important; /* De 3s para 6s */
+/* ============ 2. SIMPLIFICAR VANTA.JS ============ */
+.vanta-background {
+    opacity: 0.3 !important; /* Reduzir muito a intensidade */
 }
 
-.caixas {
-    animation-duration: 7s !important; /* De 3.5s para 7s */
+/* ============ 3. REDUZIR PARTÍCULAS ============ */
+.particles-overlay {
+    display: none !important; /* Desabilitar completamente */
 }
 
-/* ============ 2. OTIMIZAR SHADOWS ============ */
-.robo {
-    filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.2)) !important; /* Reduzir de 20px para 15px */
-}
-
-.notebook, .caixas {
-    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.2)) !important; /* Reduzir intensidade */
-}
-
-/* ============ 3. SIMPLIFICAR GRADIENTES ============ */
+/* ============ 4. GRADIENTES SIMPLES ============ */
 .chatbot-container {
-    background: linear-gradient(145deg, 
-        rgba(10, 15, 35, 0.95), 
-        rgba(15, 25, 55, 0.95)
-    ) !important; /* Remover terceira cor */
+    background: rgba(10, 15, 35, 0.95) !important; /* Cor sólida */
 }
 
-/* ============ 4. MOBILE OPTIMIZATIONS ============ */
+.chatbot-main-title {
+    background: linear-gradient(45deg, #00bfff, #8b1a7e) !important; /* Só 2 cores */
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    animation: none !important; /* Parar animação do gradiente */
+}
+
+/* ============ 5. OTIMIZAR IMAGENS ============ */
+.cenario img {
+    image-rendering: optimizeSpeed !important;
+    will-change: auto !important;
+}
+
+/* ============ 6. MOBILE TOTAL ============ */
 @media (max-width: 768px) {
-    .particles-overlay {
-        opacity: 0.5 !important; /* Reduzir partículas em mobile */
+    .vanta-background {
+        display: none !important;
     }
     
-    .vanta-background {
-        opacity: 0.7 !important; /* Reduzir intensidade do Vanta */
+    .cenario img {
+        max-width: 80% !important;
+        height: auto !important;
     }
-}
-
-/* ============ 5. PRELOAD HINT ============ */
-.cenario img {
-    image-rendering: optimizeSpeed; /* Priorizar velocidade */
 }
