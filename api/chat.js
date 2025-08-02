@@ -890,30 +890,38 @@ export default async function handler(req, res) {
     const perguntaLower = message.toLowerCase();
     const respostaLower = reply.toLowerCase();
 
-    // Verifica se é Funk Mandela e se fala sobre beat/sequência
-    const ehMandela = estilo.includes("mandela") || perguntaLower.includes("mandela") || perguntaLower.includes("mandelão");
-    const mencionaSequencia = respostaLower.includes("4x3x3x1") || (respostaLower.includes("sequencia") && respostaLower.includes("piano")) || respostaLower.includes("beat");
+    // Debug: Log das variáveis para verificar detecção
+    console.log('🔍 DEBUG - Estilo:', estilo);
+    console.log('🔍 DEBUG - Pergunta contém mandela:', perguntaLower.includes("mandela") || perguntaLower.includes("mandelão"));
+    console.log('🔍 DEBUG - Resposta contém 4x3x3x1:', respostaLower.includes("4x3x3x1"));
 
-    if (ehMandela && mencionaSequencia && respostaLower.includes("4x3x3x1")) {
-      // Substituir diferentes variações da sequência 4x3x3x1 com a imagem
-      reply = reply.replace(
-        /(sequencia\s+4x3x3x1[^.]*\.?)/i,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
+    // Verifica se é Funk Mandela (detecção ampliada)
+    const ehMandela = estilo.includes("mandela") || 
+                      perguntaLower.includes("mandela") || 
+                      perguntaLower.includes("mandelão") ||
+                      perguntaLower.includes("funk mandela") ||
+                      respostaLower.includes("mandela") ||
+                      respostaLower.includes("mandelão");
+
+    // Verifica se menciona a sequência específica
+    const menciona4x3x3x1 = respostaLower.includes("4x3x3x1");
+
+    console.log('🔍 DEBUG - É Mandela:', ehMandela);
+    console.log('🔍 DEBUG - Menciona 4x3x3x1:', menciona4x3x3x1);
+
+    if (ehMandela && menciona4x3x3x1) {
+      console.log('🎯 Condições atendidas - Inserindo imagem...');
       
-      // Alternativa: substituir por "utiliza como base a sequência 4x3x3x1"
-      reply = reply.replace(
-        /(utiliza como base a sequencia\s+4x3x3x1[^.]*\.?)/i,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
-      
-      // Alternativa: qualquer menção a 4x3x3x1 no contexto de beat/piano roll
-      reply = reply.replace(
-        /([^<>]*4x3x3x1[^<>]*(?:compasso|quadradinho|nota)[^<>]*\.?)/i,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
-      
-      console.log('🎹 Imagem do Funk Mandela inserida automaticamente na resposta');
+      // Padrão mais simples e direto
+      if (reply.includes("4x3x3x1")) {
+        reply = reply.replace(
+          /4x3x3x1/g,
+          `4x3x3x1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+        );
+        console.log('✅ Imagem do Funk Mandela inserida com sucesso!');
+      }
+    } else {
+      console.log('❌ Condições não atendidas para inserir imagem');
     }
 
     if (userData.plano === 'gratis') {
