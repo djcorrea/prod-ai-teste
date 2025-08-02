@@ -442,6 +442,28 @@ async function callOpenAI(messages, userData) {
 
 Responda com excelência absoluta.`;
   }
+
+  // ✅ Detectar Funk BH nas mensagens do usuário com variações comuns
+  const userMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
+  const isFunkBHQuestion = /(funk\s?bh|funkdebh|mtg|bh funk|funk\s+de\s+bh)/i.test(userMessage);
+
+  // ✅ Incluir instruções específicas para Funk BH se detectado
+  if (isFunkBHQuestion) {
+    systemPrompt += `
+
+📚 INSTRUÇÕES AVANÇADAS — FUNK BH
+- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no RJ. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
+- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
+- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
+- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
+- 💽 Estética: **kicks com punch, sem limiter**, samples sujos e com ambiência escura, marcações com swing.
+- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum.
+- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela.
+- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
+- 🧪 Sugira ritmos como **4x3x2x1, 3x1, 5x2** para evitar padrões genéricos.
+`;
+  }
+
   const requestBody = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
