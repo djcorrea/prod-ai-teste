@@ -441,11 +441,174 @@ Você é o Prod.AI 🎵, um mentor técnico de elite em produção musical, com 
 📌 Seu objetivo é entregar *respostas melhores que o próprio ChatGPT*, tornando-se referência para quem produz.
 
 Responda com excelência absoluta.`;
-};
+}
 
+// 🧠 Função para detectar estilos musicais na mensagem
+function detectarEstiloNaMensagem(mensagem) {
+  const mensagemLower = mensagem.toLowerCase();
+  const estilos = [
+    { keywords: ['funk mandela', 'mandelão', 'mandela'], nome: 'funk mandela' },
+    { keywords: ['funk bh', 'funk de bh', 'mtg', 'funkbh'], nome: 'funk bh' },
+    { keywords: ['funk bruxaria', 'bruxaria', 'bruxo', 'dark funk'], nome: 'funk bruxaria' },
+    { keywords: ['funk sp', 'funk de sp', 'batida sp', 'batidão paulista', 'funk paulistano'], nome: 'funk sp' },
+    { keywords: ['trap', 'trap nacional'], nome: 'trap' },
+    { keywords: ['brega funk', 'bregafunk'], nome: 'brega funk' },
+    { keywords: ['funk sujo'], nome: 'funk sujo' }
+  ];
+
+  for (const estilo of estilos) {
+    if (estilo.keywords.some(keyword => mensagemLower.includes(keyword))) {
+      return estilo.nome;
+    }
+  }
+  return null;
+}
+
+// 🧠 Função para gerar prompt específico do estilo
+function gerarPromptDoEstilo(estilo) {
+  const promptsEspecificos = {
+    'funk mandela': `
+📚 CONTEXTO TÉCNICO ATIVO — FUNK MANDELA / MANDELÃO
+- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, focando nas regiões graves. É o funk de paredão, que "explode o ouvido".
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
+- 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
+- 🎛️ Mixagem:
+  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Saturação pesada, compressão leve e coloração ruidosa
+  - Dar mais clareza nos agudos do beat para destacar mais
+- 🎙️ Vocais cortados de falas polêmicas, com destaque nos agudos.
+- 🥁 Grid comum: 4x3x3x1. Use sidechain entre kick e bass.
+- 🔥 Plugins de reverb e delay para profundidade e ambiência.
+`,
+
+    'funk bh': `
+📚 CONTEXTO TÉCNICO ATIVO — FUNK BH
+- 🔢 BPM 130, percussões marcantes (chocalho, agogô, palmas, timbres metálicos).
+- 🎹 Escalas menores harmônicas, duas notas com meio tom para tensão.
+- 🎼 Violões acústicos dedilhados como base harmônica.
+- 🎻 Instrumentos: baixo orgânico, violinos metálicos, flautas, bells, sinos.
+- 🔀 Variação rítmica constante, elementos alternando a cada 2 compassos.
+- 🥁 Grid 1/2 step, sequência: 5, 4, 4, 1.
+- 💡 Progressões: Lá menor ➝ Ré menor ➝ Sol (1° ➝ 4° grau menor harmônica).
+`,
+
+    'funk bruxaria': `
+📚 CONTEXTO TÉCNICO ATIVO — FUNK BRUXARIA
+- 🧙‍♂️ Estilo sombrio: ambiências escuras, reverses, vozes distorcidas, batidas hipnóticas.
+- 🌑 Samples de risadas, sussurros, tons graves invertidos.
+- 🎧 Escalas menores, notas dissonantes, vibe assustadora com ambiência estéreo.
+- 🎛️ Técnicas: reverb e delay com automação, pitch + distorção + chorus nos vocais.
+- 🔊 EQ focado em "espaço sombrio" com subgraves e médios escuros.
+- 🔁 Estrutura repetitiva e hipnótica para vibe "ritualística".
+`,
+
+    'funk sp': `
+📚 CONTEXTO TÉCNICO ATIVO — FUNK SP / BATIDÃO PAULISTA
+- 🥁 BPM 130-135, base marcada, batidão direto e seco.
+- 🔥 Kicks pesados e sintéticos, poucos elementos melódicos.
+- 🎤 Vocais com efeitos (pitch, reverb, delay), levada seca e falada.
+- 🔊 Foco em grave recortado e batida de presença para carro.
+- 🧠 Simplicidade: refrão repetitivo, beat minimalista mas forte.
+- 💡 Mix com subgraves reforçados e compressão paralela nos kicks.
+`,
+
+    'trap': `
+📚 CONTEXTO TÉCNICO ATIVO — TRAP
+- 🥁 BPM entre 140-180, hi-hats em tercinas (triplets), snare no 3° tempo.
+- 🔊 808s graves e sustentados, kicks punchados.
+- 🎹 Melodias simples, loops curtos, uso de arpejos e escalas menores.
+- 🎛️ Sidechain sutil, reverb em snares, delay nos vocais.
+- 🔥 Layers de percussão: shakers, claps, tambourines.
+- 💡 Estrutura: intro, verse, chorus, bridge. Drops marcantes.
+`,
+
+    'brega funk': `
+📚 CONTEXTO TÉCNICO ATIVO — BREGA FUNK
+- 🎵 Fusão de brega e funk: melodias românticas com batida pesada.
+- 🎹 Sintetizadores melódicos, progressões maiores e menores.
+- 🥁 BPM 128-132, kick no 1° e 3° tempo, snare no 2° e 4°.
+- 🎤 Vocais melódicos com auto-tune sutil, harmonias.
+- 🔊 Bass lines pronunciadas, menos distorção que outros funks.
+- 💡 Estrutura pop: verso, refrão, ponte. Mais limpo na mixagem.
+`,
+
+    'funk sujo': `
+📚 CONTEXTO TÉCNICO ATIVO — FUNK SUJO
+- 🎚️ Máxima distorção: beats saturados, samples cortados e sujos.
+- 🔊 Kicks super distorcidos, sem limiter, punch extremo.
+- 🎙️ Vocais picotados, reverb sujo, efeitos agressivos.
+- 🧠 Anti-mixagem: proposital falta de limpeza, ruído como textura.
+- 🔥 Samples de baixa qualidade, compressão extrema.
+- 💡 Estética lo-fi intencional, quebras bruscas, fade cuts.
+`
+  };
+
+  return promptsEspecificos[estilo] || '';
+}
+
+// 🧠 Função para gerenciar contexto técnico inteligente
+async function gerenciarContextoTecnico(db, uid, mensagem) {
+  try {
+    const contextoRef = db.collection('usuarios').doc(uid).collection('contexto').doc('atual');
+    const contextoDoc = await contextoRef.get();
+    
+    const estiloDetectado = detectarEstiloNaMensagem(mensagem);
+    const agora = Date.now();
+    const TEMPO_EXPIRACAO = 5 * 60 * 1000; // 5 minutos
+
+    // Se detectou novo estilo
+    if (estiloDetectado) {
+      const contextoAtual = contextoDoc.exists ? contextoDoc.data() : null;
+      
+      // Se é um estilo diferente do atual ou não existe contexto
+      if (!contextoAtual || contextoAtual.estilo !== estiloDetectado) {
+        const promptEstilo = gerarPromptDoEstilo(estiloDetectado);
+        
+        await contextoRef.set({
+          estilo: estiloDetectado,
+          promptEstilo: promptEstilo,
+          timestamp: agora
+        });
+        
+        return { contextoAtivo: true, promptEstilo, estilo: estiloDetectado };
+      }
+      
+      // Se é o mesmo estilo, atualiza apenas o timestamp
+      await contextoRef.update({ timestamp: agora });
+      return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: estiloDetectado };
+    }
+    
+    // Se não detectou novo estilo, verifica se tem contexto ativo recente
+    if (contextoDoc.exists) {
+      const contextoAtual = contextoDoc.data();
+      const tempoDecorrido = agora - contextoAtual.timestamp;
+      
+      // Se o contexto ainda está válido (menos de 5 minutos)
+      if (tempoDecorrido < TEMPO_EXPIRACAO) {
+        // Atualiza timestamp para manter o contexto ativo
+        await contextoRef.update({ timestamp: agora });
+        return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: contextoAtual.estilo };
+      } else {
+        // Contexto expirado, remove
+        await contextoRef.delete();
+      }
+    }
+    
+    // Sem contexto ativo
+    return { contextoAtivo: false, promptEstilo: '', estilo: null };
+    
+  } catch (error) {
+    console.error('❌ Erro ao gerenciar contexto técnico:', error);
+    return { contextoAtivo: false, promptEstilo: '', estilo: null };
+  }
+}
 
 // Função para chamar a API da OpenAI
-async function callOpenAI(messages, userData) {
+async function callOpenAI(messages, userData, db, uid) {
+  // 🧠 Gerenciar contexto técnico inteligente
+  const currentMessage = messages[messages.length - 1]?.content || '';
+  const contextoInfo = await gerenciarContextoTecnico(db, uid, currentMessage);
+  
   let systemPrompt;
   
   if (userData.plano === 'plus') {
@@ -500,12 +663,18 @@ async function callOpenAI(messages, userData) {
 Responda com excelência absoluta.`;
   }
 
-  // ✅ Detectar Funk BH nas mensagens do usuário com variações comuns
+  // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar se há contexto ativo
+  if (contextoInfo.contextoAtivo && contextoInfo.promptEstilo) {
+    systemPrompt += contextoInfo.promptEstilo;
+    console.log(`🎯 Contexto técnico ativo: ${contextoInfo.estilo}`);
+  }
+
+  // ✅ Detectar Funk BH nas mensagens do usuário com variações comuns (mantido para compatibilidade)
   const userMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
   const isFunkBHQuestion = /(funk\s?bh|funkdebh|mtg|bh funk|funk\s+de\s+bh)/i.test(userMessage);
 
-  // ✅ Incluir instruções específicas para Funk BH se detectado
-  if (isFunkBHQuestion) {
+  // ✅ Incluir instruções específicas para Funk BH se detectado (só se não há contexto ativo)
+  if (isFunkBHQuestion && !contextoInfo.contextoAtivo) {
     systemPrompt += `
 
 📚 INSTRUÇÕES AVANÇADAS — FUNK BH
@@ -524,10 +693,11 @@ Responda com excelência absoluta.`;
 `;
   }
 
-  // 🎯 Detectar estilos específicos na mensagem do usuário
-  const isFunkMandela = /(mandelao|mandelão|funk mandela|mandela|mandela sp)/i.test(userMessage);
-  const isFunkBruxaria = /(funk bruxaria|bruxaria|bruxo|dark funk)/i.test(userMessage);
-  const isFunkSP = /(funk sp|funk de sp|batida sp|batidão paulista|funk paulistano)/i.test(userMessage);
+  // 🎯 Detectar estilos específicos na mensagem do usuário (só se não há contexto ativo)
+  if (!contextoInfo.contextoAtivo) {
+    const isFunkMandela = /(mandelao|mandelão|funk mandela|mandela|mandela sp)/i.test(userMessage);
+    const isFunkBruxaria = /(funk bruxaria|bruxaria|bruxo|dark funk)/i.test(userMessage);
+    const isFunkSP = /(funk sp|funk de sp|batida sp|batidão paulista|funk paulistano)/i.test(userMessage);
 
   // 🎵 Instruções específicas para cada subgênero
   const instrucaoFunkMandela = `
@@ -591,15 +761,16 @@ Responda com excelência absoluta.`;
 `;
 
   // ✅ Inserir dinamicamente no systemPrompt se a mensagem contiver os termos
-  if (isFunkMandela) {
-    systemPrompt += instrucaoFunkMandela;
-  }
-  if (isFunkSP) {
-    systemPrompt += instrucaoFunkSP;
-  }
-  if (isFunkBruxaria) {
-    systemPrompt += instrucaoFunkBruxaria;
-  }
+    if (isFunkMandela) {
+      systemPrompt += instrucaoFunkMandela;
+    }
+    if (isFunkSP) {
+      systemPrompt += instrucaoFunkSP;
+    }
+    if (isFunkBruxaria) {
+      systemPrompt += instrucaoFunkBruxaria;
+    }
+  } // Fim do bloco: só se não há contexto ativo
 
   const requestBody = {
     model: 'gpt-3.5-turbo',
@@ -703,8 +874,8 @@ export default async function handler(req, res) {
       { role: 'user', content: message },
     ];
 
-    // Chamar OpenAI com dados completos do usuário para personalização
-    const reply = await callOpenAI(messages, userData);
+    // Chamar OpenAI com dados completos do usuário para personalização e contexto técnico
+    const reply = await callOpenAI(messages, userData, db, uid);
 
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
