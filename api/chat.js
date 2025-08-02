@@ -288,7 +288,11 @@ Responda com excelência absoluta.`;
 - 💻 Sempre considerar que o usuário usa FL Studio, citar plugins nativos e samples`;
   }
 
-if (perfil.estilo.toLowerCase().includes("funkbh")) {
+const estilo = perfil.estilo.toLowerCase().replace(/\s/g, "");
+
+const estilosBH = ["funkbh", "funkbh", "bh", "mtg"]; // todos minúsculos e sem espaço
+
+if (estilosBH.some(e => estilo.includes(e))) {
   instrucoesFunkbh += `
 📚 INSTRUÇÕES AVANÇADAS — FUNK BH
 - 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no RJ. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
