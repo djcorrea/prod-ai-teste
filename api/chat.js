@@ -702,9 +702,16 @@ Responda com excelência absoluta.`;
   // 🎵 Instruções específicas para cada subgênero
   const instrucaoFunkMandela = `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
-- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, kicks com mais destaques nas regiões graves. É o funk de paredão, que "explode o ouvido".
+- 🔊 Batidas fortes, com **kicks fortes e distorcidos**, kicks com mais destaques nas regiões graves entre 45Hz e 70Hz. É o funk de paredão, que "explode o ouvido".
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
 - 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
+Diretrizes técnicas:
+- 🕒 **BPM** entre 130 e 135.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
+- 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
+- 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
+
 - 🎛️ Mixagem:
   - EQ para tirar grave dos beats e deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
@@ -875,7 +882,26 @@ export default async function handler(req, res) {
     ];
 
     // Chamar OpenAI com dados completos do usuário para personalização e contexto técnico
-    const reply = await callOpenAI(messages, userData, db, uid);
+    let reply = await callOpenAI(messages, userData, db, uid);
+
+    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK MANDELA
+    const estilo = userData.perfil?.estilo?.toLowerCase() || "";
+    const perguntaLower = message.toLowerCase();
+    const respostaLower = reply.toLowerCase();
+
+    // Verifica se é Funk Mandela e se fala sobre grid/sequência
+    const ehMandela = estilo.includes("mandela") || perguntaLower.includes("mandela") || perguntaLower.includes("mandelão");
+    const mencionaSequencia = respostaLower.includes("4x3x3x1") || respostaLower.includes("grade") || respostaLower.includes("grid") || respostaLower.includes("sequencia no piano roll");
+
+    if (ehMandela && mencionaSequencia) {
+      // Substituir a menção ao grid com a imagem
+      reply = reply.replace(
+        /(grid.{0,20}4x3x3x1[^.]*\.?)/i,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      console.log('🎹 Imagem do Funk Mandela inserida automaticamente na resposta');
+    }
 
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
