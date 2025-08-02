@@ -1,48 +1,71 @@
-/* OTIMIZAÇÕES AGRESSIVAS - TESTE DE PERFORMANCE */
+/* PERFORMANCE EQUILIBRADA - BONITO E FLUIDO */
 
-/* ============ 1. DESABILITAR ANIMAÇÕES PESADAS ============ */
-.robo, .notebook, .caixas, .teclado, .mesa {
+/* ============ 1. ANIMAÇÕES LEVES APENAS NO ROBÔ PRINCIPAL ============ */
+.robo {
+    filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4)) !important;
+    animation: robotBreathingOptimized 4s ease-in-out infinite !important;
+}
+
+/* Outros elementos sem animação pesada */
+.notebook, .caixas, .teclado, .mesa {
     animation: none !important;
-    transform: none !important;
-    filter: none !important;
+    filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.3)) !important;
 }
 
-/* ============ 2. SIMPLIFICAR VANTA.JS ============ */
+/* ============ 2. VANTA.JS LEVE ============ */
 .vanta-background {
-    opacity: 0.3 !important; /* Reduzir muito a intensidade */
+    opacity: 0.6 !important; /* Mais visível que antes */
 }
 
-/* ============ 3. REDUZIR PARTÍCULAS ============ */
+/* ============ 3. PARTÍCULAS SUTIS ============ */
 .particles-overlay {
-    display: none !important; /* Desabilitar completamente */
+    opacity: 0.3 !important; /* Leve, mas visível */
+    animation: none !important; /* Sem animação de movimento */
 }
 
-/* ============ 4. GRADIENTES SIMPLES ============ */
+/* ============ 4. NEON NO CHATBOT ============ */
 .chatbot-container {
-    background: rgba(10, 15, 35, 0.95) !important; /* Cor sólida */
+    background: linear-gradient(145deg, 
+        rgba(10, 15, 35, 0.95), 
+        rgba(15, 25, 55, 0.95)
+    ) !important;
+    border: 2px solid rgba(0, 150, 255, 0.4) !important;
+    box-shadow: 0 0 30px rgba(0, 150, 255, 0.3) !important;
 }
 
+/* ============ 5. TÍTULO COM GRADIENTE ESTÁTICO ============ */
 .chatbot-main-title {
-    background: linear-gradient(45deg, #00bfff, #8b1a7e) !important; /* Só 2 cores */
+    background: linear-gradient(45deg, #00bfff, #6699ff, #8b1a7e) !important;
     -webkit-background-clip: text !important;
     background-clip: text !important;
-    animation: none !important; /* Parar animação do gradiente */
+    animation: none !important; /* Sem animação no gradiente */
+    text-shadow: 0 0 20px rgba(0, 150, 255, 0.5) !important;
 }
 
-/* ============ 5. OTIMIZAR IMAGENS ============ */
-.cenario img {
-    image-rendering: optimizeSpeed !important;
-    will-change: auto !important;
+/* ============ 6. HOVER SUAVE APENAS NO ROBÔ ============ */
+.robo:hover {
+    transform: scale(1.02) !important;
+    transition: transform 0.3s ease !important;
 }
 
-/* ============ 6. MOBILE TOTAL ============ */
+/* ============ 7. BORDAS NEON NOS INPUTS ============ */
+.chatbot-input-field:focus-within {
+    border-color: rgba(0, 150, 255, 0.6) !important;
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.4) !important;
+}
+
+/* ============ 8. OTIMIZAÇÃO MOBILE ============ */
 @media (max-width: 768px) {
     .vanta-background {
+        opacity: 0.4 !important;
+    }
+    
+    .particles-overlay {
         display: none !important;
     }
     
-    .cenario img {
-        max-width: 80% !important;
-        height: auto !important;
+    .robo {
+        animation: none !important;
+        filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.3)) !important;
     }
 }
