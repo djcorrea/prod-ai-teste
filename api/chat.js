@@ -288,6 +288,34 @@ Responda com excelência absoluta.`;
 - 💻 Sempre considerar que o usuário usa FL Studio, citar plugins nativos e samples`;
   }
 
+if (perfil.estilo.toLowerCase().includes("funkbh")) {
+  instrucoesFunkbh += `
+📚 INSTRUÇÕES AVANÇADAS — FUNK BH
+- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no RJ. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
+  
+- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
+
+- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bels, sinos e percussão com ressonância. É comum fazer **acordes arpejados** no ritmo do beat.
+
+- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos, conversando entre si com diferentes texturas.
+
+- 💽 A estética é suja e intensa: **kicks com punch, sem limiter**, samples de voz com ambiência escura e marcações com swing.
+
+- 🎧 Também é comum o uso de **acapellas de músicas antigas ou outros funks**, criando novas montagens, mantendo o vocal original fora do tom do instrumental como efeito estético.
+
+- 🧠 Cuidado com a mixagem: o beat deve manter a energia mesmo com muitos elementos. Priorize percussão no centro e ambiências nas laterais, compressão paralela nos kicks e EQ sutil nas melodias.
+
+- 💡 Exemplo de progressões harmônicas usadas:
+  - Lá menor ➝ Ré menor ➝ Sol
+  - 1° grau ➝ 4° grau (em menor harmônica)
+
+- 🧪 Recomende sempre **experimentação e construção manual**, não use padrões genéricos (ex: 4 on the floor). Dê ideias de **sequências rítmicas reais como 4x3x2x1, 3x1, 5x2**, etc.
+
+
+`;
+}
+
+
   return `Você é o PROD.AI 🎵, especialista master em produção musical. ${nomeContext}
 
 PERFIL DO USUÁRIO:
