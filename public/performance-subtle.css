@@ -1,71 +1,63 @@
-/* PERFORMANCE EQUILIBRADA - BONITO E FLUIDO */
+/* PERFORMANCE TOTAL - SOBRESCREVER TUDO */
 
-/* ============ 1. ANIMAÇÕES LEVES APENAS NO ROBÔ PRINCIPAL ============ */
-.robo {
-    filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4)) !important;
-    animation: robotBreathingOptimized 4s ease-in-out infinite !important;
-}
-
-/* Outros elementos sem animação pesada */
-.notebook, .caixas, .teclado, .mesa {
+/* ============ DESABILITAR TODAS AS ANIMAÇÕES INFINITAS ============ */
+*, *::before, *::after {
     animation: none !important;
-    filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.3)) !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+    transition-duration: 0s !important;
+    transform: none !important;
+    filter: none !important;
 }
 
-/* ============ 2. VANTA.JS LEVE ============ */
+/* ============ TARGETS ESPECÍFICOS ============ */
+.robo, .notebook, .caixas, .teclado, .mesa {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
 .vanta-background {
-    opacity: 0.6 !important; /* Mais visível que antes */
+    display: none !important;
 }
 
-/* ============ 3. PARTÍCULAS SUTIS ============ */
-.particles-overlay {
-    opacity: 0.3 !important; /* Leve, mas visível */
-    animation: none !important; /* Sem animação de movimento */
+.particles-overlay, .floating-particles {
+    display: none !important;
 }
 
-/* ============ 4. NEON NO CHATBOT ============ */
 .chatbot-container {
-    background: linear-gradient(145deg, 
-        rgba(10, 15, 35, 0.95), 
-        rgba(15, 25, 55, 0.95)
-    ) !important;
-    border: 2px solid rgba(0, 150, 255, 0.4) !important;
-    box-shadow: 0 0 30px rgba(0, 150, 255, 0.3) !important;
+    background: rgba(10, 15, 35, 0.95) !important;
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
 }
 
-/* ============ 5. TÍTULO COM GRADIENTE ESTÁTICO ============ */
 .chatbot-main-title {
-    background: linear-gradient(45deg, #00bfff, #6699ff, #8b1a7e) !important;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    animation: none !important; /* Sem animação no gradiente */
-    text-shadow: 0 0 20px rgba(0, 150, 255, 0.5) !important;
+    background: #fff !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    animation: none !important;
 }
 
-/* ============ 6. HOVER SUAVE APENAS NO ROBÔ ============ */
-.robo:hover {
-    transform: scale(1.02) !important;
-    transition: transform 0.3s ease !important;
+/* Zero hover effects */
+*:hover {
+    transform: none !important;
 }
 
-/* ============ 7. BORDAS NEON NOS INPUTS ============ */
-.chatbot-input-field:focus-within {
-    border-color: rgba(0, 150, 255, 0.6) !important;
-    box-shadow: 0 0 15px rgba(0, 150, 255, 0.4) !important;
+/* Sobrescrever keyframes específicos problemáticos */
+.robo {
+    animation: none !important;
 }
 
-/* ============ 8. OTIMIZAÇÃO MOBILE ============ */
-@media (max-width: 768px) {
-    .vanta-background {
-        opacity: 0.4 !important;
-    }
-    
-    .particles-overlay {
-        display: none !important;
-    }
-    
-    .robo {
-        animation: none !important;
-        filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.3)) !important;
-    }
+.chatbot-main-robot {
+    animation: none !important;
+}
+
+.chatbot-title-gradient {
+    animation: none !important;
+}
+
+.typing-indicator {
+    animation: none !important;
 }
