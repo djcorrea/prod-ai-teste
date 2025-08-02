@@ -702,7 +702,6 @@ Responda com excelência absoluta.`;
   // 🎵 Instruções específicas para cada subgênero
   const instrucaoFunkMandela = `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
-- 🔊 Batidas fortes, com kicks fortes com mais destaques nas regiões graves entre 45Hz e 70Hz. É o funk de paredão, que "explode o ouvido".
 🔥BEAT:
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
 - 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
