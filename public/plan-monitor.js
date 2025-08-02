@@ -107,6 +107,11 @@ function startPlanMonitoring() {
     
     if (isMainPage) {
         console.log('🔄 Iniciando monitoramento de plano...');
+        // 🚨 GARGALO CRÍTICO:
+        // setInterval executa checkUserPlanStatus a cada 30 segundos INDEFINIDAMENTE
+        // A função faz consultas ao Firebase/Firestore constantemente
+        // Pode estar causando lag por executar operações de rede e DOM repetidas
+        // Sugestão: Aumentar intervalo para 5 minutos (300000ms) ou usar eventos
         setInterval(checkUserPlanStatus, 30000);
         setTimeout(checkUserPlanStatus, 2000); // Verificação inicial
     } else {

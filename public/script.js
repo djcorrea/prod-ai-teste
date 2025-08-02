@@ -194,6 +194,14 @@ function initVantaBackground() {
         }
         
         if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+            // 🚨 GARGALO CRÍTICO DE GPU:
+            // Vanta.js + THREE.js criam uma cena 3D complexa com animações constantes
+            // Pode estar consumindo muito da GPU, especialmente com:
+            // - mouseControls: true (rastreamento do mouse)
+            // - touchControls: true (rastreamento de toque)
+            // - points: 8.00 (muitos pontos na rede)
+            // - maxDistance: 25.00 (distância de conexão alta)
+            // Sugestão: Reduzir points para 4, maxDistance para 15, ou desabilitar temporariamente
             vantaEffect = VANTA.NET({
                 el: "#vanta-bg",
                 mouseControls: true,
@@ -295,6 +303,10 @@ function handleResize() {
 function waitForFirebase() {
   console.log('⏳ Aguardando Firebase...');
   return new Promise((resolve) => {
+    // 🚨 POSSÍVEL OTIMIZAÇÃO:
+    // Este loop recursivo pode rodar indefinidamente se Firebase não carregar
+    // Pode estar causando lag por executar a cada 100ms sem limite de tentativas
+    // Sugestão: Adicionar contador de tentativas máximas (ex: 50 tentativas = 5 segundos)
     const checkFirebase = () => {
       console.log('🔍 Verificando Firebase:', { auth: !!window.auth, firebaseReady: !!window.firebaseReady });
       if (window.auth && window.firebaseReady) {
@@ -302,6 +314,7 @@ function waitForFirebase() {
         resolve();
       } else {
         console.log('⏳ Firebase ainda não está pronto, tentando novamente em 100ms...');
+        // 🚨 GARGALO: Loop infinito sem timeout - pode rodar para sempre
         setTimeout(checkFirebase, 100);
       }
     };
@@ -390,10 +403,16 @@ class ProdAIChatbot {
     }
     
     waitForPageLoad() {
+        // 🚨 POSSÍVEL OTIMIZAÇÃO:
+        // Esta função verifica imagens e bibliotecas a cada 50ms indefinidamente
+        // Pode estar causando lag por fazer querySelectorAll('img') constantemente
+        // Sugestão: Adicionar timeout máximo e otimizar verificação de imagens
         const checkPageReady = () => {
+            // 🚨 GARGALO: querySelectorAll executado repetidamente pode ser caro
             const images = document.querySelectorAll('img');
             let allImagesLoaded = true;
             
+            // 🚨 GARGALO: Loop forEach executado a cada 50ms em todas as imagens
             images.forEach(img => {
                 if (!img.complete || img.naturalHeight === 0) {
                     allImagesLoaded = false;
@@ -407,6 +426,8 @@ class ProdAIChatbot {
                     this.animateInitialAppearance();
                 }, 800);
             } else {
+                // 🚨 GARGALO: Loop infinito sem contador de tentativas máximas
+                // Executa a cada 50ms indefinidamente se imagens não carregarem
                 setTimeout(checkPageReady, 50);
             }
         };

@@ -11,11 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Bibliotecas para efeitos visuais -->
+    <!-- 🚨 GARGALOS CRÍTICOS DE PERFORMANCE:
+         - THREE.js (570KB): Biblioteca 3D pesada, carregamento sem defer pode bloquear parsing
+         - Vanta.js (150KB): Efeitos de partículas 3D que usam GPU intensivamente
+         - GSAP (400KB): Biblioteca de animações, pode conflitar com animações CSS
+         Sugestão: Adicionar defer ou async, ou carregar condicionalmente -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <!-- Firebase e FingerprintJS -->
+    <!-- 🚨 POSSÍVEL OTIMIZAÇÃO:
+         FingerprintJS pode ser pesado para detectar dispositivos
+         Firebase módulos podem estar sendo importados desnecessariamente -->
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 
     <!-- Scripts funcionais existentes -->
@@ -32,6 +40,9 @@
         <img src="fundo.webp" alt="Fundo futurista" class="fundo" />
 
         <!-- Elementos do cenário -->
+        <!-- 🚨 POSSÍVEL OTIMIZAÇÃO: 
+             Verificar se todas essas imagens são realmente necessárias
+             Múltiplas imagens grandes podem causar overhead de memória -->
         <img src="robo.webp" alt="Robô futurista" class="robo" />
         <img src="mesa.webp" alt="Mesa" class="mesa" />
         <img src="caixas.webp" alt="Caixas de som principais" class="caixas" />
@@ -39,6 +50,8 @@
         <img src="teclado.webp" alt="teclado" class="teclado" />
         
         <!-- Overlay de partículas extras -->
+        <!-- 🚨 GARGALO: Div vazia que pode estar sendo usada para gerar partículas CSS
+             Pode estar causando renderizações extras -->
         <div class="particles-overlay"></div>
     </div>
 
@@ -119,7 +132,15 @@
     </div>
 
     <!-- Script integrado com as funcionalidades existentes -->
+    <!-- 🚨 GARGALO: script.js (1500+ linhas) carregado sem defer
+         Contém loops recursivos, Vanta.js initialization, e múltiplos timeouts
+         Cache busting com ?v= pode estar forçando redownload desnecessário -->
     <script src="script.js?v=20250128-1711"></script>
+    <!-- 🚨 SCRIPTS DESABILITADOS PARA PERFORMANCE:
+         plan-monitor.js contém setInterval(30s) que faz consultas Firebase constantes
+         force-visibility.js pode estar forçando reflows de layout -->
+    <!-- <script src="plan-monitor.js"></script> -->
+    <!-- <script src="force-visibility.js"></script> -->
     <script src="plan-monitor.js"></script>
     <script src="force-visibility.js"></script>
 </body>

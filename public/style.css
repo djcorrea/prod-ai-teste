@@ -61,7 +61,13 @@ body {
     height: auto;
     max-height: 86.1vh;
     z-index: 3;
+    /* 🚨 POSSÍVEL OTIMIZAÇÃO:
+       drop-shadow pode ser pesado para GPU, especialmente com blur de 20px
+       Considere usar box-shadow ou reduzir o blur */
     filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.3));
+    /* 🚨 GARGALO: Duas animações infinitas simultâneas podem causar lag
+       robotBreathingOptimized roda infinitamente a cada 2s
+       Pode estar causando repaints constantes */
     animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 2s ease-in-out infinite 1s;
 }
 
@@ -81,7 +87,10 @@ body {
     height: auto;
     max-height: 120vh;
     z-index: 2;
+    /* 🚨 POSSÍVEL OTIMIZAÇÃO: Outro drop-shadow pesado */
     filter: drop-shadow(0 0 15px rgba(0, 150, 255, 0.3));
+    /* 🚨 GARGALO: Mais animações infinitas simultâneas
+       subtleGlowOptimized roda a cada 3s infinitamente */
     animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 3s ease-in-out infinite 1.2s;
 }
 
@@ -91,7 +100,9 @@ body {
     height: auto;
     max-height: 150vh;
     z-index: 2;
+    /* 🚨 POSSÍVEL OTIMIZAÇÃO: Mais drop-shadow */
     filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.25));
+    /* 🚨 GARGALO: Terceira animação infinita */
     animation: subtleGlowOptimized 2.5s ease-in-out infinite 0.5s;
     opacity: 1 !important;
     transform: none !important;
