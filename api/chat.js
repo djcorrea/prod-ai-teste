@@ -177,7 +177,7 @@ const instrucoesBase = {
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 🔥BEAT:
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
 - 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
@@ -485,7 +485,7 @@ function gerarPromptDoEstilo(estilo) {
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 🔥BEAT:
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🔁 Beat com estrutura repetitiva, synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
 - 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
@@ -717,7 +717,7 @@ Responda com excelência absoluta.`;
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 🔥BEAT:
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🔁 Beat com estrutura repetitiva, synth ou samples  com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
 - 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
@@ -741,7 +741,7 @@ Diretrizes técnicas:
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 🔥BEAT:
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva, com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🔁 Beat com estrutura repetitiva, synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
 - 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
