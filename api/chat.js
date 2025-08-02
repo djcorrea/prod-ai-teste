@@ -475,19 +475,20 @@ Responda com excelência absoluta.`;
   // 🎵 Instruções específicas para cada subgênero
   const instrucaoFunkMandela = `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
-- 🔊 Batidas brutais, com **kicks longos e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
+- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
 - 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
 - 🎛️ Mixagem:
   - EQ para tirar grave dos beats e deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
+  - Dar mais clareza nos agudos do beat para destacar mais
 - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, fora do tom propositalmente para criar choque sonoro.
-- 🧪 Variações rítmicas com grid 1/6, deslocamento de notas e técnicas "antimusicais" para dar identidade crua ao som.
+- 🧪 No beat vocÊ pode usar samples prontos que você encontra em packs na internet, ou pode utilizar presets de sintetizadores.
 `;
 
   const instrucaoFunkSP = `
 📚 INSTRUÇÕES AVANÇADAS — FUNK SP / BATIDÃO PAULISTA
-- 🥁 Base marcada, BPM entre 140–150, estilo direto, reto, batidão mesmo.
+- 🥁 Base marcada, BPM entre 130–135, estilo direto, reto, batidão mesmo.
 - 🔥 Kicks pesados e sintéticos, com poucos elementos melódicos.
 - 🎤 Vocais com muito efeito (pitch, reverb, delay), muitas vezes com levada seca e falada.
 - 🔊 Estilo pensado pro carro, com ênfase em **grave recortado** e batida de presença.
