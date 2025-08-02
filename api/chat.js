@@ -873,23 +873,17 @@ export default async function handler(req, res) {
     if (ehMandela && mencionaBeat4x3x3x1) {
       console.log('🎯 Condições atendidas - Inserindo imagem no contexto do BEAT...');
       
-      // Substituir quando fala especificamente de beat/sequência 4x3x3x1
-      reply = reply.replace(
-        /(beat.*?4x3x3x1.*?\.)/gi,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
+      // Inserir imagem apenas uma vez na primeira ocorrência encontrada
+      const imagemHTML = `<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
       
-      // Alternativa: quando fala de sequência no piano roll
-      reply = reply.replace(
-        /(sequencia.*?4x3x3x1.*?\.)/gi,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
-      
-      // Alternativa: quando fala de piano roll + 4x3x3x1
-      reply = reply.replace(
-        /(piano roll.*?4x3x3x1.*?\.)/gi,
-        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-      );
+      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
+      if (/(beat.*?4x3x3x1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(beat.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
+      } else if (/(sequencia.*?4x3x3x1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(sequencia.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
+      } else if (/(piano roll.*?4x3x3x1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(piano roll.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
+      }
       
       console.log('✅ Imagem do Funk Mandela inserida com sucesso no contexto do BEAT!');
     } else {
