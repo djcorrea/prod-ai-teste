@@ -781,19 +781,12 @@ function showRemainingMessages(count) {
   }
 }
 
-// Função para formatar respostas da IA com estilo bonito e emojis significativos
+// ❌ REMOVIDO: System Prompt duplicado (mantido apenas no backend chat.js)
 function formatarRespostaEstilosa(textoPuro) {
-  // Remover prefixo "Assistente:" se existir
+  // Função simplificada - não modifica o conteúdo da resposta
   let texto = textoPuro.replace(/<strong>Assistente:<\/strong>\s*/, '').trim();
   
-  // Aplicar formatação de emojis significativos no início de blocos
-  texto = aplicarEmojiDireto(texto);
-  
-  // Detectar e formatar títulos com emojis significativos
-  texto = texto.replace(/^([🔥💡❌✅⚙️⚠️🎯🚀📊🎨��🌟🎵🎪]+)\s*([A-Za-zÀ-ÿ0-9\s]{3,50}):\s*/gm, 
-    '<p><strong>$1 $2:</strong></p>');
-  
-  // Detectar listas e transformar em HTML
+  // Apenas formatação HTML básica, sem injections de prompts
   const linhas = texto.split('\n');
   let htmlFormatado = '';
   let dentroLista = false;
@@ -810,8 +803,8 @@ function formatarRespostaEstilosa(textoPuro) {
       continue;
     }
     
-    // Detectar itens de lista (números, emojis significativos, bullets)
-    const regexLista = /^(\d+[\.\)]|[🔥�❌✅⚙️⚠️🎯🚀�🎨����🎪]+|\-|\•)\s+(.+)$/;
+    // Detectar itens de lista básicos apenas (sem emojis forçados)
+    const regexLista = /^(\d+[\.\)]|\-|\•)\s+(.+)$/;
     
     if (regexLista.test(linha)) {
       if (!dentroLista) {
@@ -819,16 +812,12 @@ function formatarRespostaEstilosa(textoPuro) {
         dentroLista = true;
       }
       
-      // Extrair emoji/número e conteúdo
       const match = linha.match(regexLista);
       if (match) {
         const icone = match[1];
         let conteudo = match[2];
         
-        // Detectar texto em negrito (primeira parte até os dois pontos)
-        conteudo = conteudo.replace(/^([^:]+):\s*(.+)$/, '<strong>$1:</strong> $2');
-        
-        // Aplicar formatação adicional
+        // Formatação básica mantida
         conteudo = conteudo.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         conteudo = conteudo.replace(/\*([^*]+)\*/g, '<em>$1</em>');
         
@@ -840,15 +829,12 @@ function formatarRespostaEstilosa(textoPuro) {
         dentroLista = false;
       }
       
-      // Linha normal - aplicar formatações
+      // Formatação básica mantida
       linha = linha.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
       linha = linha.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       
-      // Se não foi formatado como título, envolver em parágrafo
-      if (!linha.startsWith('<p><strong>') && linha.length > 0) {
+      if (linha.length > 0) {
         htmlFormatado += `<p>${linha}</p>`;
-      } else {
-        htmlFormatado += linha;
       }
     }
   }
@@ -862,185 +848,12 @@ function formatarRespostaEstilosa(textoPuro) {
 }
 
 // Função para aplicar emojis significativos no início de blocos de conteúdo
-function aplicarEmojisSignificativos(texto) {
-  // Mapeamento de tipos de conteúdo para emojis significativos
-  const emojiMap = [
-    // Dicas e sugestões
-    {
-      patterns: ['dica', 'sugestão', 'recomendação', 'tip', 'sugestão', 'conselho'],
-      emoji: '💡',
-      format: 'Dica'
-    },
-    
-    // Coisas a evitar ou problemas
-    {
-      patterns: ['evite', 'não faça', 'cuidado', 'problema', 'erro', 'atenção', 'avoid'],
-      emoji: '❌',
-      format: 'Evite'
-    },
-    
-    // Coisas importantes ou poderosas
-    {
-      patterns: ['importante', 'crucial', 'essencial', 'fundamental', 'chave', 'destaque'],
-      emoji: '�',
-      format: 'IMPORTANTE'
-    },
-    
-    // Configurações técnicas
-    {
-      patterns: ['configuração', 'setup', 'ajuste', 'parâmetro', 'settings', 'config'],
-      emoji: '⚙️',
-      format: 'Configuração'
-    },
-    
-    // Resultados positivos ou aprovação
-    {
-      patterns: ['resultado', 'sucesso', 'funcionou', 'correto', 'perfeito', 'aprovado'],
-      emoji: '✅',
-      format: 'Resultado'
-    },
-    
-    // Alertas e avisos
-    {
-      patterns: ['alerta', 'aviso', 'warning', 'cuidado', 'observação', 'nota'],
-      emoji: '⚠️',
-      format: 'Atenção'
-    },
-    
-    // Objetivos e foco
-    {
-      patterns: ['objetivo', 'meta', 'foco', 'alvo', 'propósito', 'goal'],
-      emoji: '🎯',
-      format: 'Objetivo'
-    },
-    
-    // Performance e otimização
-    {
-      patterns: ['performance', 'otimização', 'velocidade', 'melhoria', 'boost'],
-      emoji: '🚀',
-      format: 'Performance'
-    },
-    
-    // Análise e dados
-    {
-      patterns: ['análise', 'dados', 'estatística', 'métrica', 'relatório'],
-      emoji: '📊',
-      format: 'Análise'
-    },
-    
-    // Design e criatividade
-    {
-      patterns: ['design', 'criativo', 'visual', 'estilo', 'aparência'],
-      emoji: '🎨',
-      format: 'Design'
-    },
-    
-    // Ferramentas e recursos
-    {
-      patterns: ['ferramenta', 'recurso', 'tool', 'funcionalidade', 'feature'],
-      emoji: '�',
-      format: 'Ferramenta'
-    },
-    
-    // Qualidade premium
-    {
-      patterns: ['premium', 'plus', 'pro', 'avançado', 'superior', 'qualidade'],
-      emoji: '💎',
-      format: 'Premium'
-    },
-    
-    // Destaque especial
-    {
-      patterns: ['destaque', 'especial', 'exclusivo', 'único', 'diferencial'],
-      emoji: '�',
-      format: 'Destaque'
-    }
-  ];
-  
-  // Aplicar formatação por parágrafo
-  const paragrafos = texto.split('\n\n');
-  let textoFormatado = '';
-  
-  for (let paragrafo of paragrafos) {
-    paragrafo = paragrafo.trim();
-    if (!paragrafo) continue;
-    
-    // Verificar se já tem emoji no início
-    if (/^[🔥💡❌✅⚙️⚠️🎯🚀📊🎨🔧💎🌟]/.test(paragrafo)) {
-      textoFormatado += paragrafo + '\n\n';
-      continue;
-    }
-    
-    // Procurar padrões no início do parágrafo
-    let emojiAplicado = false;
-    for (const { patterns, emoji, format } of emojiMap) {
-      const regex = new RegExp(`^(${patterns.join('|')})\\b`, 'i');
-      
-      if (regex.test(paragrafo)) {
-        // Aplicar emoji e formatação no início
-        paragrafo = paragrafo.replace(/^([^:]*?):\s*/, `**${emoji} ${format.toUpperCase()}:** `);
-        
-        // Se não tinha dois pontos, adicionar formatação
-        if (!paragrafo.includes('**')) {
-          paragrafo = `**${emoji} ${format.toUpperCase()}:** ${paragrafo}`;
-        }
-        
-        emojiAplicado = true;
-        break;
-      }
-    }
-    
-    // Se é um título sem emoji (termina com dois pontos), aplicar emoji genérico
-    if (!emojiAplicado && /^[A-Z][^:]*:$/.test(paragrafo.trim())) {
-      paragrafo = `**� ${paragrafo.replace(':', '').toUpperCase()}:**`;
-    }
-    
-    textoFormatado += paragrafo + '\n\n';
-  }
-  
-  return textoFormatado.trim();
-}
+// ❌ REMOVIDO: System Prompt duplicado (mantido apenas no backend chat.js)
 
-// ✅ NOVA FUNÇÃO: Aplicar emoji de forma mais direta e simples
+// ❌ REMOVIDO: System Prompt duplicado (mantido apenas no backend chat.js)
 function aplicarEmojiDireto(texto) {
-  // Detectar palavras-chave e aplicar emoji no início
-  const palavrasChave = {
-    'dica': '💡 DICA',
-    'sugestão': '💡 DICA', 
-    'recomenda': '💡 DICA',
-    'importante': '🔥 IMPORTANTE',
-    'crucial': '🔥 IMPORTANTE',
-    'essencial': '🔥 IMPORTANTE',
-    'evite': '❌ EVITE',
-    'não': '❌ EVITE',
-    'cuidado': '❌ EVITE',
-    'resultado': '✅ RESULTADO',
-    'sucesso': '✅ RESULTADO',
-    'correto': '✅ RESULTADO',
-    'configuração': '⚙️ CONFIGURAÇÃO',
-    'config': '⚙️ CONFIGURAÇÃO',
-    'setup': '⚙️ CONFIGURAÇÃO',
-    'alerta': '⚠️ ATENÇÃO',
-    'aviso': '⚠️ ATENÇÃO',
-    'objetivo': '🎯 OBJETIVO',
-    'meta': '🎯 OBJETIVO',
-    'performance': '🚀 PERFORMANCE',
-    'velocidade': '🚀 PERFORMANCE',
-    'análise': '📊 ANÁLISE',
-    'dados': '📊 ANÁLISE',
-    'design': '🎨 DESIGN',
-    'visual': '🎨 DESIGN'
-  };
-  
-  // Procurar a primeira palavra-chave encontrada
-  for (const [palavra, emoji] of Object.entries(palavrasChave)) {
-    if (texto.toLowerCase().includes(palavra)) {
-      return `**${emoji}:** ${texto}`;
-    }
-  }
-  
-  // Se não encontrou palavra-chave específica, usar emoji genérico
-  return `**🌟 RESPOSTA:** ${texto}`;
+  // Função simplificada - não altera mais o conteúdo
+  return texto;
 }
 
 // Função para injetar estilos CSS da resposta estilosa
