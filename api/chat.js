@@ -890,14 +890,26 @@ export default async function handler(req, res) {
     const perguntaLower = message.toLowerCase();
     const respostaLower = reply.toLowerCase();
 
-    // Verifica se é Funk Mandela e se fala sobre grid/sequência
+    // Verifica se é Funk Mandela e se fala sobre beat/sequência
     const ehMandela = estilo.includes("mandela") || perguntaLower.includes("mandela") || perguntaLower.includes("mandelão");
-    const mencionaSequencia = respostaLower.includes("4x3x3x1") || respostaLower.includes("beat") || respostaLower.includes("grid") || respostaLower.includes("sequencia no piano roll");
+    const mencionaSequencia = respostaLower.includes("4x3x3x1") || (respostaLower.includes("sequencia") && respostaLower.includes("piano")) || respostaLower.includes("beat");
 
-    if (ehMandela && mencionaSequencia) {
-      // Substituir a menção ao grid com a imagem
+    if (ehMandela && mencionaSequencia && respostaLower.includes("4x3x3x1")) {
+      // Substituir diferentes variações da sequência 4x3x3x1 com a imagem
       reply = reply.replace(
-        /(beat.{0,20}4x3x3x1[^.]*\.?)/i,
+        /(sequencia\s+4x3x3x1[^.]*\.?)/i,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      // Alternativa: substituir por "utiliza como base a sequência 4x3x3x1"
+      reply = reply.replace(
+        /(utiliza como base a sequencia\s+4x3x3x1[^.]*\.?)/i,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      // Alternativa: qualquer menção a 4x3x3x1 no contexto de beat/piano roll
+      reply = reply.replace(
+        /([^<>]*4x3x3x1[^<>]*(?:compasso|quadradinho|nota)[^<>]*\.?)/i,
         `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
       );
       
