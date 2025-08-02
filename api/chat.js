@@ -903,25 +903,38 @@ export default async function handler(req, res) {
                       respostaLower.includes("mandela") ||
                       respostaLower.includes("mandelão");
 
-    // Verifica se menciona a sequência específica
-    const menciona4x3x3x1 = respostaLower.includes("4x3x3x1");
+    // Verifica se menciona especificamente BEAT + sequência 4x3x3x1
+    const mencionaBeat4x3x3x1 = (respostaLower.includes("beat") && respostaLower.includes("4x3x3x1")) ||
+                                (respostaLower.includes("sequencia") && respostaLower.includes("4x3x3x1")) ||
+                                (respostaLower.includes("piano roll") && respostaLower.includes("4x3x3x1"));
 
     console.log('🔍 DEBUG - É Mandela:', ehMandela);
-    console.log('🔍 DEBUG - Menciona 4x3x3x1:', menciona4x3x3x1);
+    console.log('🔍 DEBUG - Menciona Beat + 4x3x3x1:', mencionaBeat4x3x3x1);
 
-    if (ehMandela && menciona4x3x3x1) {
-      console.log('🎯 Condições atendidas - Inserindo imagem...');
+    if (ehMandela && mencionaBeat4x3x3x1) {
+      console.log('🎯 Condições atendidas - Inserindo imagem no contexto do BEAT...');
       
-      // Padrão mais simples e direto
-      if (reply.includes("4x3x3x1")) {
-        reply = reply.replace(
-          /4x3x3x1/g,
-          `4x3x3x1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
-        );
-        console.log('✅ Imagem do Funk Mandela inserida com sucesso!');
-      }
+      // Substituir quando fala especificamente de beat/sequência 4x3x3x1
+      reply = reply.replace(
+        /(beat.*?4x3x3x1.*?\.)/gi,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      // Alternativa: quando fala de sequência no piano roll
+      reply = reply.replace(
+        /(sequencia.*?4x3x3x1.*?\.)/gi,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      // Alternativa: quando fala de piano roll + 4x3x3x1
+      reply = reply.replace(
+        /(piano roll.*?4x3x3x1.*?\.)/gi,
+        `$1<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`
+      );
+      
+      console.log('✅ Imagem do Funk Mandela inserida com sucesso no contexto do BEAT!');
     } else {
-      console.log('❌ Condições não atendidas para inserir imagem');
+      console.log('❌ Condições não atendidas - não é sobre BEAT + 4x3x3x1');
     }
 
     if (userData.plano === 'gratis') {
