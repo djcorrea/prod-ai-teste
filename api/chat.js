@@ -182,7 +182,7 @@ const instrucoesBase = {
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
@@ -490,7 +490,7 @@ function gerarPromptDoEstilo(estilo) {
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
@@ -722,7 +722,7 @@ Responda com excelência absoluta.`;
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
@@ -746,7 +746,7 @@ Diretrizes técnicas:
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
@@ -770,7 +770,7 @@ Diretrizes técnicas:
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, pode se usar bass na mesma sequencia do beat para dar mais grave ao beat e ficar mais forte, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
