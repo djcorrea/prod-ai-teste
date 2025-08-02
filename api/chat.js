@@ -171,6 +171,44 @@ async function handleUserLimits(db, uid, email) {
   }
 }
 
+// 🧠 Bases técnicas por estilo (instrução base)
+const instrucoesBase = {
+  funkMandela: `
+🧠 INSTRUÇÃO BASE - FUNK MANDELA / MANDELÃO:
+- Batidas brutais, com **kicks fortes e distorcidos**, focando nas regiões graves.
+- Samples sujos e recortados, muitas vezes com ambiências carregadas.
+- Estrutura com fade manual no final, delay agressivo.
+- Grid comum: 4x3x3x1. Evite kick e bass juntos, use sidechain.
+- Compressão leve, saturação pesada e coloração ruidosa. 
+- Vocais podem ser cortados ou picotados.
+`,
+
+  funkSP: `
+🧠 INSTRUÇÃO BASE - FUNK SP / BATIDÃO PAULISTA:
+- BPM entre 130–135, base marcada, batidão direto e seco.
+- Groove constante, com variações simples e focado na pressão dos kicks.
+- Menos ambiência, mais impacto. Mixagem mais seca.
+`,
+
+  funkBH: `
+🧠 INSTRUÇÃO BASE - FUNK BH:
+- BPM 130, percussões marcantes (chocalho, agogô, palmas).
+- Escalas menores harmônicas, duas notas com meio tom.
+- Violões acústicos como base, bells e sinos.
+- Variação rítmica constante, elementos alternando a cada 2 compassos.
+- Grid 1/2 step, sequência: 5, 4, 4, 1.
+`,
+
+  funkBruxaria: `
+🧠 INSTRUÇÃO BASE - FUNK BRUXARIA:
+- Ambiências sombrias, reverses, vozes distorcidas.
+- Samples de risadas, sussurros, tons graves invertidos.
+- Escalas menores, notas dissonantes, vibe assustadora.
+- Reverb e delay com automação, pitch + distorção nos vocais.
+- Estrutura repetitiva e hipnótica, equalização para "espaço sombrio".
+`
+};
+
 // Função para gerar system prompt personalizado para usuários Plus
 function generatePersonalizedSystemPrompt(perfil) {
   if (!perfil) {
@@ -325,6 +363,23 @@ Responda com excelência absoluta.`;
   }
 
   // CORREÇÃO: Incluir instrucoesFunkbh no return
+  
+  // 🎯 Detectar estilo a partir do perfil para aplicar base técnica
+  let estiloBase = '';
+  
+  if (perfil?.estilo) {
+    const estiloLower = perfil.estilo.toLowerCase();
+    if (estiloLower.includes('mandela') || estiloLower.includes('mandelão')) {
+      estiloBase = instrucoesBase.funkMandela;
+    } else if (estiloLower.includes('sp') || estiloLower.includes('paulista')) {
+      estiloBase = instrucoesBase.funkSP;
+    } else if (estiloLower.includes('bh') || estiloLower.includes('mtg')) {
+      estiloBase = instrucoesBase.funkBH;
+    } else if (estiloLower.includes('bruxaria') || estiloLower.includes('bruxo')) {
+      estiloBase = instrucoesBase.funkBruxaria;
+    }
+  }
+
   return `Você é o PROD.AI 🎵, especialista master em produção musical. ${nomeContext}
 
 PERFIL DO USUÁRIO:
@@ -333,6 +388,8 @@ PERFIL DO USUÁRIO:
 - Estilo Musical: ${perfil.estilo || 'Variado'}
 - Maior Dificuldade: ${perfil.dificuldade || 'Não informado'}
 ${sobreContext ? `- Sobre: ${sobreContext}` : ''}
+
+${estiloBase ? estiloBase : ''}
 
 INSTRUÇÕES DE RESPOSTA:
 ${linguagemStyle}
@@ -475,15 +532,19 @@ Responda com excelência absoluta.`;
   // 🎵 Instruções específicas para cada subgênero
   const instrucaoFunkMandela = `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
-- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
+- 🔊 Batidas brutais, com **kicks fortes e distorcidos**, kicks com mais destaques nas regiões graves. É o funk de paredão, que "explode o ouvido".
 - 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
 - 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
 - 🎛️ Mixagem:
   - EQ para tirar grave dos beats e deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
   - Dar mais clareza nos agudos do beat para destacar mais
-- 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, fora do tom propositalmente para criar choque sonoro.
-- 🧪 No beat vocÊ pode usar samples prontos que você encontra em packs na internet, ou pode utilizar presets de sintetizadores.
+  - Mixagem não tão limpa, mas com punch e presença.
+- 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
+- 🧪 No beat você pode usar samples prontos que você encontra em packs na internet, ou pode utilizar presets de sintetizadores.
+- 🔥 Use plugins de reverb e delay no beat para dar mais profundidade e ambiência.
+- 🥁 Beat repetitivo, muitas vezes com padrão: grid Line, sequencia no piano roll: 4x3x3x1, ou seja, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🎛️ Se estiver usando kick e bass ao mesmo tempo, faça um sidechain para que o bass abra espaço para o kick bater.
 `;
 
   const instrucaoFunkSP = `
@@ -494,6 +555,17 @@ Responda com excelência absoluta.`;
 - 🔊 Estilo pensado pro carro, com ênfase em **grave recortado** e batida de presença.
 - 🧠 Simplicidade proposital: refrão repetitivo e beat minimalista, mas forte.
 - 💡 Priorize mix com subgraves reforçados no centro e compressão paralela nos kicks.
+🔊 Batidas brutais, com **kicks fortes e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
+- 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
+- 🎛️ Mixagem:
+  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Saturação pesada, compressão leve e coloração ruidosa
+  - Dar mais clareza nos agudos do beat para destacar mais
+  - Mixagem não tão limpa, mas com punch e presença.
+- 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, fora do tom propositalmente para criar choque sonoro.
+- 🧪 No beat você pode usar samples prontos que você encontra em packs na internet, ou pode utilizar presets de sintetizadores.
+- 🔥 Use plugins de reverb e delay no beat para dar mais profundidade e ambiência.
 `;
 
   const instrucaoFunkBruxaria = `
@@ -502,11 +574,20 @@ Responda com excelência absoluta.`;
 - 🌑 Samples de risadas demoníacas, vozes sussurradas, tons graves e loops invertidos.
 - 🎧 Use escalas menores, notas dissonantes e ambiência estéreo para criar uma vibe assustadora.
 - 🎛️ Técnicas:
-  - Reverses em snares, FX e vocais
-  - Delay e reverb com automação
   - Vozes com pitch + distorção + chorus
 - 🔊 Equalização focada em criar um "espaço sombrio" com destaque para subgraves e médios escuros.
 - 🔁 Estrutura repetitiva e hipnótica para induzir a vibe "ritualística".
+🔊 Batidas brutais, com **kicks fortes e distorcidos**, graves pulsantes e marcações intensas. É o funk de paredão, que "explode o ouvido".
+- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos e recortados**.
+- 🔁 Estrutura quebrada: beats com fade manual no fim, delay agressivo e ambiências carregadas.
+- 🎛️ Mixagem:
+  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Saturação pesada, compressão leve e coloração ruidosa
+  - Dar mais clareza nos agudos do beat para destacar mais
+  - Mixagem não tão limpa, mas com punch e presença.
+- 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, fora do tom propositalmente para criar choque sonoro.
+- 🧪 No beat você pode usar samples prontos que você encontra em packs na internet, ou pode utilizar presets de sintetizadores.
+- 🔥 Use plugins de reverb e delay no beat para dar mais profundidade e ambiência.
 `;
 
   // ✅ Inserir dinamicamente no systemPrompt se a mensagem contiver os termos
