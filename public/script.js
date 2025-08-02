@@ -295,21 +295,12 @@ function handleResize() {
 function waitForFirebase() {
   console.log('⏳ Aguardando Firebase...');
   return new Promise((resolve) => {
-    let attempts = 0;
-    const maxAttempts = 100; // Máximo 10 segundos (100 * 100ms)
-    
     const checkFirebase = () => {
       console.log('🔍 Verificando Firebase:', { auth: !!window.auth, firebaseReady: !!window.firebaseReady });
       if (window.auth && window.firebaseReady) {
         console.log('✅ Firebase pronto!');
         resolve();
-        return; // PARAR O LOOP
-      } else if (attempts >= maxAttempts) {
-        console.warn('⚠️ Timeout no Firebase, continuando...');
-        resolve();
-        return; // PARAR O LOOP
       } else {
-        attempts++;
         console.log('⏳ Firebase ainda não está pronto, tentando novamente em 100ms...');
         setTimeout(checkFirebase, 100);
       }
@@ -399,9 +390,6 @@ class ProdAIChatbot {
     }
     
     waitForPageLoad() {
-        let attempts = 0;
-        const maxAttempts = 200; // Máximo 10 segundos (200 * 50ms)
-        
         const checkPageReady = () => {
             const images = document.querySelectorAll('img');
             let allImagesLoaded = true;
@@ -418,13 +406,7 @@ class ProdAIChatbot {
                 setTimeout(() => {
                     this.animateInitialAppearance();
                 }, 800);
-                return; // PARAR O LOOP
-            } else if (attempts >= maxAttempts) {
-                console.warn('⚠️ Timeout no carregamento, continuando...');
-                this.animateInitialAppearance();
-                return; // PARAR O LOOP
             } else {
-                attempts++;
                 setTimeout(checkPageReady, 50);
             }
         };
