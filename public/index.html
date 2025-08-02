@@ -11,20 +11,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Bibliotecas para efeitos visuais -->
-    <!-- 🚨 GARGALOS CRÍTICOS DE PERFORMANCE:
-         - THREE.js (570KB): Biblioteca 3D pesada, carregamento sem defer pode bloquear parsing
-         - Vanta.js (150KB): Efeitos de partículas 3D que usam GPU intensivamente
-         - GSAP (400KB): Biblioteca de animações, pode conflitar com animações CSS
-         Sugestão: Adicionar defer ou async, ou carregar condicionalmente -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Otimizado: Adicionado defer para não bloquear parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
 
     <!-- Firebase e FingerprintJS -->
-    <!-- 🚨 POSSÍVEL OTIMIZAÇÃO:
-         FingerprintJS pode ser pesado para detectar dispositivos
-         Firebase módulos podem estar sendo importados desnecessariamente -->
-    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <!-- Otimizado: FingerprintJS com defer -->
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js" defer></script>
 
     <!-- Scripts funcionais existentes -->
     <script type="module" src="firebase.js"></script>
@@ -132,13 +126,9 @@
     </div>
 
     <!-- Script integrado com as funcionalidades existentes -->
-    <!-- 🚨 GARGALO: script.js (1500+ linhas) carregado sem defer
-         Contém loops recursivos, Vanta.js initialization, e múltiplos timeouts
-         Cache busting com ?v= pode estar forçando redownload desnecessário -->
-    <script src="script.js?v=20250128-1711"></script>
-    <!-- 🚨 SCRIPTS DESABILITADOS PARA PERFORMANCE:
-         plan-monitor.js contém setInterval(30s) que faz consultas Firebase constantes
-         force-visibility.js pode estar forçando reflows de layout -->
+    <!-- Otimizado: Adicionado defer para carregamento não-bloqueante -->
+    <script src="script.js?v=20250128-1711" defer></script>
+    <!-- Scripts de monitoramento desabilitados para performance -->
     <!-- <script src="plan-monitor.js"></script> -->
     <!-- <script src="force-visibility.js"></script> -->
     <script src="plan-monitor.js"></script>

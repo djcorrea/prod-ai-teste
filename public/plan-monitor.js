@@ -100,19 +100,15 @@ async function checkUserPlanStatus() {
     }
 }
 
-// Verificar plano a cada 30 segundos para detectar mudanças (só se estiver na página principal)
+// Verificar plano com intervalo otimizado para reduzir carga
 function startPlanMonitoring() {
     // Verificar se estamos na página principal onde faz sentido monitorar
     const isMainPage = document.querySelector('.hero') || document.querySelector('#startSendBtn') || window.location.pathname.includes('index.html');
     
     if (isMainPage) {
-        console.log('🔄 Iniciando monitoramento de plano...');
-        // 🚨 GARGALO CRÍTICO:
-        // setInterval executa checkUserPlanStatus a cada 30 segundos INDEFINIDAMENTE
-        // A função faz consultas ao Firebase/Firestore constantemente
-        // Pode estar causando lag por executar operações de rede e DOM repetidas
-        // Sugestão: Aumentar intervalo para 5 minutos (300000ms) ou usar eventos
-        setInterval(checkUserPlanStatus, 30000);
+        console.log('🔄 Iniciando monitoramento de plano otimizado...');
+        // Otimizado: De 30s para 2 minutos - muito menos impacto
+        setInterval(checkUserPlanStatus, 120000); // 2 minutos
         setTimeout(checkUserPlanStatus, 2000); // Verificação inicial
     } else {
         console.log('📄 Página secundária - pulando monitoramento de plano');

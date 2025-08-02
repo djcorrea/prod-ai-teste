@@ -194,14 +194,7 @@ function initVantaBackground() {
         }
         
         if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
-            // 🚨 GARGALO CRÍTICO DE GPU:
-            // Vanta.js + THREE.js criam uma cena 3D complexa com animações constantes
-            // Pode estar consumindo muito da GPU, especialmente com:
-            // - mouseControls: true (rastreamento do mouse)
-            // - touchControls: true (rastreamento de toque)
-            // - points: 8.00 (muitos pontos na rede)
-            // - maxDistance: 25.00 (distância de conexão alta)
-            // Sugestão: Reduzir points para 4, maxDistance para 15, ou desabilitar temporariamente
+            // Otimizado: Reduzimos ligeiramente os parâmetros mas mantendo visual bonito
             vantaEffect = VANTA.NET({
                 el: "#vanta-bg",
                 mouseControls: true,
@@ -213,12 +206,13 @@ function initVantaBackground() {
                 scaleMobile: 1.00,
                 color: 0x8a2be2,
                 backgroundColor: 0x0a0a1a,
-                points: isDesktop ? 8.00 : 4.00,
-                maxDistance: isDesktop ? 25.00 : 15.00,
-                spacing: isDesktop ? 18.00 : 25.00,
+                // Otimizado: Reduzimos pontos mas mantendo visual atraente
+                points: isDesktop ? 6.00 : 3.00, // Era 8/4, agora 6/3
+                maxDistance: isDesktop ? 20.00 : 12.00, // Era 25/15, agora 20/12
+                spacing: isDesktop ? 20.00 : 28.00, // Ajustado para compensar
                 showDots: true
             });
-            console.log('✅ Vanta.js carregado com sucesso');
+            console.log('✅ Vanta.js carregado com sucesso (otimizado)');
         } else {
             console.log('⚠️ Vanta.js ou THREE.js não encontrados - página não requer este efeito');
         }
@@ -303,18 +297,22 @@ function handleResize() {
 function waitForFirebase() {
   console.log('⏳ Aguardando Firebase...');
   return new Promise((resolve) => {
-    // 🚨 POSSÍVEL OTIMIZAÇÃO:
-    // Este loop recursivo pode rodar indefinidamente se Firebase não carregar
-    // Pode estar causando lag por executar a cada 100ms sem limite de tentativas
-    // Sugestão: Adicionar contador de tentativas máximas (ex: 50 tentativas = 5 segundos)
+    let attempts = 0;
+    const maxAttempts = 50; // Máximo 5 segundos (50 * 100ms)
+    
     const checkFirebase = () => {
       console.log('🔍 Verificando Firebase:', { auth: !!window.auth, firebaseReady: !!window.firebaseReady });
       if (window.auth && window.firebaseReady) {
         console.log('✅ Firebase pronto!');
         resolve();
+        return; // PARAR O LOOP
+      } else if (attempts >= maxAttempts) {
+        console.warn('⚠️ Timeout no Firebase, continuando...');
+        resolve();
+        return; // PARAR O LOOP
       } else {
+        attempts++;
         console.log('⏳ Firebase ainda não está pronto, tentando novamente em 100ms...');
-        // 🚨 GARGALO: Loop infinito sem timeout - pode rodar para sempre
         setTimeout(checkFirebase, 100);
       }
     };
@@ -403,16 +401,13 @@ class ProdAIChatbot {
     }
     
     waitForPageLoad() {
-        // 🚨 POSSÍVEL OTIMIZAÇÃO:
-        // Esta função verifica imagens e bibliotecas a cada 50ms indefinidamente
-        // Pode estar causando lag por fazer querySelectorAll('img') constantemente
-        // Sugestão: Adicionar timeout máximo e otimizar verificação de imagens
+        let attempts = 0;
+        const maxAttempts = 200; // Máximo 10 segundos (200 * 50ms)
+        
         const checkPageReady = () => {
-            // 🚨 GARGALO: querySelectorAll executado repetidamente pode ser caro
             const images = document.querySelectorAll('img');
             let allImagesLoaded = true;
             
-            // 🚨 GARGALO: Loop forEach executado a cada 50ms em todas as imagens
             images.forEach(img => {
                 if (!img.complete || img.naturalHeight === 0) {
                     allImagesLoaded = false;
@@ -425,9 +420,13 @@ class ProdAIChatbot {
                 setTimeout(() => {
                     this.animateInitialAppearance();
                 }, 800);
+                return; // PARAR O LOOP
+            } else if (attempts >= maxAttempts) {
+                console.warn('⚠️ Timeout no carregamento, continuando...');
+                this.animateInitialAppearance();
+                return; // PARAR O LOOP
             } else {
-                // 🚨 GARGALO: Loop infinito sem contador de tentativas máximas
-                // Executa a cada 50ms indefinidamente se imagens não carregarem
+                attempts++;
                 setTimeout(checkPageReady, 50);
             }
         };
