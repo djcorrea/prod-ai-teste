@@ -385,7 +385,7 @@ Você é o Prod.AI 🎵, um mentor técnico de elite em produção musical, com 
 
 Responda com excelência absoluta.`;
 };
-}
+
 
 // Função para chamar a API da OpenAI
 async function callOpenAI(messages, userData) {
