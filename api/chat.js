@@ -1091,75 +1091,57 @@ export default async function handler(req, res) {
     }
 
     // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP/ZN - SEQUÊNCIA DE KICK ESPECÍFICA
-    // Detecção específica para KICK (não BEAT)
-    const ehPerguntaFunkZN = perguntaLower.includes("como produzir") && perguntaLower.includes("funk zn") ||
-                             perguntaLower.includes("como fazer") && perguntaLower.includes("funk zn") ||
-                             perguntaLower.includes("produzir") && perguntaLower.includes("funk zn") ||
-                             perguntaLower.includes("fazer") && perguntaLower.includes("funk zn") ||
-                             perguntaLower.includes("funk sp") ||
-                             perguntaLower.includes("funk de sp") ||
-                             perguntaLower.includes("beat zn");
+    // Detecção SIMPLES e DIRETA para KICK do Funk ZN
+    const ehPerguntaFunkZN = perguntaLower.includes("funk zn") || 
+                             perguntaLower.includes("como produzir") ||
+                             perguntaLower.includes("como fazer");
 
-    const ehRespostaFunkSP = respostaLower.includes("funk sp") ||
-                            respostaLower.includes("funk zn") ||
-                            respostaLower.includes("sp") ||
-                            respostaLower.includes("zn");
+    // DETECÇÃO SUPER ESPECÍFICA: Snap + kick = imagem
+    const temSnapEKick = (respostaLower.includes("snap em \"1/2 step\"") || 
+                         respostaLower.includes("snap em '1/2 step'") ||
+                         respostaLower.includes("utilize o snap em")) &&
+                        (respostaLower.includes("🥁 kick:") || 
+                         respostaLower.includes("kick") ||
+                         respostaLower.includes("ajustar a precisão do kick"));
 
-    // DETECÇÃO INTELIGENTE: Aparece quando menciona snap em contexto de KICK (mesmo sem a palavra "kick")
-    const mencionaSnapNoContextoKick = (respostaLower.includes("snap em \"1/2 step\"") || 
-                                       respostaLower.includes("snap em '1/2 step'") ||
-                                       respostaLower.includes("utilize o snap em \"1/2 step\"") ||
-                                       respostaLower.includes("utilize o snap em '1/2 step'")) &&
-                                      (respostaLower.includes("kick") ||
-                                       respostaLower.includes("primeiro") ||
-                                       respostaLower.includes("1º quadrado") ||
-                                       respostaLower.includes("compasso") ||
-                                       respostaLower.includes("base para começar") ||
-                                       respostaLower.includes("padrão rítmico") ||
-                                       respostaLower.includes("sequência"));
+    // NÃO inserir se estiver falando de beat/percussão
+    const naoEhBeatOuPercussao = !(respostaLower.includes("🪘 percussão") || 
+                                  (respostaLower.includes("percussão / beat")) ||
+                                  (respostaLower.includes("beat:") && !respostaLower.includes("kick")));
 
-    // Verifica se NÃO está falando sobre beat/percussão no contexto do snap
-    const naoEhSobreBeatPercussao = !((respostaLower.includes("🪘 percussão") || 
-                                      respostaLower.includes("percussão / beat") ||
-                                      (respostaLower.includes("beat") && respostaLower.includes("percuss"))) &&
-                                      respostaLower.includes("snap em"));
+    console.log('🔍 DEBUG Funk ZN - Pergunta funk zn:', ehPerguntaFunkZN);
+    console.log('🔍 DEBUG Funk ZN - Tem snap + kick:', temSnapEKick);
+    console.log('🔍 DEBUG Funk ZN - NÃO é beat/percussão:', naoEhBeatOuPercussao);
 
-    const temExplicacaoKickEspecifica = mencionaSnapNoContextoKick && naoEhSobreBeatPercussao;
-
-    console.log('🔍 DEBUG Funk ZN - Pergunta sobre funk zn:', ehPerguntaFunkZN);
-    console.log('🔍 DEBUG Funk ZN - Resposta contém funk sp/zn:', ehRespostaFunkSP);
-    console.log('🔍 DEBUG Funk ZN - Menciona snap no contexto kick:', mencionaSnapNoContextoKick);
-    console.log('🔍 DEBUG Funk ZN - NÃO é sobre beat/percussão:', naoEhSobreBeatPercussao);
-    console.log('🔍 DEBUG Funk ZN - Tem explicação KICK específica:', temExplicacaoKickEspecifica);
-
-    // Inserir imagem APENAS se: (pergunta sobre funk zn OU resposta sobre funk sp) E tem explicação ESPECÍFICA do KICK (não beat)
-    if ((ehPerguntaFunkZN || ehRespostaFunkSP) && temExplicacaoKickEspecifica) {
-      console.log('🎯 Condições ATENDIDAS - Inserindo imagem do KICK Funk SP/ZN...');
+    // CONDIÇÃO FINAL: Pergunta funk + snap + kick + não é beat
+    if (ehPerguntaFunkZN && temSnapEKick && naoEhBeatOuPercussao) {
+      console.log('🎯 IMAGEM DO KICK SERÁ INSERIDA! Condições atendidas...');
       
-      // Inserir imagem logo após a explicação específica
-      const imagemKickSPHTML = `<br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
+      const imagemKickSPHTML = `<br><br>🎹 <b>Exemplo visual da precisão do kick no piano roll:</b><br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
       
-      // Estratégia SIMPLIFICADA: Inserir após qualquer menção de snap no contexto de kick
-      if (respostaLower.includes("base para começar")) {
-        const pattern1 = /(base para começar["']?\s*\.?)/gi;
-        reply = reply.replace(pattern1, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "base para começar"!');
-      } 
-      else if (respostaLower.includes("snap em")) {
-        const pattern2 = /(snap em ["']1\/2 step["'][^.]*\.)/gi;
-        reply = reply.replace(pattern2, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após explicação do snap!');
+      // ESTRATÉGIA GARANTIDA: Inserir após menção do snap no kick
+      if (respostaLower.includes("ajustar a precisão do kick")) {
+        reply = reply.replace(/(ajustar a precisão do kick[^.]*\.)/gi, `$1${imagemKickSPHTML}`);
+        console.log('✅ Imagem inserida após "ajustar a precisão do kick"!');
       }
-      else if (respostaLower.includes("primeiro kick")) {
-        const pattern3 = /(primeiro kick[^.]*\.)/gi;
-        reply = reply.replace(pattern3, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "primeiro kick"!');
+      else if (respostaLower.includes("utilize o snap em")) {
+        reply = reply.replace(/(utilize o snap em [^.]*\.)/gi, `$1${imagemKickSPHTML}`);
+        console.log('✅ Imagem inserida após "utilize o snap em"!');
+      }
+      else if (respostaLower.includes("🥁 kick:")) {
+        reply = reply.replace(/(🥁 kick:[^.]*\.)/gi, `$1${imagemKickSPHTML}`);
+        console.log('✅ Imagem inserida após "🥁 kick:"!');
+      }
+      else {
+        // Fallback: inserir no final da primeira linha sobre kick
+        reply = reply.replace(/kick/i, `kick${imagemKickSPHTML}`);
+        console.log('✅ Imagem inserida com fallback após primeira menção de kick!');
       }
     } else {
-      console.log('❌ Condições NÃO atendidas para Funk ZN');
+      console.log('❌ Condições NÃO atendidas para imagem do kick');
       console.log('   - Pergunta funk zn:', ehPerguntaFunkZN);
-      console.log('   - Resposta funk sp/zn:', ehRespostaFunkSP);
-      console.log('   - Explicação KICK específica:', temExplicacaoKickEspecifica);
+      console.log('   - Tem snap + kick:', temSnapEKick);
+      console.log('   - Não é beat/percussão:', naoEhBeatOuPercussao);
     }
 
     if (userData.plano === 'gratis') {
