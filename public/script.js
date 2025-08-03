@@ -1237,34 +1237,7 @@ async function processMessage(message) {
 
 /* ============ INICIALIZAÇÃO DO SISTEMA ============ */
 
-// Aguardar carregamento da página
-document.addEventListener('DOMContentLoaded', () => {
-    // Injetar estilos CSS para respostas estilosas
-    injetarEstilosRespostaEstilosa();
-    
-    // Verificar se estamos na página principal antes de inicializar tudo
-    const isMainPage = document.querySelector('.hero') || document.querySelector('#startSendBtn') || window.location.pathname.includes('index.html');
-    
-    if (isMainPage) {
-        console.log('🎯 Inicializando sistema da página principal...');
-        
-        // Inicializar efeitos visuais (agora as funções já estão declaradas)
-        initVantaBackground();
-        if (window.initParticleEffects && typeof window.initParticleEffects === 'function') {
-            window.initParticleEffects();
-        } else {
-            console.log('⚠️ initParticleEffects não disponível');
-        }
-        
-        // Aguardar Firebase e inicializar chatbot
-        waitForFirebase().then(() => {
-            console.log('✅ Firebase pronto, inicializando chatbot...');
-            window.prodAIChatbot = new ProdAIChatbot();
-        });
-    } else {
-        console.log('📄 Página secundária detectada - pulando inicialização completa do script.js');
-    }
-});
+// REMOVIDO: Listener DOMContentLoaded duplicado - agora consolidado em initializeAll
 
 function debugVercel() {
   console.log('=== DEBUG VERCEL ===');
@@ -1281,20 +1254,7 @@ function debugVercel() {
   console.log('=================');
 }
 
-/* ============ INICIALIZAÇÃO DO VISUAL NOVO ============ */
-function initVisualEffects() {
-    console.log('🚀 Inicializando cenário futurista...');
-    
-    optimizeForMobile();
-    initVantaBackground();
-    initEntranceAnimations();
-    initParallaxEffect();
-    initHoverEffects();
-    
-    window.addEventListener('resize', handleResize);
-    
-    console.log('✅ Cenário futurista carregado!');
-}
+// REMOVIDO: initVisualEffects duplicada - funcionalidades integradas ao initializeApp
 
 /* ============ INICIALIZAÇÃO PRINCIPAL ============ */
 function initializeApp() {
@@ -1349,59 +1309,64 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-/* ============ EFEITO PARALLAX ============ */
+/* ============ EFEITO PARALLAX OTIMIZADO ============ */
 function initParallaxEffect() {
     if (!isDesktop) return;
     
+    let mouseMoveTimeout;
     document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth - 0.5) * 2;
-        const y = (e.clientY / window.innerHeight - 0.5) * 2;
-        
-        if (typeof gsap !== 'undefined') {
-            // Movimento do robô
-            const robo = document.querySelector('.robo');
-            if (robo) {
-                gsap.to(robo, {
-                    duration: 0.3,
-                    rotationY: x * 3,
-                    rotationX: -y * 2,
-                    x: x * 15,
-                    y: y * 10,
+        // Throttle pesado para reduzir CPU
+        clearTimeout(mouseMoveTimeout);
+        mouseMoveTimeout = setTimeout(() => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            if (typeof gsap !== 'undefined') {
+                // Movimento do robô
+                const robo = document.querySelector('.robo');
+                if (robo) {
+                    gsap.to(robo, {
+                        duration: 0.3,
+                        rotationY: x * 3,
+                        rotationX: -y * 2,
+                        x: x * 15,
+                        y: y * 10,
+                        ease: "power2.out"
+                    });
+                }
+                
+                // Controle do Vanta
+                if (vantaEffect) {
+                    vantaEffect.setOptions({
+                        mouseControls: true,
+                        gyroControls: false
+                    });
+                }
+                
+                // Movimento dos outros elementos
+                gsap.to('.notebook', {
+                    duration: 0.4,
+                    x: x * 8,
+                    y: -y * 5,
+                    rotationY: x * 2,
+                    ease: "power2.out"
+                });
+                
+                gsap.to('.caixas', {
+                    duration: 0.45,
+                    x: x * 5,
+                    y: -y * 3,
+                    ease: "power2.out"
+                });
+                
+                gsap.to('.teclado', {
+                    duration: 0.35,
+                    x: x * 6,
+                    y: -y * 4,
                     ease: "power2.out"
                 });
             }
-            
-            // Controle do Vanta
-            if (vantaEffect) {
-                vantaEffect.setOptions({
-                    mouseControls: true,
-                    gyroControls: false
-                });
-            }
-            
-            // Movimento dos outros elementos
-            gsap.to('.notebook', {
-                duration: 0.4,
-                x: x * 8,
-                y: -y * 5,
-                rotationY: x * 2,
-                ease: "power2.out"
-            });
-            
-            gsap.to('.caixas', {
-                duration: 0.45,
-                x: x * 5,
-                y: -y * 3,
-                ease: "power2.out"
-            });
-            
-            gsap.to('.teclado', {
-                duration: 0.35,
-                x: x * 6,
-                y: -y * 4,
-                ease: "power2.out"
-            });
-        }
+        }, 16); // ~60fps throttle para reduzir consumo de CPU
     });
 }
 
@@ -1421,6 +1386,31 @@ if (document.readyState === 'loading') {
 
 // Listener único de redimensionamento (otimizado com throttle)
 window.addEventListener('resize', handleResize);
+
+// Otimização: Pausar animações quando elementos não estão visíveis
+function optimizeAnimationsWithVisibility() {
+  if ('IntersectionObserver' in window) {
+    const animatedElements = document.querySelectorAll('.robot-main, .notebook, .keyboard, .mouse, .mesa, .floating-particle, .chatbot-main-robot, .typing-indicator');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+        } else {
+          entry.target.style.animationPlayState = 'paused';
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '50px'
+    });
+    
+    animatedElements.forEach(el => observer.observe(el));
+  }
+}
+
+// Inicializar otimização de animações
+setTimeout(optimizeAnimationsWithVisibility, 1000);
 
 // Expor funções globais (manter compatibilidade)
 window.sendFirstMessage = () => {
