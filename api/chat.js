@@ -556,6 +556,8 @@ function gerarPromptDoEstilo(estilo) {
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+- Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
+- Use todos os conteudos abaixo.
 SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS: 
 📚 INSTRUÇÕES INTRODUÇÃO — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
@@ -599,6 +601,8 @@ Diretrizes técnicas:
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+- Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
+- Use todos os conteudos abaixo.
 SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 📚 CONTEXTO TÉCNICO A— FUNK BRUXARIA
 🧙‍♂️ **Estilo sombrio:**  
@@ -619,7 +623,8 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 - Sons com ambiência estéreo, modulação, e LFOs lentos ajudam na sensação hipnótica.
 🔥 **Beat:**
 - Samples sujos e distorcidos funcionam bem. Packs como **Favela Beat**, **DJ Ayzen** são otimas fontes. Você pode usar tambem presets de synths como o Vital e Serum.
-- Pode se utilizar Bass pesados como beat principal, fazendo uma verdadeira pressão sonora.
+- Pode se utilizar Bass pesados como beat principal, fazendo uma verdadeira pressão sonora. Padrão rítmico do beat: Use Snap "Line" e faça a sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
+
 - Padrão rítmico do beat: Use Snap "Line" e faça a sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
 - Estrutura repetitiva, ritualística, com **variações sutis** ao longo da faixa.
 - Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
