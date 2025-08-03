@@ -1105,24 +1105,32 @@ export default async function handler(req, res) {
                             respostaLower.includes("sp") ||
                             respostaLower.includes("zn");
 
-    // DETECÇÃO MAIS FLEXÍVEL: Aparece se mencionar KICK + snap (mas não se for sobre BEAT)
-    const mencionaSnapKick = (respostaLower.includes("snap em \"1/2 step\"") || 
-                             respostaLower.includes("snap em '1/2 step'") ||
-                             respostaLower.includes("utilize o snap em \"1/2 step\"") ||
-                             respostaLower.includes("utilize o snap em '1/2 step'")) &&
-                            respostaLower.includes("kick");
+    // DETECÇÃO INTELIGENTE: Aparece quando menciona snap em contexto de KICK (mesmo sem a palavra "kick")
+    const mencionaSnapNoContextoKick = (respostaLower.includes("snap em \"1/2 step\"") || 
+                                       respostaLower.includes("snap em '1/2 step'") ||
+                                       respostaLower.includes("utilize o snap em \"1/2 step\"") ||
+                                       respostaLower.includes("utilize o snap em '1/2 step'")) &&
+                                      (respostaLower.includes("kick") ||
+                                       respostaLower.includes("primeiro") ||
+                                       respostaLower.includes("1º quadrado") ||
+                                       respostaLower.includes("compasso") ||
+                                       respostaLower.includes("base para começar") ||
+                                       respostaLower.includes("padrão rítmico") ||
+                                       respostaLower.includes("sequência"));
 
     // Verifica se NÃO está falando sobre beat/percussão no contexto do snap
-    const naoEhSobreBeatPercussao = !((respostaLower.includes("beat") || respostaLower.includes("percussão")) &&
+    const naoEhSobreBeatPercussao = !((respostaLower.includes("🪘 percussão") || 
+                                      respostaLower.includes("percussão / beat") ||
+                                      (respostaLower.includes("beat") && respostaLower.includes("percuss"))) &&
                                       respostaLower.includes("snap em"));
 
-    const temExplicacaoKickEspecifica = mencionaSnapKick && naoEhSobreBeatPercussao;
+    const temExplicacaoKickEspecifica = mencionaSnapNoContextoKick && naoEhSobreBeatPercussao;
 
     console.log('🔍 DEBUG Funk ZN - Pergunta sobre funk zn:', ehPerguntaFunkZN);
     console.log('🔍 DEBUG Funk ZN - Resposta contém funk sp/zn:', ehRespostaFunkSP);
-    console.log('🔍 DEBUG Funk ZN - Menciona snap + kick:', mencionaSnapKick);
+    console.log('🔍 DEBUG Funk ZN - Menciona snap no contexto kick:', mencionaSnapNoContextoKick);
     console.log('🔍 DEBUG Funk ZN - NÃO é sobre beat/percussão:', naoEhSobreBeatPercussao);
-    console.log('🔍 DEBUG Funk ZN - Tem explicação KICK específica (não beat):', temExplicacaoKickEspecifica);
+    console.log('🔍 DEBUG Funk ZN - Tem explicação KICK específica:', temExplicacaoKickEspecifica);
 
     // Inserir imagem APENAS se: (pergunta sobre funk zn OU resposta sobre funk sp) E tem explicação ESPECÍFICA do KICK (não beat)
     if ((ehPerguntaFunkZN || ehRespostaFunkSP) && temExplicacaoKickEspecifica) {
