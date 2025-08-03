@@ -119,11 +119,11 @@ function initVantaBackground() {
         }
         
         if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
-            // CRÍTICO: Reduzir qualidade dramática para performance
+            // Balanceado: Visual preservado + performance otimizada
             const isLowPerformance = navigator.hardwareConcurrency <= 4;
             vantaEffect = VANTA.NET({
                 el: "#vanta-bg",
-                mouseControls: !isLowPerformance, // Desabilitar em CPUs fracas
+                mouseControls: true,
                 touchControls: true,
                 gyroControls: false,
                 minHeight: 200.00,
@@ -132,11 +132,11 @@ function initVantaBackground() {
                 scaleMobile: 1.00,
                 color: 0x8a2be2,
                 backgroundColor: 0x0a0a1a,
-                // CRÍTICO: Redução extrema para dispositivos fracos
-                points: isLowPerformance ? 2.00 : (isDesktop ? 4.00 : 2.00),
-                maxDistance: isLowPerformance ? 8.00 : (isDesktop ? 15.00 : 10.00),
-                spacing: isLowPerformance ? 35.00 : (isDesktop ? 25.00 : 30.00),
-                showDots: !isLowPerformance // Sem pontos em dispositivos fracos
+                // Balanceado: Redução moderada - visual mantido
+                points: isLowPerformance ? 3.00 : (isDesktop ? 6.00 : 3.00),
+                maxDistance: isLowPerformance ? 12.00 : (isDesktop ? 20.00 : 12.00),
+                spacing: isLowPerformance ? 30.00 : (isDesktop ? 20.00 : 28.00),
+                showDots: true // Manter pontos visíveis para visual
             });
             // Vanta.js loaded successfully
         } else {
@@ -193,39 +193,36 @@ function optimizeForMobile() {
     if (isLowPerformance || isOldDevice) {
         const style = document.createElement('style');
         style.textContent = `
-            /* CRÍTICO: Desabilitar animações pesadas em dispositivos fracos */
-            .robo, .notebook, .teclado, .caixas, .mesa, .floating-particle {
-                animation: none !important;
-                filter: none !important;
-                transform: none !important;
+            /* OTIMIZADO: Apenas reduzir frequência de animações, não remover */
+            .robo, .notebook, .teclado, .caixas, .mesa {
+                animation-duration: 8s !important; /* Mais lento = menos processamento */
             }
             .chatbot-main-robot {
-                animation: none !important;
-                filter: drop-shadow(0 0 5px rgba(0, 150, 255, 0.3)) !important;
+                animation-duration: 4s !important; /* Reduzir frequência */
             }
-            .particles-overlay, .particle {
-                display: none !important;
+            .floating-particle {
+                animation-duration: 20s !important; /* Muito mais lento */
             }
-            /* Pausar animações CSS infinitas para economia de CPU */
-            * {
-                animation-play-state: paused !important;
+            /* Manter visual mas reduzir processamento */
+            .particles-overlay {
+                opacity: 0.3 !important; /* Reduzir mas não esconder */
             }
         `;
         document.head.appendChild(style);
-        console.warn('🐌 Dispositivo com performance baixa detectado - animações desabilitadas');
+        console.warn('🐌 Dispositivo com performance baixa detectado - animações otimizadas');
         return true; // Performance mode enabled
     }
     
-    // Mobile optimizations padrão
+    // Mobile optimizations mais suaves
     if (!isDesktop) {
         const style = document.createElement('style');
         style.textContent = `
+            /* Manter animações mas reduzir frequência no mobile */
             .robo, .notebook, .teclado, .caixas, .mesa {
-                animation: none !important;
-                filter: none !important;
+                animation-duration: 6s !important; /* Mais lento no mobile */
             }
             .particles-overlay {
-                display: none !important;
+                opacity: 0.5 !important; /* Reduzir mas manter visível */
             }
         `;
         document.head.appendChild(style);

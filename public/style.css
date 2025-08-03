@@ -61,8 +61,8 @@ body {
     height: auto;
     max-height: 86.1vh;
     z-index: 3;
-    /* Otimizado: Reduzimos blur de 15px para 8px - melhor performance */
-    filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.3));
+    /* Otimizado: Blur balanceado - visual preservado + performance */
+    filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.3));
     /* Otimizado: Aumentamos duração para reduzir frequência de repaint */
     animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 4s ease-in-out infinite 1s;
 }
@@ -74,7 +74,7 @@ body {
     height: auto;
     max-height: 1500px;
     z-index: 1;
-    filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.2));
+    filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.2));
 }
 
 .notebook {
@@ -83,8 +83,8 @@ body {
     height: auto;
     max-height: 120vh;
     z-index: 2;
-    /* Otimizado: Blur reduzido de 12px para 6px */
-    filter: drop-shadow(0 0 6px rgba(0, 150, 255, 0.3));
+    /* Otimizado: Blur balanceado - visual preservado + performance */
+    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.3));
     /* Otimizado: Duração aumentada de 3s para 5s */
     animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 5s ease-in-out infinite 1.2s;
 }
@@ -96,7 +96,7 @@ body {
     max-height: 150vh;
     z-index: 2;
     /* Otimizado: Blur reduzido de 12px para 10px */
-    filter: drop-shadow(0 0 5px rgba(0, 150, 255, 0.25));
+    filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.25));
     /* Otimizado: Duração aumentada de 2.5s para 4s */
     animation: subtleGlowOptimized 4s ease-in-out infinite 0.5s;
     opacity: 1 !important;
@@ -128,7 +128,7 @@ body {
     height: auto;
     max-height: 115vh;
     z-index: 2;
-    filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.4));
+    filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4));
     animation: subtleGlowOptimized 3.5s ease-in-out infinite 1s;
 }
 
@@ -312,8 +312,8 @@ body {
     height: 180px;
     object-fit: contain;
     filter: 
-        drop-shadow(0 0 12px rgba(0, 150, 255, 0.6))
-        drop-shadow(0 0 20px rgba(138, 43, 226, 0.4));
+        drop-shadow(0 0 18px rgba(0, 150, 255, 0.6))
+        drop-shadow(0 0 35px rgba(138, 43, 226, 0.4));
     animation: chatbotMainRobotFloatOptimized 2s ease-in-out infinite;
     will-change: transform;
 }
