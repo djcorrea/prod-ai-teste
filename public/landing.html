@@ -266,6 +266,51 @@
             left: 100%;
         }
         
+        /* Scroll Arrow */
+        .scroll-arrow {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 20;
+            animation: fade-in 1s ease-out 1.5s both;
+        }
+        
+        .arrow-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s ease;
+            animation: arrow-bounce 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: relative;
+        }
+        
+        .arrow-icon:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-purple);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+        
+        @keyframes arrow-bounce {
+            0%, 100% { 
+                transform: translateY(0);
+            }
+            50% { 
+                transform: translateY(-10px);
+            }
+        }
+        
         /* Holographic Card */
         .section {
             padding: 100px 50px;
@@ -458,6 +503,121 @@
             letter-spacing: 2px;
             text-transform: uppercase;
         }
+
+        /* Instructions Section */
+        .instructions-section {
+            padding: 100px 50px;
+            background: radial-gradient(ellipse at center, rgba(255, 0, 255, 0.03) 0%, transparent 70%);
+            position: relative;
+        }
+
+        .instructions-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instructions-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), transparent);
+            animation: border-scan 3s linear infinite;
+        }
+
+        @keyframes border-scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .instructions-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        }
+
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .instruction-item {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.05));
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instruction-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .instruction-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+            border-color: var(--neon-purple);
+        }
+
+        .instruction-item:hover::before {
+            left: 100%;
+        }
+
+        .instruction-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--electric-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--dark-bg);
+            margin-bottom: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .instruction-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .instruction-highlight {
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
         
         /* Contact Form */
         .contact-section {
@@ -604,6 +764,23 @@
             .section {
                 padding: 60px 20px;
             }
+
+            .instructions-section {
+                padding: 60px 20px;
+            }
+
+            .instructions-container {
+                padding: 30px 20px;
+            }
+
+            .instructions-title {
+                font-size: 2rem;
+            }
+
+            .instructions-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
             
             .hero-content {
                 padding: 0 1rem;
@@ -636,6 +813,19 @@
             
             .section {
                 padding: 40px 15px;
+            }
+
+            .instructions-section {
+                padding: 40px 15px;
+            }
+
+            .instructions-container {
+                padding: 25px 15px;
+            }
+
+            .instructions-title {
+                font-size: 1.5rem;
+                margin-bottom: 25px;
             }
             
             .section-title {
@@ -683,6 +873,7 @@
                 <li><a href="#about-intro" class="nav-link">SOBRE</a></li>
                 <li><a href="#services" class="nav-link">RECURSOS FUTURISTAS</a></li>
                 <li><a href="#performance" class="nav-link">PERFORMANCE</a></li>
+                <li><a href="#instructions" class="nav-link">INSTRUÇÕES</a></li>
             </ul>
             <div class="mobile-menu-toggle">
                 <span class="menu-bar"></span>
@@ -699,10 +890,19 @@
             <p class="hero-subtitle">PRODUÇÃO MUSICAL INTELIGENTE</p>
             <a href="login.html" class="cta-button">EXPLORAR AGORA</a>
         </div>
+        
+        <!-- Scroll Down Arrow -->
+        <div class="scroll-arrow" onclick="scrollToAbout()">
+            <div class="arrow-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5L12 19M5 12L12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
     </section>
     
     <!-- About Section -->
-    <section class="section" id="about-intro" style="padding-top: 20px; padding-bottom: 30px;">
+    <section class="section" id="about-intro" style="padding-top: 0px; padding-bottom: 30px; margin-top: -50px;">
         <h2 class="section-title scroll-reveal">O QUE É A PROD.AI?</h2>
         <div style="max-width: 900px; margin: 0 auto; text-align: center;">
             <p style="font-size: 1.4rem; line-height: 1.9; color: var(--text-secondary); letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);">
@@ -746,7 +946,7 @@
                 <div class="neumo-label">Resposta Média</div>
             </div>
             <div class="neumo-box scroll-reveal">
-                H<div class="neumo-number">24H</div>
+                <div class="neumo-number">24H</div>
                 <div class="neumo-label">Suporte</div>
             </div>
             <div class="neumo-box scroll-reveal">
@@ -760,6 +960,63 @@
             <div class="neumo-box scroll-reveal">
                 <div class="neumo-number">100%</div>
                 <div class="neumo-label">Focado em Música</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instructions Section -->
+    <section class="instructions-section" id="instructions">
+        <div class="instructions-container scroll-reveal">
+            <h2 class="instructions-title">INSTRUÇÕES PARA EXTRAIR O MELHOR DO PROD.AI</h2>
+            
+            <div class="instructions-grid">
+                <div class="instruction-item">
+                    <div class="instruction-number">1</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Seja específico</span> nas suas perguntas. 
+                        Ao invés de "Como mixar?", pergunte "Como aplicar compressão no vocal de rap?"
+                    </p>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">2</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Mencione seu DAW</span> e plugins. 
+                        Exemplo: "Como criar sidechain no FL Studio usando Fruity Limiter?"
+                    </p>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">3</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Descreva o problema</span> em detalhes. 
+                        "Meu baixo está sumindo na mixagem quando toco com a bateria..."
+                    </p>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">4</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Indique seu nível</span> de experiência. 
+                        "Sou iniciante" ou "Produzo há 3 anos" ajuda a personalizar as respostas.
+                    </p>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">5</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Peça exemplos práticos</span>. 
+                        "Me dê valores de EQ para vocal" ou "Quais acordes usar em Trap?"
+                    </p>
+                </div>
+                
+                <div class="instruction-item">
+                    <div class="instruction-number">6</div>
+                    <p class="instruction-text">
+                        <span class="instruction-highlight">Faça perguntas de follow-up</span>. 
+                        Continue a conversa para aprofundar o conhecimento sobre o tópico.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -837,7 +1094,7 @@
         });
         
         // 3D Card Tilt Effect
-        document.querySelectorAll('.glass-card, .neumo-box').forEach(card => {
+        document.querySelectorAll('.glass-card, .neumo-box, .instruction-item').forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
@@ -902,7 +1159,7 @@
         });
         
         // Holographic text effect on hover
-        document.querySelectorAll('.card-title, .neumo-label').forEach(text => {
+        document.querySelectorAll('.card-title, .neumo-label, .instruction-highlight').forEach(text => {
             text.addEventListener('mouseenter', function() {
                 this.style.animation = 'holographic 2s ease infinite';
             });
@@ -1081,6 +1338,15 @@
         
         // Initialize everything when DOM is loaded
         console.log('Site futurista carregado com sucesso!');
+        
+        // Scroll to About function
+        function scrollToAbout() {
+            const aboutSection = document.getElementById('about-intro');
+            aboutSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
     </script>
 </body>
 </html>
