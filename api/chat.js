@@ -267,10 +267,10 @@ Diretrizes técnicas:
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 
 📚 INSTRUÇÕES AVANÇADAS — FUNK BH
-- 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
-- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
+- 🔢 Use 130 BPM, que é o mais comum no Funk de BH. Ou 128 para um ritmo mais lento.
+- 🥁 O Funk BH é caracterizado por percussões curtas que fazem a marcação do beat, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para fazer o beat.
 - 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
-- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: na Lander).
+- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: no Splice).
 - 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
 - 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
 - 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
@@ -278,7 +278,7 @@ Diretrizes técnicas:
 - 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
 - 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
 - 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas.
-- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1
+- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
 `,
 
   funkBruxaria: `
