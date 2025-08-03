@@ -63,9 +63,8 @@ body {
     z-index: 3;
     /* Otimizado: Blur balanceado - visual preservado + performance */
     filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.3));
-    /* SINCRONIZADO: Robô aparece primeiro */
-    animation: fadeInSync 0.6s ease-out forwards;
-    animation-delay: 0s;
+    /* Otimizado: Aumentamos duração para reduzir frequência de repaint */
+    animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 4s ease-in-out infinite 1s;
 }
 
 .mesa {
@@ -76,9 +75,8 @@ body {
     max-height: 1500px;
     z-index: 1;
     filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.2));
-    /* SINCRONIZADO: Mesa aparece quase junto */
-    animation: fadeInSync 0.6s ease-out forwards;
-    animation-delay: 0.1s;
+    /* CRÍTICO: Mesa precisa de animação para aparecer */
+    animation: fadeInUp 1s ease-out forwards;
 }
 
 .notebook {
@@ -89,9 +87,8 @@ body {
     z-index: 2;
     /* Otimizado: Blur balanceado - visual preservado + performance */
     filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.3));
-    /* SINCRONIZADO: Notebook aparece em seguida */
-    animation: fadeInSync 0.6s ease-out forwards;
-    animation-delay: 0.2s;
+    /* Otimizado: Duração aumentada de 3s para 5s */
+    animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 5s ease-in-out infinite 1.2s;
 }
 
 .teclado {
@@ -102,9 +99,35 @@ body {
     z-index: 2;
     /* Otimizado: Blur reduzido de 12px para 10px */
     filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.25));
-    /* SINCRONIZADO: Teclado aparece junto com notebook */
-    animation: fadeInSync 0.6s ease-out forwards;
-    animation-delay: 0.3s;
+    /* Otimizado: Duração aumentada de 2.5s para 4s */
+    animation: subtleGlowOptimized 4s ease-in-out infinite 0.5s;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ GARANTIR VISIBILIDADE DO NOTEBOOK E TECLADO ============ */
+.notebook {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.teclado {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ GARANTIR VISIBILIDADE DA MESA ============ */
+.mesa {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* ============ ANIMAÇÃO DE ENTRADA PARA DESKTOP ============ */
+@media (min-width: 768px) {
+    .notebook, .teclado {
+        animation-delay: 0.8s;
+        animation-fill-mode: forwards;
+    }
 }
 
 .caixas {
@@ -114,9 +137,7 @@ body {
     max-height: 115vh;
     z-index: 2;
     filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4));
-    /* SINCRONIZADO: Caixas aparecem por último dos elementos */
-    animation: fadeInSync 0.6s ease-out forwards;
-    animation-delay: 0.4s;
+    animation: subtleGlowOptimized 3.5s ease-in-out infinite 1s;
 }
 
 /* ============ OVERLAY DE PARTÍCULAS ============ */
@@ -222,18 +243,6 @@ body {
     }
 }
 
-/* ============ ANIMAÇÃO SINCRONIZADA DE ENTRADA ============ */
-@keyframes fadeInSync {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -276,9 +285,6 @@ body {
         rgba(15, 25, 55, 0.95), 
         rgba(20, 10, 45, 0.95)
     );
-    /* CHATBOT: Aparece por último com delay */
-    animation: fadeInSync 0.8s ease-out forwards;
-    animation-delay: 1s;
     border: 2px solid rgba(0, 150, 255, 0.3);
     border-radius: 24px;
     box-shadow: 0 0 60px rgba(0, 150, 255, 0.3);
