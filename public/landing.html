@@ -858,22 +858,27 @@
         });
         
         // Form Submit Animation
-        document.querySelector('.contact-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const button = e.target.querySelector('.submit-button');
-            button.textContent = 'ENVIANDO...';
-            
-            setTimeout(() => {
-                button.textContent = 'MENSAGEM ENVIADA ✓';
-                button.style.background = 'linear-gradient(45deg, #00ff00, #00ffaa)';
-                
-                setTimeout(() => {
-                    button.textContent = 'ENVIAR MENSAGEM';
-                    button.style.background = '';
-                    e.target.reset();
-                }, 2000);
-            }, 1500);
-        });
+        const contactForm = document.querySelector('.contact-form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('.submit-button');
+                if (button) {
+                    button.textContent = 'ENVIANDO...';
+                    
+                    setTimeout(() => {
+                        button.textContent = 'MENSAGEM ENVIADA ✓';
+                        button.style.background = 'linear-gradient(45deg, #00ff00, #00ffaa)';
+                        
+                        setTimeout(() => {
+                            button.textContent = 'ENVIAR MENSAGEM';
+                            button.style.background = '';
+                            e.target.reset();
+                        }, 2000);
+                    }, 1500);
+                }
+            });
+        }
         
         // Dynamic cursor glow
         document.addEventListener('mousemove', (e) => {

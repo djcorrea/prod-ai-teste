@@ -329,25 +329,35 @@ class ProdAIChatbot {
     
     setupEventListeners() {
         // Eventos do estado Welcome
-        this.sendButton.addEventListener('click', () => this.handleFirstMessage());
-        this.mainInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleFirstMessage();
-        });
-        this.mainInput.addEventListener('focus', () => this.animateInputFocus());
+        if (this.sendButton) {
+            this.sendButton.addEventListener('click', () => this.handleFirstMessage());
+        }
+        if (this.mainInput) {
+            this.mainInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.handleFirstMessage();
+            });
+            this.mainInput.addEventListener('focus', () => this.animateInputFocus());
+        }
         
         // Eventos do estado Ativo
-        this.activeSendBtn.addEventListener('click', () => this.sendMessage());
-        this.activeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendMessage();
-        });
+        if (this.activeSendBtn) {
+            this.activeSendBtn.addEventListener('click', () => this.sendMessage());
+        }
+        if (this.activeInput) {
+            this.activeInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.sendMessage();
+            });
+        }
         
         // Event listeners para botões de ação
         const actionButtons = document.querySelectorAll('.chatbot-action-btn');
         actionButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const action = e.target.closest('.chatbot-action-btn').getAttribute('data-action');
-                this.handleActionButton(action);
-            });
+            if (button) {
+                button.addEventListener('click', (e) => {
+                    const action = e.target.closest('.chatbot-action-btn').getAttribute('data-action');
+                    this.handleActionButton(action);
+                });
+            }
         });
     }
     

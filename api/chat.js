@@ -175,25 +175,27 @@ async function handleUserLimits(db, uid, email) {
 const instrucoesBase = {
   funkMandela: `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+- O Funk Mandela, ou (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
-- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
-- 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+- 🎚️ Para criar o beat utilizae samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Ayzen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
+- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota. 
+- 🧠 Faça variações das notas do beat no piano até chegar em um resultado desejado, utilize tecnicas como subir e descer oitavas, uma dica é começar com o padrao 4x3x3x1 e ir trocando as notas por outras notas que combinem com o tom da voz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
 🎛️ Mixagem:
-  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+  - EQ para tirar um pouco de grave dos beats entre 20Hz e 180Hz para deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
   - Dar mais clareza nos agudos do beat para destacar mais
   - Mixagem não tão limpa, mas com punch e presença.
 🎙️ Acapella, vocal: 
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
-  - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
+- 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
   - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
 `,
 
@@ -483,19 +485,21 @@ function gerarPromptDoEstilo(estilo) {
   const promptsEspecificos = {
     'funk mandela': `
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+- O Funk Mandela, ou  (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
-- 🎚️ Distorção proposital nos elementos, com uso de **samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Aizen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva, synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
-- 🎛️ Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+- 🎚️ Para criar o beat utilizae samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Ayzen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
+- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota. 
+- 🧠 Faça variações das notas do beat no piano até chegar em um resultado desejado, utilize tecnicas como subir e descer oitavas, uma dica é começar com o padrao 4x3x3x1 e ir trocando as notas por outras notas que combinem com o tom da voz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
 - 🕒 **BPM** entre 130 e 135.
-- 🥁 kicks fortes em 50–60Hz, samples sujos encontrados em packs de samples ou synths feitos em sintetizadores, FX, utiliza tambem claps sequenciados.
+- 🥁 kicks fortes em 50–60Hz.
 - 🔁 **Groove constante**, sem variações melódicas complexas. Beat é o destaque.
 - 🧼 **Mixagem seca**: pouca compressão, menos mixagem deixando a batida com impacto.
 - 🎚️ Sidechain leve entre kick e bass apenas se necessário quando utiliza os dois juntos — foco na pressão bruta.
 🎛️ Mixagem:
-  - EQ para tirar grave dos beats e deixar espaço pro kick
+  - Identifique as regiões de frequências no beat que precisam de mais ganho, para deixar o sample com destaque acostumase aumentar a região dos medios e agudos, em volta de 1k hz a 20k hz.
+  - EQ para tirar um pouco de grave dos beats entre 20Hz e 180Hz para deixar espaço pro kick
   - Saturação pesada, compressão leve e coloração ruidosa
   - Dar mais clareza nos agudos do beat para destacar mais
   - Mixagem não tão limpa, mas com punch e presença.

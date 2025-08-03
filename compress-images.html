@@ -183,10 +183,13 @@
     <script>
         let selectedFiles = [];
         
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            selectedFiles = Array.from(e.target.files);
-            updateUploadArea();
-        });
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                selectedFiles = Array.from(e.target.files);
+                updateUploadArea();
+            });
+        }
 
         function updateUploadArea() {
             const uploadArea = document.querySelector('.upload-area');

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Favicon</title>
+</head>
+<body>
+    <canvas id="canvas" width="16" height="16" style="border: 1px solid black; width: 160px; height: 160px;"></canvas>
+    <br><br>
+    <button onclick="downloadFavicon()">Download favicon.ico</button>
+    
+    <script>
+        // Criar um favicon simples com as letras "AI"
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Fundo azul
+        ctx.fillStyle = '#007ACC';
+        ctx.fillRect(0, 0, 16, 16);
+        
+        // Texto "AI" em branco
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('AI', 8, 12);
+        
+        function downloadFavicon() {
+            // Converter canvas para blob e baixar
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'favicon.ico';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 'image/x-icon');
+        }
+        
+        // Auto download
+        setTimeout(downloadFavicon, 1000);
+    </script>
+</body>
+</html>

@@ -108,14 +108,16 @@
 
     <script>
         // Simulação da funcionalidade de alterar senha para testes
-        document.getElementById('test-button').addEventListener('click', function() {
-            const newPassword = document.getElementById('new-password').value.trim();
-            const confirmPassword = document.getElementById('confirm-password').value.trim();
-            const button = this;
-            const resultDiv = document.getElementById('result');
-            
-            // Limpar resultado anterior
-            resultDiv.innerHTML = '';
+        const testButton = document.getElementById('test-button');
+        if (testButton) {
+            testButton.addEventListener('click', function() {
+                const newPassword = document.getElementById('new-password').value.trim();
+                const confirmPassword = document.getElementById('confirm-password').value.trim();
+                const button = this;
+                const resultDiv = document.getElementById('result');
+                
+                // Limpar resultado anterior
+                resultDiv.innerHTML = '';
             
             // Validações (idênticas ao código real)
             if (!newPassword || !confirmPassword) {
@@ -153,12 +155,19 @@
         
         // Permitir Enter nos campos
         ['new-password', 'confirm-password'].forEach(id => {
-            document.getElementById(id).addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('test-button').click();
-                }
-            });
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const testBtn = document.getElementById('test-button');
+                        if (testBtn) {
+                            testBtn.click();
+                        }
+                    }
+                });
+            }
         });
+        }
     </script>
 </body>
 </html>

@@ -558,16 +558,18 @@
                 });
                 
                 // Capturar submissão do formulário
-                document.getElementById('interviewForm').addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    try {
-                        console.log('🔄 Formulário submetido, verificando autenticação...');
+                const interviewForm = document.getElementById('interviewForm');
+                if (interviewForm) {
+                    interviewForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
                         
-                        // Verificar se há usuário autenticado
-                        const user = auth.currentUser;
-                        if (!user) {
-                            alert('Você precisa estar logado para preencher a entrevista. Redirecionando...');
+                        try {
+                            console.log('🔄 Formulário submetido, verificando autenticação...');
+                            
+                            // Verificar se há usuário autenticado
+                            const user = auth.currentUser;
+                            if (!user) {
+                                alert('Você precisa estar logado para preencher a entrevista. Redirecionando...');
                             window.location.href = 'login.html';
                             return;
                         }
@@ -669,7 +671,8 @@
                         console.error('❌ Erro completo:', error);
                         alert('Erro ao salvar suas informações. Detalhes: ' + error.message);
                     }
-                });
+                    });
+                }
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar Firebase:', error);
