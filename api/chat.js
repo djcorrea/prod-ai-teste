@@ -659,20 +659,28 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-🧠 INSTRUÇÃO BASE - FUNK SP / ZN:
-🥁 BEAT / SEQUÊNCIA DE KICK
+- Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
+- Use todos os conteudos abaixo.
+SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
+🧠 INSTRUÇÃO INTRODUÇÃO BASE - FUNK SP / ZN:
+🎙️ VOZ / ACAPELA
+- 🎤 Utilize acapelas com rimas diretas, estilo inspirado em tendências atuais, com frases agressivas ou chicletes.
+- 🗑️ Faça cortes sequenciados em algumas partes da voz, criando um efeito mais dinamico.
+- 🧠 Faça um tratamento de voz adequado para que a voz se destaque na música, faça uma equalização com foco em reduzir os graves e aumentar os agudos, faça uma compressão multibanda, adicione reverb e delay se for preciso.
+🥁KICK
 - Use um kick grave e seco, de preferência sem cauda longa.
-- ✂️ Corte o começo do sample (vento/silêncio) para evitar sujeira no som.
-- 🟦 A sequência principal segue um padrão quebrado, com kick no meio do 3º quadrado.
-- 🔁 Copie o primeiro kick e cole adiante, deslocando o terceiro kick para frente (além da batida tradicional).
-- 🔳 Insira outro kick a 1 quadrado e meio do anterior, criando o ritmo quebrado típico do estilo.
+- ✂️ Corte o começo do kick (vento/silêncio) para evitar sujeira no som.
+- 🟦 A sequência principal segue um padrão quebrado.
+- 🔁 No piano ou na playlist: Utilize o snap em "1/2 step" adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma "Base para começar"
 - 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
 
-🪘 PERCUSSÃO / RITMO
-- 🪘 Corte o final de cada sample de percussão para evitar sobreposição.
-- 🥁 Posicione as percussões com base nas linhas centrais do grid para manter equilíbrio visual e rítmico.
+🪘 PERCUSSÃO / BEAT
+- 🪘 Use percurssões como (Sinos, samples metalicas, samples curtas, efeitos curtos, caixas)
+- 🥁 Adicione efeitos como: reverb para deixar mais longo o sample, delay em alguns casos para criar mais profundidade.
+- 🔉 Para fazer um beat base para ponto de partida: use o snap em "1/2 step" para o ajustar melhor o grid para fazer progressões ritimadas, coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai. 
+- 🎹 Adicione samples ou percursões secundárias no fundo, para dar mais vida para o beat, faça combinações entre percursões (subindo, descendo as notas, desce oitavas) para fazer o verdadeiro "Beat Ritmado"
 - 🎯 Adicione percussões entre os kicks para preencher o groove.
-- 🔁 Copie o loop com variações até a 5ª barra da timeline, mantendo pequenas quebras.
+- 🔁 Copie o loop com variações e repita, mantendo pequenas quebras.
 - 🧠 Crie variações removendo elementos de seções específicas (ex: apagando a percussão da última barra).
 - 🗂️ Organize cada tipo de percussão em tracks diferentes no mixer para facilitar a mixagem individual.
 
@@ -680,11 +688,6 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 - 🧽 Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
 - 📊 Use cores e nomes para os canais de bateria e percussão.
 - 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
-
-🎙️ VOZ / ACAPELA
-- 🎤 Utilize acapelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
-- 🗑️ Substitua a acapela se não encaixar bem na batida — mantenha opções no projeto.
-- 🧠 Frases de efeito como "senta aí" ou "toma, toma" funcionam bem com vocais retos e repetitivos.
 `,
 
     'funk bh': instrucoesBase.funkBH,
@@ -1084,6 +1087,60 @@ export default async function handler(req, res) {
       console.log('✅ Imagem do Funk BH inserida com sucesso no contexto do BEAT!');
     } else {
       console.log('❌ Condições não atendidas para Funk BH - não é sobre BEAT + 6, 4, 4, 1');
+    }
+
+    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP - SEQUÊNCIA DE KICK
+    // Verifica se é Funk SP/ZN (detecção ampliada)
+    const ehFunkSP = estilo.includes("sp") || 
+                     estilo.includes("zn") ||
+                     estilo.includes("paulista") ||
+                     perguntaLower.includes("funk sp") || 
+                     perguntaLower.includes("funk zn") ||
+                     perguntaLower.includes("funk de sp") ||
+                     perguntaLower.includes("beat zn") ||
+                     respostaLower.includes("funk sp") ||
+                     respostaLower.includes("sp") ||
+                     respostaLower.includes("zn");
+
+    // Verifica se menciona especificamente a explicação do snap "1/2 step" + kick
+    const mencionaKickSnapStep = respostaLower.includes("utilize o snap em \"1/2 step\"") ||
+                                 respostaLower.includes("snap em \"1/2 step\"") ||
+                                 respostaLower.includes("utilize o snap em '1/2 step'") ||
+                                 respostaLower.includes("snap em '1/2 step'");
+
+    // Verifica se contém a frase específica sobre criar base para começar
+    const mencionaBaseKick = (respostaLower.includes("adiciona o primeiro kick no 1º quadrado") && 
+                             respostaLower.includes("base para começar")) ||
+                             (respostaLower.includes("primeiro kick") && 
+                             respostaLower.includes("1º quadrado") &&
+                             respostaLower.includes("2º compasso"));
+
+    console.log('🔍 DEBUG - É Funk SP/ZN:', ehFunkSP);
+    console.log('🔍 DEBUG - Menciona Snap 1/2 step:', mencionaKickSnapStep);
+    console.log('🔍 DEBUG - Menciona Base Kick:', mencionaBaseKick);
+
+    if (ehFunkSP && mencionaKickSnapStep && mencionaBaseKick) {
+      console.log('🎯 Condições atendidas - Inserindo imagem do Kick Funk SP...');
+      
+      // Inserir imagem logo após a explicação específica
+      const imagemKickSPHTML = `<br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
+      
+      // Detectar e substituir a frase específica
+      const fraseCompleta = /Utilize o snap em ["']1\/2 step["'] adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma ["']Base para começar["']/gi;
+      
+      if (fraseCompleta.test(reply)) {
+        reply = reply.replace(fraseCompleta, `$&${imagemKickSPHTML}`);
+        console.log('✅ Imagem do Kick Funk SP inserida com sucesso na explicação específica!');
+      } else {
+        // Fallback: tentar inserir após qualquer menção de "Base para começar"
+        const fallbackPattern = /(base para começar["']?\s*\.?)/gi;
+        if (fallbackPattern.test(reply)) {
+          reply = reply.replace(fallbackPattern, `$1${imagemKickSPHTML}`);
+          console.log('✅ Imagem do Kick Funk SP inserida via fallback!');
+        }
+      }
+    } else {
+      console.log('❌ Condições não atendidas para Funk SP - não contém explicação específica do kick');
     }
 
     if (userData.plano === 'gratis') {
