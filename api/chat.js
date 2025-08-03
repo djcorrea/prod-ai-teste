@@ -1039,6 +1039,45 @@ export default async function handler(req, res) {
       console.log('❌ Condições não atendidas - não é sobre BEAT + 4x3x3x1');
     }
 
+    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK BH
+    // Verifica se é Funk BH (detecção ampliada)
+    const ehFunkBH = estilo.includes("bh") || 
+                     estilo.includes("mtg") ||
+                     perguntaLower.includes("funk bh") || 
+                     perguntaLower.includes("funk de bh") ||
+                     perguntaLower.includes("mtg") ||
+                     perguntaLower.includes("funkbh") ||
+                     respostaLower.includes("funk bh") ||
+                     respostaLower.includes("bh");
+
+    // Verifica se menciona especificamente BEAT + sequência 6, 4, 4, 1
+    const mencionaBeat6441 = (respostaLower.includes("beat") && respostaLower.includes("6, 4, 4, 1")) ||
+                             (respostaLower.includes("sequencia") && respostaLower.includes("6, 4, 4, 1")) ||
+                             (respostaLower.includes("piano roll") && respostaLower.includes("6, 4, 4, 1"));
+
+    console.log('🔍 DEBUG - É Funk BH:', ehFunkBH);
+    console.log('🔍 DEBUG - Menciona Beat + 6, 4, 4, 1:', mencionaBeat6441);
+
+    if (ehFunkBH && mencionaBeat6441) {
+      console.log('🎯 Condições atendidas - Inserindo imagem do Funk BH no contexto do BEAT...');
+      
+      // Inserir imagem apenas uma vez na primeira ocorrência encontrada
+      const imagemBHHTML = `<br><br>🎹 <b>Exemplo visual da sequência 6, 4, 4, 1 no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Sequência Funk BH 6,4,4,1" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
+      
+      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
+      if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+      } else if (/(sequencia.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(sequencia.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+      } else if (/(piano roll.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(piano roll.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+      }
+      
+      console.log('✅ Imagem do Funk BH inserida com sucesso no contexto do BEAT!');
+    } else {
+      console.log('❌ Condições não atendidas para Funk BH - não é sobre BEAT + 6, 4, 4, 1');
+    }
+
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
     } else {
