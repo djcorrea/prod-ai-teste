@@ -599,43 +599,36 @@ Diretrizes técnicas:
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-
-📚 CONTEXTO TÉCNICO ATIVO — FUNK BRUXARIA
-
+SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
+📚 CONTEXTO TÉCNICO A— FUNK BRUXARIA
 🧙‍♂️ **Estilo sombrio:**  
 - Ambiências escuras, vozes distorcidas, batidas hipnóticas com estética ritualística.
+- Estilo bem experimental, livre e sem regras fixas.
 - Surgiu na Zona Sul de SP e ganhou força em bailes como o da 17.
-
+- BPM entre **130 e 135**, muitas vezes um estilo mais acelerado”.
+🎙️ **Acapella:**
+- A estrutura nasce **a partir da voz**.
+- Usar falas repetitivas, proibidonas (ex: "sarra", "vou te colocar").
+- Criar **repiques, cortes e manipulações** com esticamento e variações tonais.
+- Aplicar pitch shifting (12st ou -12st), automação de volume e reverb reverse para dar identidade.
 🎹 **Melodia / Harmonia:**
 - Usar plugins como **Vital**, **Flex**, **Nexus** ou **Harmor**, escolhendo timbres escuros e densos (pads, leads graves).
 - Criar uma sequência de **notas graves com notas agudas simultâneas** para contraste de textura.
 - Usar escalas menores e notas dissonantes para criar tensão.
 - Pode utilizar também **vozes sampleadas** com efeitos de **pitch**, **formant shift**, **distorção** e **reverses**.
 - Sons com ambiência estéreo, modulação, e LFOs lentos ajudam na sensação hipnótica.
-
 🔥 **Beat:**
-- Padrão rítmico do beat: sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida.
+- Samples sujos e distorcidos funcionam bem. Packs como **Favela Beat**, **DJ Ayzen** são otimas fontes. Você pode usar tambem presets de synths como o Vital e Serum.
+- Pode se utilizar Bass pesados como beat principal, fazendo uma verdadeira pressão sonora.
+- Padrão rítmico do beat: Use Snap "Line" e faça a sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
 - Estrutura repetitiva, ritualística, com **variações sutis** ao longo da faixa.
-- BPM entre **130 e 135**, criando sensação “arrastada”.
-- Trabalhar em **1/2 step grid** no piano roll para ter mais controle nas repetições.
-- Samples **sujos e distorcidos** funcionam bem. Packs como **DJ MTG**, **Ayzen**, ou edição manual no Edison / SliceX.
-- Comece pelo kick e vá adicionando elementos de forma espaçada**, mantendo a estética crua.
 - Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
-
 🥁 **Kick:**
 - Escolher um kick **seco, com punch**, entre 50–70Hz.
 - Sidechain leve se estiver usando bass/synth grave junto.
 - Pode duplicar e processar com **saturação paralela**.
-
-🎙️ **Acapella:**
-- A estrutura nasce **a partir da voz**.
-- Usar falas repetitivas, proibidonas ou com comando (ex: "chegava", "vou te pegar").
-- Criar **repiques, cortes e manipulações** com esticamento e variações tonais.
-- Aplicar pitch shifting (12st ou -12st), automação de volume e reverb reverse para dar identidade.
-
 ⚙️ **Produção / Mixagem:**
-- EQ voltado para deixar os subgraves limpos, mantendo médios escuros (~300Hz–1kHz).
-- Distorção leve no beat (Fast Dist, RC-20), com controle nos harmônicos.
+- EQ voltado para deixar os graves mais fortes. e os agudos mais claros
 - Delay curto (Ping Pong com feedback baixo), reverb com decay menor que 1.5s.
 - Chorus e flanger em estéreo para elementos de ambiência.
 - Trabalhar com **testes e variações constantes** — o estilo é baseado em exploração.
