@@ -1246,6 +1246,18 @@ async function processMessage(message) {
 
 /* ============ INICIALIZAÇÃO CONSOLIDADA ============ */
 function initializeEverything() {
+    // Ativar fade-in inicial com delay para elementos visuais
+    setTimeout(() => {
+        const fadeElements = document.querySelectorAll('.fade-in-start');
+        fadeElements.forEach((element, index) => {
+            // Pequeno delay escalonado para cada elemento
+            setTimeout(() => {
+                element.style.animationDelay = `${index * 50}ms`;
+                element.classList.add('active');
+            }, 100 + (index * 50));
+        });
+    }, 100);
+    
     // Injetar estilos CSS para respostas estilosas
     injetarEstilosRespostaEstilosa();
     

@@ -11,6 +11,21 @@ body {
     background: #0a0a1a;
 }
 
+/* ============ ANIMAÇÃO FADE-IN INICIAL ============ */
+.fade-in-start {
+    opacity: 0;
+    animation: fadeInStart 300ms ease-out forwards;
+}
+
+@keyframes fadeInStart {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 /* ============ CENÁRIO PRINCIPAL ============ */
 .cenario {
     position: relative;
