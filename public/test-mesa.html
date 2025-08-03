@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Mesa</title>
+    <style>
+        body {
+            background: #0a0a1a;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .cenario {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .mesa {
+            position: absolute;
+            bottom: -79%;
+            left: -320px;
+            width: 145%;
+            height: auto;
+            max-height: 1500px;
+            z-index: 1;
+            filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.2));
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        
+        .debug {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="cenario">
+        <img src="mesa.webp" alt="Mesa" class="mesa" id="mesa" />
+    </div>
+    
+    <div class="debug">
+        <h3>Debug Mesa:</h3>
+        <p>Mesa carregada: <span id="loaded">❌</span></p>
+        <p>Mesa visível: <span id="visible">❌</span></p>
+        <p>Dimensões: <span id="dimensions">-</span></p>
+    </div>
+
+    <script>
+        const mesa = document.getElementById('mesa');
+        const loadedSpan = document.getElementById('loaded');
+        const visibleSpan = document.getElementById('visible');
+        const dimensionsSpan = document.getElementById('dimensions');
+        
+        mesa.onload = function() {
+            loadedSpan.textContent = '✅';
+            loadedSpan.style.color = 'green';
+            
+            const rect = mesa.getBoundingClientRect();
+            dimensionsSpan.textContent = `${rect.width}x${rect.height}`;
+            
+            if (rect.width > 0 && rect.height > 0) {
+                visibleSpan.textContent = '✅';
+                visibleSpan.style.color = 'green';
+            }
+        };
+        
+        mesa.onerror = function() {
+            loadedSpan.textContent = '❌ Erro ao carregar';
+            loadedSpan.style.color = 'red';
+        };
+    </script>
+</body>
+</html>
