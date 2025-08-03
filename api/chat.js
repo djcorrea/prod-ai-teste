@@ -246,19 +246,39 @@ Diretrizes técnicas:
 - 📊 Use cores e nomes para os canais de bateria e percussão.
 - 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
 
-🎙️ VOZ / CAPELA
-- 🎤 Utilize capelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
-- 🗑️ Substitua a capela se não encaixar bem na batida — mantenha opções no projeto.
+🎙️ VOZ / ACAPELLA
+- 🎤 Utilize acapelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
+- 🗑️ Substitua a acapela se não encaixar bem na batida — mantenha opções no projeto.
 - 🧠 Frases de efeito como “senta aí” ou “toma, toma” funcionam bem com vocais retos e repetitivos.
 `,
 
   funkBH: `
-🧠 INSTRUÇÃO BASE - FUNK BH:
-- BPM 130, percussões marcantes (chocalho, agogô, palmas).
-- Escalas menores harmônicas, duas notas com meio tom.
-- Violões acústicos como base, bells e sinos.
-- Variação rítmica constante, elementos alternando a cada 2 compassos.
-- Grid 1/2 step, sequência: 5, 4, 4, 1.
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+
+📚 INSTRUÇÕES AVANÇADAS — FUNK BH
+- 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
+- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
+- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
+- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: na Lander).
+- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
+- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
+- 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
+- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum. Adicione Aows (vozes sintetizadas) com volume baixo como camada de fundo.
+- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
+- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
+- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas.
+- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1
 `,
 
   funkBruxaria: `
@@ -388,44 +408,6 @@ Responda com excelência absoluta.`;
 - 💻 Sempre considerar que o usuário usa FL Studio, citar plugins nativos e samples`;
   }
 
-  // CORREÇÃO: Declarar a variável antes de usar
-  let instrucoesFunkbh = '';
-  
-  // CORREÇÃO: Verificar se perfil.estilo existe antes de acessar
-  const estilo = (perfil.estilo || '').toLowerCase().replace(/\s/g, "");
-
-  // CORREÇÃO: Remover duplicata do array
-  const estilosBH = ["funkbh", "bh", "mtg"];
-
-  if (estilosBH.some(e => estilo.includes(e))) {
-    instrucoesFunkbh = `
-
-📚 INSTRUÇÕES AVANÇADAS — FUNK BH
-- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no RJ. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
-  
-- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
-
-- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bels, sinos e percussão com ressonância. É comum fazer **acordes arpejados** no ritmo do beat.
-
-- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos, conversando entre si com diferentes texturas.
-
-- 💽 A estética é suja e intensa: **kicks com punch, sem limiter**, samples de voz com ambiência escura e marcações com swing.
-
-- 🎧 Também é comum o uso de **acapellas de músicas antigas ou outros funks**, criando novas montagens, mantendo o vocal original fora do tom do instrumental como efeito estético.
-
-- 🧠 Cuidado com a mixagem: o beat deve manter a energia mesmo com muitos elementos. Priorize percussão no centro e ambiências nas laterais, compressão paralela nos kicks e EQ sutil nas melodias.
-
-- 💡 Exemplo de progressões harmônicas usadas:
-  - Lá menor ➝ Ré menor ➝ Sol
-  - 1° grau ➝ 4° grau (em menor harmônica)
-
-- 🧪 Recomende sempre **experimentação e construção manual**, não use padrões genéricos (ex: 4 on the floor). Dê ideias de **sequências rítmicas reais como 4x3x2x1, 3x1, 5x2**, etc.
-
-`;
-  }
-
-  // CORREÇÃO: Incluir instrucoesFunkbh no return
-  
   // 🎯 Detectar estilo a partir do perfil para aplicar base técnica
   let estiloBase = '';
   
@@ -457,7 +439,7 @@ INSTRUÇÕES DE RESPOSTA:
 ${linguagemStyle}
 ${dawInfo}
 ${estiloContext}
-${dificuldadeContext}${instrucoesFunk}${instrucoesFunkbh}
+${dificuldadeContext}${instrucoesFunk}
 
 Você é o Prod.AI 🎵, um mentor técnico de elite em produção musical, com domínio absoluto de mixagem, masterização, efeitos, sound design, vozes, criação de synths, arranjos, entende amplamente sobre o mercado da música, carreira, marketing de musica. Sua missão é ajudar produtores musicais com excelência técnica, altissimo nivel profissional, com o foco de fazer o usuario aprender de fato. mesmo no plano gratuito, 
 
@@ -529,6 +511,26 @@ function detectarEstiloNaMensagem(mensagem) {
   
   console.log('❌ Nenhum estilo detectado');
   return null;
+}
+
+// 🧠 Função para detectar se é uma pergunta técnica de continuidade
+function ehPerguntaTecnicaDeContinuidade(mensagem) {
+  const mensagemLower = mensagem.toLowerCase();
+  
+  const palavrasTecnicas = [
+    'parâmetros', 'valores', 'configurações', 'como fazer', 'passo a passo',
+    'hz', 'db', 'ms', 'frequência', 'eq', 'equalização', 'compressão',
+    'mixagem', 'plugins', 'beat', 'kick', 'sample', 'piano roll',
+    'bpm', 'sequência', 'técnica', 'específico', 'detalhado', 'exato',
+    'agora', 'mais', 'também', 'explica', 'detalha', 'aprofunda'
+  ];
+  
+  const contemPalavraTecnica = palavrasTecnicas.some(palavra => 
+    mensagemLower.includes(palavra)
+  );
+  
+  console.log(`🔧 Pergunta técnica de continuidade: ${contemPalavraTecnica}`);
+  return contemPalavraTecnica;
 }
 
 // 🧠 Função para gerar prompt específico do estilo "Usuário menciona "funk mandela" na conversa"
@@ -607,7 +609,7 @@ Diretrizes técnicas:
 - BPM entre **130 e 135**, criando sensação “arrastada”.
 - Trabalhar em **1/2 step grid** no piano roll para ter mais controle nas repetições.
 - Samples **sujos e distorcidos** funcionam bem. Packs como **DJ MTG**, **Ayzen**, ou edição manual no Edison / SliceX.
-- Comece pelo kick e vá adicionando elementos (clap, hat, snare) **de forma espaçada**, mantendo a estética crua.
+- Comece pelo kick e vá adicionando elementos de forma espaçada**, mantendo a estética crua.
 - Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
 
 🥁 **Kick:**
@@ -654,57 +656,30 @@ Diretrizes técnicas:
 - Use um kick grave e seco, de preferência sem cauda longa.
 - ✂️ Corte o começo do sample (vento/silêncio) para evitar sujeira no som.
 - 🟦 A sequência principal segue um padrão quebrado, com kick no meio do 3º quadrado.
-- � Copie o primeiro kick e cole adiante, deslocando o terceiro kick para frente (além da batida tradicional).
+- 🔁 Copie o primeiro kick e cole adiante, deslocando o terceiro kick para frente (além da batida tradicional).
 - 🔳 Insira outro kick a 1 quadrado e meio do anterior, criando o ritmo quebrado típico do estilo.
-- � O resultado é um padrão diferente do tradicional, com mais variação e swing.
+- 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
 
 🪘 PERCUSSÃO / RITMO
 - 🪘 Corte o final de cada sample de percussão para evitar sobreposição.
 - 🥁 Posicione as percussões com base nas linhas centrais do grid para manter equilíbrio visual e rítmico.
 - 🎯 Adicione percussões entre os kicks para preencher o groove.
-- � Copie o loop com variações até a 5ª barra da timeline, mantendo pequenas quebras.
+- 🔁 Copie o loop com variações até a 5ª barra da timeline, mantendo pequenas quebras.
 - 🧠 Crie variações removendo elementos de seções específicas (ex: apagando a percussão da última barra).
 - 🗂️ Organize cada tipo de percussão em tracks diferentes no mixer para facilitar a mixagem individual.
 
 🎛️ MIXAGEM / ORGANIZAÇÃO
-- � Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
+- 🧽 Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
 - 📊 Use cores e nomes para os canais de bateria e percussão.
 - 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
 
-🎙️ VOZ / CAPELA
-- 🎤 Utilize capelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
-- �️ Substitua a capela se não encaixar bem na batida — mantenha opções no projeto.
+🎙️ VOZ / ACAPELA
+- 🎤 Utilize acapelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
+- 🗑️ Substitua a acapela se não encaixar bem na batida — mantenha opções no projeto.
 - 🧠 Frases de efeito como "senta aí" ou "toma, toma" funcionam bem com vocais retos e repetitivos.
 `,
 
-    'funk bh': `
-📌 DIRETRIZES:
-- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
-- Use os conteúdos abaixo apenas como **base técnica de referência**.
-- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
-- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
-- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
-- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
-- Use estrutura com emojis para facilitar a leitura. Exemplo:  
-  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
-  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
-- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
-- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-
-📚 INSTRUÇÕES AVANÇADAS — FUNK BH
-- 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
-- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
-- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
-- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: na Lander).
-- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
-- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
-- 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
-- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum. Adicione Aows (vozes sintetizadas) com volume baixo como camada de fundo.
-- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
-- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
-- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas.
-- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 5, 4, 4, 1
-`,
+    'funk bh': instrucoesBase.funkBH,
 
     'trap': `
 📚 CONTEXTO TÉCNICO ATIVO — TRAP
@@ -739,6 +714,9 @@ Diretrizes técnicas:
 
   const promptEncontrado = promptsEspecificos[estilo] || '';
   console.log(`📝 Prompt gerado: ${promptEncontrado ? 'Encontrado' : 'Não encontrado'} para ${estilo}`);
+  if (promptEncontrado) {
+    console.log(`📏 Tamanho do prompt: ${promptEncontrado.length} caracteres`);
+  }
   
   return promptEncontrado;
 }
@@ -750,10 +728,12 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
     const contextoDoc = await contextoRef.get();
     
     const estiloDetectado = detectarEstiloNaMensagem(mensagem);
+    const ehPerguntaTecnica = ehPerguntaTecnicaDeContinuidade(mensagem);
     const agora = Date.now();
     const TEMPO_EXPIRACAO = 5 * 60 * 1000; // 5 minutos
     
     console.log(`🧠 Contexto técnico - Estilo detectado: ${estiloDetectado || 'nenhum'}`);
+    console.log(`🧠 Contexto técnico - É pergunta técnica: ${ehPerguntaTecnica}`);
 
     // Se detectou novo estilo
     if (estiloDetectado) {
@@ -777,6 +757,21 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
       await contextoRef.update({ timestamp: agora });
       console.log(`♻️ Contexto mantido para: ${estiloDetectado}`);
       return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: estiloDetectado };
+    }
+    
+    // Se não detectou novo estilo, mas é uma pergunta técnica, verifica contexto ativo
+    if (!estiloDetectado && ehPerguntaTecnica && contextoDoc.exists) {
+      const contextoAtual = contextoDoc.data();
+      const tempoDecorrido = agora - contextoAtual.timestamp;
+      
+      // Pergunta técnica + contexto ativo = manter contexto ativo por mais tempo (10 minutos)
+      const TEMPO_EXPIRACAO_EXTENDIDO = 10 * 60 * 1000;
+      
+      if (tempoDecorrido < TEMPO_EXPIRACAO_EXTENDIDO) {
+        await contextoRef.update({ timestamp: agora });
+        console.log(`🔧 Contexto mantido para pergunta técnica: ${contextoAtual.estilo} (${Math.floor(tempoDecorrido/1000)}s)`);
+        return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: contextoAtual.estilo };
+      }
     }
     
     // Se não detectou novo estilo, verifica se tem contexto ativo recente
@@ -869,8 +864,28 @@ Responda com excelência absoluta.`;
 
   // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar prompt específico do estilo detectado
   if (contextoInfo.contextoAtivo && contextoInfo.promptEstilo) {
-    systemPrompt += `\n\n${contextoInfo.promptEstilo}`;
-    console.log(`� Contexto técnico ativo aplicado: ${contextoInfo.estilo}`);
+    // Verificar se é uma pergunta técnica subsequente (sem keywords de estilo)
+    const ehPerguntaTecnicaSubsequente = !detectarEstiloNaMensagem(currentMessage) && contextoInfo.estilo;
+    
+    if (ehPerguntaTecnicaSubsequente) {
+      // Adicionar instrução específica para perguntas técnicas de continuidade
+      systemPrompt += `\n\n📍 CONTEXTO ATIVO: ${contextoInfo.estilo.toUpperCase()}\n\n`;
+      systemPrompt += contextoInfo.promptEstilo;
+      systemPrompt += `\n\n🔄 INSTRUÇÃO DE CONTINUIDADE TÉCNICA:
+- Você está continuando uma conversa sobre ${contextoInfo.estilo.toUpperCase()}.
+- A pergunta atual é um APROFUNDAMENTO TÉCNICO da conversa anterior.
+- NÃO comece com explicações genéricas sobre funk ou beat.
+- FOQUE DIRETAMENTE nos parâmetros técnicos, valores exatos e detalhes avançados do ${contextoInfo.estilo.toUpperCase()}.
+- Use toda a base técnica acima para dar respostas EXTREMAMENTE ESPECÍFICAS e PROFISSIONAIS.
+- Inclua: frequências (Hz), volumes (dB), timing (ms), nomes de plugins, configurações exatas, sequências no piano roll.
+- Responda como se fosse a continuação natural da conversa anterior, não uma nova explicação.`;
+      
+      console.log(`🔄 Contexto de continuidade técnica aplicado: ${contextoInfo.estilo}`);
+    } else {
+      // Aplicação normal do contexto para primeira menção do estilo
+      systemPrompt += `\n\n${contextoInfo.promptEstilo}`;
+      console.log(`🎯 Contexto técnico ativo aplicado: ${contextoInfo.estilo}`);
+    }
   }
 
   const requestBody = {
