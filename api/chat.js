@@ -670,7 +670,6 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 🥁KICK
 - Use um kick grave e seco, de preferência sem cauda longa.
 - ✂️ Corte o começo do kick (vento/silêncio) para evitar sujeira no som.
-- 🟦 A sequência principal segue um padrão quebrado.
 - 🔁 No piano ou na playlist: Utilize o snap em "1/2 step" adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma "Base para começar"
 - 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
 
@@ -1090,57 +1089,60 @@ export default async function handler(req, res) {
     }
 
     // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP - SEQUÊNCIA DE KICK
-    // Verifica se é Funk SP/ZN (detecção ampliada)
-    const ehFunkSP = estilo.includes("sp") || 
-                     estilo.includes("zn") ||
-                     estilo.includes("paulista") ||
-                     perguntaLower.includes("funk sp") || 
-                     perguntaLower.includes("funk zn") ||
-                     perguntaLower.includes("funk de sp") ||
-                     perguntaLower.includes("beat zn") ||
-                     respostaLower.includes("funk sp") ||
-                     respostaLower.includes("sp") ||
-                     respostaLower.includes("zn");
+    // Detecção mais flexível: Funk SP + explicação específica do snap 1/2 step
+    const ehFunkSPContext = estilo.includes("sp") || 
+                           estilo.includes("zn") ||
+                           estilo.includes("paulista") ||
+                           perguntaLower.includes("funk sp") || 
+                           perguntaLower.includes("funk zn") ||
+                           perguntaLower.includes("funk de sp") ||
+                           perguntaLower.includes("beat zn") ||
+                           respostaLower.includes("funk sp") ||
+                           respostaLower.includes("funk zn") ||
+                           respostaLower.includes("sp") ||
+                           respostaLower.includes("zn");
 
-    // Verifica se menciona especificamente a explicação do snap "1/2 step" + kick
-    const mencionaKickSnapStep = respostaLower.includes("utilize o snap em \"1/2 step\"") ||
-                                 respostaLower.includes("snap em \"1/2 step\"") ||
-                                 respostaLower.includes("utilize o snap em '1/2 step'") ||
-                                 respostaLower.includes("snap em '1/2 step'");
+    // Verifica se contém a explicação específica do kick com snap 1/2 step
+    const temExplicacaoKickSP = (respostaLower.includes("snap em \"1/2 step\"") || 
+                                respostaLower.includes("snap em '1/2 step'") ||
+                                respostaLower.includes("utilize o snap em \"1/2 step\"") ||
+                                respostaLower.includes("utilize o snap em '1/2 step'")) &&
+                               (respostaLower.includes("primeiro kick") ||
+                                respostaLower.includes("1º quadrado") ||
+                                respostaLower.includes("base para começar"));
 
-    // Verifica se contém a frase específica sobre criar base para começar
-    const mencionaBaseKick = (respostaLower.includes("adiciona o primeiro kick no 1º quadrado") && 
-                             respostaLower.includes("base para começar")) ||
-                             (respostaLower.includes("primeiro kick") && 
-                             respostaLower.includes("1º quadrado") &&
-                             respostaLower.includes("2º compasso"));
+    console.log('🔍 DEBUG Funk SP - Contexto SP/ZN detectado:', ehFunkSPContext);
+    console.log('🔍 DEBUG Funk SP - Explicação kick detectada:', temExplicacaoKickSP);
+    console.log('🔍 DEBUG Funk SP - Texto da resposta contém snap:', respostaLower.includes("snap em"));
 
-    console.log('🔍 DEBUG - É Funk SP/ZN:', ehFunkSP);
-    console.log('🔍 DEBUG - Menciona Snap 1/2 step:', mencionaKickSnapStep);
-    console.log('🔍 DEBUG - Menciona Base Kick:', mencionaBaseKick);
-
-    if (ehFunkSP && mencionaKickSnapStep && mencionaBaseKick) {
-      console.log('🎯 Condições atendidas - Inserindo imagem do Kick Funk SP...');
+    if (ehFunkSPContext && temExplicacaoKickSP) {
+      console.log('🎯 Condições ATENDIDAS - Inserindo imagem do Kick Funk SP...');
       
       // Inserir imagem logo após a explicação específica
       const imagemKickSPHTML = `<br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
       
-      // Detectar e substituir a frase específica
-      const fraseCompleta = /Utilize o snap em ["']1\/2 step["'] adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma ["']Base para começar["']/gi;
-      
-      if (fraseCompleta.test(reply)) {
-        reply = reply.replace(fraseCompleta, `$&${imagemKickSPHTML}`);
-        console.log('✅ Imagem do Kick Funk SP inserida com sucesso na explicação específica!');
-      } else {
-        // Fallback: tentar inserir após qualquer menção de "Base para começar"
-        const fallbackPattern = /(base para começar["']?\s*\.?)/gi;
-        if (fallbackPattern.test(reply)) {
-          reply = reply.replace(fallbackPattern, `$1${imagemKickSPHTML}`);
-          console.log('✅ Imagem do Kick Funk SP inserida via fallback!');
+      // Estratégia 1: Inserir após a frase completa se encontrada
+      if (respostaLower.includes("base para começar")) {
+        const pattern1 = /(utilize o snap em ["']1\/2 step["'][^.]*base para começar["']?[^.]*\.)/gi;
+        if (pattern1.test(reply)) {
+          reply = reply.replace(pattern1, `$1${imagemKickSPHTML}`);
+          console.log('✅ Imagem inserida após frase completa!');
+        } else {
+          // Estratégia 2: Inserir após "base para começar"
+          const pattern2 = /(base para começar["']?\s*\.?)/gi;
+          reply = reply.replace(pattern2, `$1${imagemKickSPHTML}`);
+          console.log('✅ Imagem inserida após "base para começar"!');
         }
+      } else if (respostaLower.includes("snap em")) {
+        // Estratégia 3: Inserir após menção de snap se não tem "base para começar"
+        const pattern3 = /(snap em ["']1\/2 step["'][^.]*\.)/gi;
+        reply = reply.replace(pattern3, `$1${imagemKickSPHTML}`);
+        console.log('✅ Imagem inserida após explicação do snap!');
       }
     } else {
-      console.log('❌ Condições não atendidas para Funk SP - não contém explicação específica do kick');
+      console.log('❌ Condições NÃO atendidas para Funk SP');
+      console.log('   - Contexto SP:', ehFunkSPContext);
+      console.log('   - Explicação kick:', temExplicacaoKickSP);
     }
 
     if (userData.plano === 'gratis') {
