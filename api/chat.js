@@ -186,7 +186,8 @@ const instrucoesBase = {
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS: 
+📚 INSTRUÇÕES INTRODUÇÃO — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🎙️ Acapella, vocal: 
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
@@ -555,7 +556,8 @@ function gerarPromptDoEstilo(estilo) {
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
+SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS: 
+📚 INSTRUÇÕES INTRODUÇÃO — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🎙️ Acapella, vocal: 
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
