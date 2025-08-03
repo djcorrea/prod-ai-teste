@@ -1246,17 +1246,15 @@ async function processMessage(message) {
 
 /* ============ INICIALIZAÇÃO CONSOLIDADA ============ */
 function initializeEverything() {
-    // Ativar fade-in inicial com delay para elementos visuais
+    // Ativar fade-in inicial suave para todos os elementos simultaneamente
     setTimeout(() => {
         const fadeElements = document.querySelectorAll('.fade-in-start');
-        fadeElements.forEach((element, index) => {
-            // Pequeno delay escalonado para cada elemento
-            setTimeout(() => {
-                element.style.animationDelay = `${index * 50}ms`;
-                element.classList.add('active');
-            }, 100 + (index * 50));
+        fadeElements.forEach((element) => {
+            // Todos os elementos com mesmo timing - mais suave
+            element.style.animationDelay = '0ms';
+            element.classList.add('active');
         });
-    }, 100);
+    }, 150);
     
     // Injetar estilos CSS para respostas estilosas
     injetarEstilosRespostaEstilosa();

@@ -14,15 +14,18 @@ body {
 /* ============ ANIMAÇÃO FADE-IN INICIAL ============ */
 .fade-in-start {
     opacity: 0;
-    animation: fadeInStart 300ms ease-out forwards;
+    transform: translateY(30px);
+    animation: fadeInStart 800ms ease-out forwards;
 }
 
 @keyframes fadeInStart {
     from {
         opacity: 0;
+        transform: translateY(30px) scale(0.95);
     }
     to {
         opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
