@@ -534,14 +534,65 @@ Diretrizes técnicas:
 `,
 
     'funk bruxaria': `
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+
 📚 CONTEXTO TÉCNICO ATIVO — FUNK BRUXARIA
-- 🧙‍♂️ Estilo sombrio: ambiências escuras, vozes distorcidas, batidas hipnóticas.
-- 🌑 Samples de risadas, sussurros, tons graves, encontrados em pack de samples ou presets de sintetizadores.
-- 🎧 Escalas menores, notas dissonantes, vibe assustadora com ambiência estéreo.
-- 🎛️ Técnicas: reverb e delay com automação, pitch + distorção + chorus nos vocais.
-- 🔊 EQ focado em "espaço sombrio" com subgraves e médios escuros.
-- 🔁 Beat com estrutura repetitiva, synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
-- 🔁 Estrutura repetitiva e hipnótica para vibe "ritualística".
+
+🧙‍♂️ **Estilo sombrio:**  
+- Ambiências escuras, vozes distorcidas, batidas hipnóticas com estética ritualística.
+- Surgiu na Zona Sul de SP e ganhou força em bailes como o da 17.
+
+🎹 **Melodia / Harmonia:**
+- Usar plugins como **Vital**, **Flex**, **Nexus** ou **Harmor**, escolhendo timbres escuros e densos (pads, leads graves).
+- Criar uma sequência de **notas graves com notas agudas simultâneas** para contraste de textura.
+- Usar escalas menores e notas dissonantes para criar tensão.
+- Pode utilizar também **vozes sampleadas** com efeitos de **pitch**, **formant shift**, **distorção** e **reverses**.
+- Sons com ambiência estéreo, modulação, e LFOs lentos ajudam na sensação hipnótica.
+
+🔥 **Beat:**
+- Padrão rítmico do beat: sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida.
+- Estrutura repetitiva, ritualística, com **variações sutis** ao longo da faixa.
+- BPM entre **130 e 135**, criando sensação “arrastada”.
+- Trabalhar em **1/2 step grid** no piano roll para ter mais controle nas repetições.
+- Samples **sujos e distorcidos** funcionam bem. Packs como **DJ MTG**, **Ayzen**, ou edição manual no Edison / SliceX.
+- Comece pelo kick e vá adicionando elementos (clap, hat, snare) **de forma espaçada**, mantendo a estética crua.
+- Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
+
+🥁 **Kick:**
+- Escolher um kick **seco, com punch**, entre 50–70Hz.
+- Sidechain leve se estiver usando bass/synth grave junto.
+- Pode duplicar e processar com **saturação paralela**.
+
+🎙️ **Acapella:**
+- A estrutura nasce **a partir da voz**.
+- Usar falas repetitivas, proibidonas ou com comando (ex: "chegava", "vou te pegar").
+- Criar **repiques, cortes e manipulações** com esticamento e variações tonais.
+- Aplicar pitch shifting (12st ou -12st), automação de volume e reverb reverse para dar identidade.
+
+⚙️ **Produção / Mixagem:**
+- EQ voltado para deixar os subgraves limpos, mantendo médios escuros (~300Hz–1kHz).
+- Distorção leve no beat (Fast Dist, RC-20), com controle nos harmônicos.
+- Delay curto (Ping Pong com feedback baixo), reverb com decay menor que 1.5s.
+- Chorus e flanger em estéreo para elementos de ambiência.
+- Trabalhar com **testes e variações constantes** — o estilo é baseado em exploração.
+
+🌍 **Destaque internacional:**
+- Funk bruxaria já apareceu em vídeos da Europa, e **Kanye West** sampleou beats do estilo.
+- Brasileiros estão levando o som underground para festivais gringos.
+
+📎 **Lembrete final:** Este conteúdo é apenas uma base. Sempre expanda tecnicamente as respostas conforme o contexto da pergunta, entregando o máximo de profundidade, clareza e aplicabilidade possível.
+
 `,
 
     'funk sp': `
