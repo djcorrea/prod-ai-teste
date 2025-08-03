@@ -34,8 +34,6 @@ const API_CONFIG = {
   }
 };
 
-console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
-
 /* ============ FUNÇÕES GLOBAIS SIMPLIFICADAS ============ */
 // Versão otimizada - definições diretas sem verificações excessivas
 window.testAPIConnection = window.testAPIConnection || async function() {
@@ -46,9 +44,9 @@ window.testAPIConnection = window.testAPIConnection || async function() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: 'teste de conexão', userUid: 'test' })
         });
-        console.log(response.ok ? '✅ API OK' : '⚠️ API status:', response.status);
+        // API test - silent mode for performance
     } catch (error) {
-        console.log('⚠️ API error:', error.message);
+        // Silent API error handling
     }
 };
 
@@ -67,15 +65,11 @@ window.setupEventListeners = window.setupEventListeners || function() {
 // Função testAPIConnection (definição completa no início)
 window.testAPIConnection = async function testAPIConnection() {
   try {
-    console.log('🔍 [testAPIConnection] Função executada - início');
-    
     // Verificar se estamos na página principal
     if (!document.querySelector('#startSendBtn') && !document.querySelector('#sendBtn')) {
-      console.log('📄 Página não requer teste de API');
       return;
     }
     
-    console.log('🧪 Testando conexão com API...');
     const response = await fetch(API_CONFIG.chatEndpoint, {
       method: 'POST',
       headers: {
@@ -87,22 +81,15 @@ window.testAPIConnection = async function testAPIConnection() {
       })
     });
     
-    if (response.ok) {
-      console.log('✅ API funcionando corretamente');
-    } else {
-      console.log('⚠️ API respondeu com status:', response.status);
-    }
+    // Silent API check for performance
   } catch (error) {
-    console.log('⚠️ Erro ao testar API (não crítico):', error.message);
+    // Silent error handling
   }
 };
 
 // Função initParticleEffects (definição completa no início)
 window.initParticleEffects = function initParticleEffects() {
     try {
-        console.log('🔍 [initParticleEffects] Função executada - início');
-        console.log('✨ Inicializando efeitos de partículas...');
-        
         // Verificar se os elementos existem antes de aplicar efeitos
         const heroSection = document.querySelector('.hero');
         const ctaSection = document.querySelector('.cta');
@@ -117,18 +104,10 @@ window.initParticleEffects = function initParticleEffects() {
             ctaSection.classList.add('particles-active');
         }
         
-        console.log('✅ Efeitos de partículas inicializados');
-        
     } catch (error) {
-        console.log('⚠️ Efeitos de partículas não disponíveis nesta página:', error.message);
-        // Não é um erro crítico, apenas log informativo
+        // Silent error handling for particles
     }
 };
-
-console.log('🎯 [DEBUG] Funções globais declaradas:', {
-    testAPIConnection: typeof window.testAPIConnection,
-    initParticleEffects: typeof window.initParticleEffects
-});
 
 /* ============ INICIALIZAÇÃO DO VANTA BACKGROUND (Visual Novo) ============ */
 function initVantaBackground() {
@@ -136,7 +115,6 @@ function initVantaBackground() {
         // Verificar se estamos na página principal e se o elemento existe
         const vantaElement = document.getElementById("vanta-bg");
         if (!vantaElement) {
-            console.log('📄 Elemento vanta-bg não encontrado - pulando inicialização do Vanta.js');
             return;
         }
         
@@ -159,12 +137,12 @@ function initVantaBackground() {
                 spacing: isDesktop ? 20.00 : 28.00, // Ajustado para compensar
                 showDots: true
             });
-            console.log('✅ Vanta.js carregado com sucesso (otimizado)');
+            // Vanta.js loaded successfully
         } else {
-            console.log('⚠️ Vanta.js ou THREE.js não encontrados - página não requer este efeito');
+            // Vanta.js not available on this page
         }
     } catch (error) {
-        console.log('⚠️ Erro ao carregar Vanta.js (não crítico):', error.message);
+        // Silent Vanta.js error handling
     }
 }
 
@@ -220,7 +198,7 @@ function optimizeForMobile() {
             }
         `;
         document.head.appendChild(style);
-        console.log('📱 Otimizações mobile aplicadas');
+        // Mobile optimizations applied
     }
 }
 
@@ -253,7 +231,7 @@ function handleResize() {
 
 /* ============ FUNÇÕES DO SISTEMA ANTIGO ============ */
 function waitForFirebase() {
-  console.log('⏳ Aguardando Firebase...');
+  // Waiting for Firebase...
   return new Promise((resolve) => {
     let attempts = 0;
     const maxAttempts = 50; // Máximo 5 segundos (50 * 100ms)

@@ -71,8 +71,18 @@ function showMessage(messageOrError, type = "error") {
   }
 }
 
-// Função para obter o fingerprint do navegador
+// Função para obter o fingerprint do navegador com lazy loading
 async function getFingerprint() {
+  // Lazy load FingerprintJS only when needed
+  if (!window.FingerprintJS) {
+    try {
+      await loadScript('https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js');
+    } catch (error) {
+      console.warn('FingerprintJS failed to load:', error);
+      return null;
+    }
+  }
+  
   if (window.FingerprintJS) {
     const fpPromise = FingerprintJS.load();
     const fp = await fpPromise;
@@ -80,6 +90,17 @@ async function getFingerprint() {
     return result.visitorId;
   }
   return null;
+}
+
+// Helper function to load scripts dynamically
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
 }
 
 // Validação de telefone
