@@ -508,11 +508,13 @@ Responda com excelência absoluta.`;
 // 🧠 Função para detectar estilos musicais na mensagem
 function detectarEstiloNaMensagem(mensagem) {
   const mensagemLower = mensagem.toLowerCase();
+  console.log('🔍 Detectando estilo na mensagem:', mensagemLower);
+  
   const estilos = [
     { keywords: ['funk mandela', 'mandelão', 'mandela'], nome: 'funk mandela' },
     { keywords: ['funk bh', 'funk de bh', 'mtg', 'funkbh'], nome: 'funk bh' },
     { keywords: ['funk bruxaria', 'bruxaria', 'bruxo', 'dark funk'], nome: 'funk bruxaria' },
-    { keywords: ['funk sp', 'funk de sp', 'batida sp', 'batidão paulista', 'funk paulistano'], nome: 'funk sp' },
+    { keywords: ['funk sp', 'funk de sp', 'funk zn', 'batida sp', 'batidão paulista', 'funk paulistano', 'beat zn', 'zn'], nome: 'funk sp' },
     { keywords: ['trap', 'trap nacional'], nome: 'trap' },
     { keywords: ['brega funk', 'bregafunk'], nome: 'brega funk' },
     { keywords: ['funk sujo'], nome: 'funk sujo' }
@@ -520,14 +522,19 @@ function detectarEstiloNaMensagem(mensagem) {
 
   for (const estilo of estilos) {
     if (estilo.keywords.some(keyword => mensagemLower.includes(keyword))) {
+      console.log(`✅ Estilo detectado: ${estilo.nome} (palavra-chave: ${estilo.keywords.find(k => mensagemLower.includes(k))})`);
       return estilo.nome;
     }
   }
+  
+  console.log('❌ Nenhum estilo detectado');
   return null;
 }
 
 // 🧠 Função para gerar prompt específico do estilo "Usuário menciona "funk mandela" na conversa"
 function gerarPromptDoEstilo(estilo) {
+  console.log(`🎯 Gerando prompt para estilo: ${estilo}`);
+  
   const promptsEspecificos = {
     'funk mandela': `
     📌 DIRETRIZES:
@@ -642,13 +649,61 @@ Diretrizes técnicas:
   ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
 - Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
-📚 CONTEXTO TÉCNICO ATIVO — FUNK SP / BATIDÃO PAULISTA
-- 🥁 BPM 130-135, base marcada, batidão direto e seco.
-- 🔥 Kicks pesados e sintéticos, poucos elementos melódicos.
-- 🎤 Vocais com efeitos (pitch, reverb, delay), levada seca e falada.
-- 🔊 Foco em grave recortado e batida de presença para carro.
-- 🧠 Simplicidade: refrão repetitivo, beat minimalista mas forte.
-- 💡 Mix com subgraves reforçados e compressão paralela nos kicks.
+🧠 INSTRUÇÃO BASE - FUNK SP / ZN:
+🥁 BEAT / SEQUÊNCIA DE KICK
+- Use um kick grave e seco, de preferência sem cauda longa.
+- ✂️ Corte o começo do sample (vento/silêncio) para evitar sujeira no som.
+- 🟦 A sequência principal segue um padrão quebrado, com kick no meio do 3º quadrado.
+- � Copie o primeiro kick e cole adiante, deslocando o terceiro kick para frente (além da batida tradicional).
+- 🔳 Insira outro kick a 1 quadrado e meio do anterior, criando o ritmo quebrado típico do estilo.
+- � O resultado é um padrão diferente do tradicional, com mais variação e swing.
+
+🪘 PERCUSSÃO / RITMO
+- 🪘 Corte o final de cada sample de percussão para evitar sobreposição.
+- 🥁 Posicione as percussões com base nas linhas centrais do grid para manter equilíbrio visual e rítmico.
+- 🎯 Adicione percussões entre os kicks para preencher o groove.
+- � Copie o loop com variações até a 5ª barra da timeline, mantendo pequenas quebras.
+- 🧠 Crie variações removendo elementos de seções específicas (ex: apagando a percussão da última barra).
+- 🗂️ Organize cada tipo de percussão em tracks diferentes no mixer para facilitar a mixagem individual.
+
+🎛️ MIXAGEM / ORGANIZAÇÃO
+- � Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
+- 📊 Use cores e nomes para os canais de bateria e percussão.
+- 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
+
+🎙️ VOZ / CAPELA
+- 🎤 Utilize capelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
+- �️ Substitua a capela se não encaixar bem na batida — mantenha opções no projeto.
+- 🧠 Frases de efeito como "senta aí" ou "toma, toma" funcionam bem com vocais retos e repetitivos.
+`,
+
+    'funk bh': `
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+
+📚 INSTRUÇÕES AVANÇADAS — FUNK BH
+- 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
+- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
+- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
+- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: na Lander).
+- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
+- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
+- 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
+- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum. Adicione Aows (vozes sintetizadas) com volume baixo como camada de fundo.
+- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
+- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
+- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas.
+- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 5, 4, 4, 1
 `,
 
     'trap': `
@@ -682,7 +737,10 @@ Diretrizes técnicas:
 `
   };
 
-  return promptsEspecificos[estilo] || '';
+  const promptEncontrado = promptsEspecificos[estilo] || '';
+  console.log(`📝 Prompt gerado: ${promptEncontrado ? 'Encontrado' : 'Não encontrado'} para ${estilo}`);
+  
+  return promptEncontrado;
 }
 
 // 🧠 Função para gerenciar contexto técnico inteligente
@@ -694,6 +752,8 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
     const estiloDetectado = detectarEstiloNaMensagem(mensagem);
     const agora = Date.now();
     const TEMPO_EXPIRACAO = 5 * 60 * 1000; // 5 minutos
+    
+    console.log(`🧠 Contexto técnico - Estilo detectado: ${estiloDetectado || 'nenhum'}`);
 
     // Se detectou novo estilo
     if (estiloDetectado) {
@@ -709,11 +769,13 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
           timestamp: agora
         });
         
+        console.log(`🔄 Novo contexto criado para: ${estiloDetectado}`);
         return { contextoAtivo: true, promptEstilo, estilo: estiloDetectado };
       }
       
       // Se é o mesmo estilo, atualiza apenas o timestamp
       await contextoRef.update({ timestamp: agora });
+      console.log(`♻️ Contexto mantido para: ${estiloDetectado}`);
       return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: estiloDetectado };
     }
     
@@ -726,14 +788,17 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
       if (tempoDecorrido < TEMPO_EXPIRACAO) {
         // Atualiza timestamp para manter o contexto ativo
         await contextoRef.update({ timestamp: agora });
+        console.log(`⏰ Contexto ativo mantido: ${contextoAtual.estilo} (${Math.floor(tempoDecorrido/1000)}s)`);
         return { contextoAtivo: true, promptEstilo: contextoAtual.promptEstilo, estilo: contextoAtual.estilo };
       } else {
         // Contexto expirado, remove
         await contextoRef.delete();
+        console.log(`❌ Contexto expirado removido: ${contextoAtual.estilo}`);
       }
     }
     
     // Sem contexto ativo
+    console.log('⚪ Sem contexto ativo');
     return { contextoAtivo: false, promptEstilo: '', estilo: null };
     
   } catch (error) {
@@ -802,68 +867,11 @@ async function callOpenAI(messages, userData, db, uid) {
 Responda com excelência absoluta.`;
   }
 
-  // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar se há contexto ativo
+  // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar prompt específico do estilo detectado
   if (contextoInfo.contextoAtivo && contextoInfo.promptEstilo) {
-    systemPrompt += contextoInfo.promptEstilo;
-    console.log(`🎯 Contexto técnico ativo: ${contextoInfo.estilo}`);
+    systemPrompt += `\n\n${contextoInfo.promptEstilo}`;
+    console.log(`� Contexto técnico ativo aplicado: ${contextoInfo.estilo}`);
   }
-
-  // ✅ Detectar Funk BH nas mensagens do usuário com variações comuns (mantido para compatibilidade)
-  const userMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
-  const isFunkBHQuestion = /(funk\s?bh|funkdebh|mtg|bh funk|funk\s+de\s+bh)/i.test(userMessage);
-
-  // ✅ Incluir instruções específicas para Funk BH se detectado (só se não há contexto ativo)
-  if (isFunkBHQuestion && !contextoInfo.contextoAtivo) {
-    systemPrompt += `
-
-📚 INSTRUÇÕES AVANÇADAS — FUNK BH
-- 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
-- 🥁 O Funk BH é caracterizado por **percussões que fazem a marcação do beat**, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para compor o ritmo.
-- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
-- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: na Lander).
-- 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
-- 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
-- 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
-- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum. Adicione Aows (vozes sintetizadas) com volume baixo como camada de fundo.
-- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
-- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
-- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas. utilize o 
-- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 5, 4, 4, 1 
-`;
-  }
-
-  // 🎯 Detectar estilos específicos na mensagem do usuário (só se não há contexto ativo)
-  if (!contextoInfo.contextoAtivo) {
-    const isFunkMandela = /(mandelao|mandelão|funk mandela|mandela|mandela sp)/i.test(userMessage);
-    const isFunkBruxaria = /(funk bruxaria|bruxaria|bruxo|dark funk)/i.test(userMessage);
-    const isFunkSP = /(funk sp|funk zn|funk ritmado|beat zn|zn)/i.test(userMessage);
-
-  // 🎵 Instruções específicas para cada subgênero já estão centralizadas no sistema de contexto
-
-  const instrucaoFunkSP = `
-📚 INSTRUÇÕES AVANÇADAS — FUNK SP / BATIDÃO PAULISTA
-🔥BEAT:
-- 🥁 BPM 130-135, base marcada, batidão direto e seco
-- � Kicks pesados e sintéticos, poucos elementos melódicos
-- 🎤 Vocais com efeitos (pitch, reverb, delay), levada seca e falada
-- � Foco em grave recortado e batida de presença para carro
-- 🧠 Simplicidade: refrão repetitivo, beat minimalista mas forte
-- 💡 Mix com subgraves reforçados e compressão paralela nos kicks
-`;
-
-  const instrucaoFunkBruxaria = `
-📚 INSTRUÇÕES AVANÇADAS — FUNK BRUXARIA
-🔥BEAT:
-- 🧙‍♂️ Estilo sombrio: ambiências escuras, reverses, vozes distorcidas, batidas hipnóticas
-- � Samples de risadas, sussurros, tons graves invertidos
-- 🎧 Escalas menores, notas dissonantes, vibe assustadora com ambiência estéreo
-- �️ Técnicas: reverb e delay com automação, pitch + distorção + chorus nos vocais
-- 🔊 EQ focado em "espaço sombrio" com subgraves e médios escuros
-- 🔁 Estrutura repetitiva e hipnótica para vibe "ritualística"
-`;
-
-  // ✅ Inserir dinamicamente no systemPrompt se a mensagem contiver os termos (agora usando sistema de contexto)
-  } // Fim do bloco: só se não há contexto ativo
 
   const requestBody = {
     model: 'gpt-3.5-turbo',
