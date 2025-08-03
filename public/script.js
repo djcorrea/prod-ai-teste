@@ -119,10 +119,11 @@ function initVantaBackground() {
         }
         
         if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
-            // Otimizado: Reduzimos ligeiramente os parâmetros mas mantendo visual bonito
+            // CRÍTICO: Reduzir qualidade dramática para performance
+            const isLowPerformance = navigator.hardwareConcurrency <= 4;
             vantaEffect = VANTA.NET({
                 el: "#vanta-bg",
-                mouseControls: true,
+                mouseControls: !isLowPerformance, // Desabilitar em CPUs fracas
                 touchControls: true,
                 gyroControls: false,
                 minHeight: 200.00,
@@ -131,11 +132,11 @@ function initVantaBackground() {
                 scaleMobile: 1.00,
                 color: 0x8a2be2,
                 backgroundColor: 0x0a0a1a,
-                // Otimizado: Reduzimos pontos mas mantendo visual atraente
-                points: isDesktop ? 6.00 : 3.00, // Era 8/4, agora 6/3
-                maxDistance: isDesktop ? 20.00 : 12.00, // Era 25/15, agora 20/12
-                spacing: isDesktop ? 20.00 : 28.00, // Ajustado para compensar
-                showDots: true
+                // CRÍTICO: Redução extrema para dispositivos fracos
+                points: isLowPerformance ? 2.00 : (isDesktop ? 4.00 : 2.00),
+                maxDistance: isLowPerformance ? 8.00 : (isDesktop ? 15.00 : 10.00),
+                spacing: isLowPerformance ? 35.00 : (isDesktop ? 25.00 : 30.00),
+                showDots: !isLowPerformance // Sem pontos em dispositivos fracos
             });
             // Vanta.js loaded successfully
         } else {
@@ -184,8 +185,38 @@ function initHoverEffects() {
     });
 }
 
-/* ============ OTIMIZAÇÕES MOBILE (Visual Novo) ============ */
+/* ============ DETECÇÃO DE PERFORMANCE E OTIMIZAÇÕES AUTOMÁTICAS ============ */
 function optimizeForMobile() {
+    const isLowPerformance = navigator.hardwareConcurrency <= 4 || navigator.deviceMemory <= 4;
+    const isOldDevice = /iPhone [1-8]|iPad.*OS [1-9]|Android [1-6]/.test(navigator.userAgent);
+    
+    if (isLowPerformance || isOldDevice) {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* CRÍTICO: Desabilitar animações pesadas em dispositivos fracos */
+            .robo, .notebook, .teclado, .caixas, .mesa, .floating-particle {
+                animation: none !important;
+                filter: none !important;
+                transform: none !important;
+            }
+            .chatbot-main-robot {
+                animation: none !important;
+                filter: drop-shadow(0 0 5px rgba(0, 150, 255, 0.3)) !important;
+            }
+            .particles-overlay, .particle {
+                display: none !important;
+            }
+            /* Pausar animações CSS infinitas para economia de CPU */
+            * {
+                animation-play-state: paused !important;
+            }
+        `;
+        document.head.appendChild(style);
+        console.warn('🐌 Dispositivo com performance baixa detectado - animações desabilitadas');
+        return true; // Performance mode enabled
+    }
+    
+    // Mobile optimizations padrão
     if (!isDesktop) {
         const style = document.createElement('style');
         style.textContent = `
@@ -200,6 +231,7 @@ function optimizeForMobile() {
         document.head.appendChild(style);
         // Mobile optimizations applied
     }
+    return false; // Normal performance
 }
 
 /* ============ REDIMENSIONAMENTO OTIMIZADO (Visual Novo) ============ */
@@ -1215,8 +1247,8 @@ async function processMessage(message) {
 
 /* ============ INICIALIZAÇÃO DO SISTEMA ============ */
 
-// Aguardar carregamento da página
-document.addEventListener('DOMContentLoaded', () => {
+/* ============ INICIALIZAÇÃO CONSOLIDADA ============ */
+function initializeEverything() {
     // Injetar estilos CSS para respostas estilosas
     injetarEstilosRespostaEstilosa();
     
@@ -1242,7 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.log('📄 Página secundária detectada - pulando inicialização completa do script.js');
     }
-});
+}
 
 function debugVercel() {
   console.log('=== DEBUG VERCEL ===');
@@ -1268,8 +1300,6 @@ function initVisualEffects() {
     initEntranceAnimations();
     initParallaxEffect();
     initHoverEffects();
-    
-    window.addEventListener('resize', handleResize);
     
     console.log('✅ Cenário futurista carregado!');
 }
@@ -1331,7 +1361,12 @@ window.addEventListener('beforeunload', () => {
 function initParallaxEffect() {
     if (!isDesktop) return;
     
+    let parallaxTimeout;
     document.addEventListener('mousemove', (e) => {
+        // CRÍTICO: Throttle para evitar travamento
+        if (parallaxTimeout) return;
+        parallaxTimeout = setTimeout(() => parallaxTimeout = null, 16); // ~60fps
+        
         const x = (e.clientX / window.innerWidth - 0.5) * 2;
         const y = (e.clientY / window.innerHeight - 0.5) * 2;
         
@@ -1383,18 +1418,11 @@ function initParallaxEffect() {
     });
 }
 
-/* ============ LIMPEZA ============ */
-window.addEventListener('beforeunload', () => {
-    if (vantaEffect) {
-        vantaEffect.destroy();
-    }
-});
-
 /* ============ INICIALIZAÇÃO NO DOM READY ============ */
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
+  document.addEventListener('DOMContentLoaded', initializeEverything);
 } else {
-  initializeApp();
+  initializeEverything();
 }
 
 // Listener único de redimensionamento (otimizado com throttle)
