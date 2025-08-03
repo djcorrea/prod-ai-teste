@@ -386,13 +386,45 @@ Responda com excelência absoluta.`;
   if (perfil?.estilo) {
     const estiloLower = perfil.estilo.toLowerCase();
     if (estiloLower.includes('mandela') || estiloLower.includes('mandelão')) {
-      estiloBase = instrucoesBase.funkMandela;
+      estiloBase = `
+
+🧠 BASE TÉCNICA PARA FUNK MANDELA/MANDELÃO:
+Use as informações abaixo como FUNDAMENTO TÉCNICO INTERNO. NÃO cole diretamente estas instruções. Adapte e expanda conforme a pergunta específica:
+
+${instrucoesBase.funkMandela}
+
+🎯 Sempre adapte essas informações conforme a intenção do usuário (tutorial, passo a passo, explicação técnica, etc.)
+`;
     } else if (estiloLower.includes('sp') || estiloLower.includes('paulista')) {
-      estiloBase = instrucoesBase.funkSP;
+      estiloBase = `
+
+🧠 BASE TÉCNICA PARA FUNK SP:
+Use as informações abaixo como FUNDAMENTO TÉCNICO INTERNO. NÃO cole diretamente estas instruções. Adapte e expanda conforme a pergunta específica:
+
+${instrucoesBase.funkSP}
+
+🎯 Sempre adapte essas informações conforme a intenção do usuário (tutorial, passo a passo, explicação técnica, etc.)
+`;
     } else if (estiloLower.includes('bh') || estiloLower.includes('mtg')) {
-      estiloBase = instrucoesBase.funkBH;
+      estiloBase = `
+
+🧠 BASE TÉCNICA PARA FUNK BH:
+Use as informações abaixo como FUNDAMENTO TÉCNICO INTERNO. NÃO cole diretamente estas instruções. Adapte e expanda conforme a pergunta específica:
+
+${instrucoesBase.funkBH}
+
+🎯 Sempre adapte essas informações conforme a intenção do usuário (tutorial, passo a passo, explicação técnica, etc.)
+`;
     } else if (estiloLower.includes('bruxaria') || estiloLower.includes('bruxo')) {
-      estiloBase = instrucoesBase.funkBruxaria;
+      estiloBase = `
+
+🧠 BASE TÉCNICA PARA FUNK BRUXARIA:
+Use as informações abaixo como FUNDAMENTO TÉCNICO INTERNO. NÃO cole diretamente estas instruções. Adapte e expanda conforme a pergunta específica:
+
+${instrucoesBase.funkBruxaria}
+
+🎯 Sempre adapte essas informações conforme a intenção do usuário (tutorial, passo a passo, explicação técnica, etc.)
+`;
     }
   }
 
@@ -484,6 +516,10 @@ function detectarEstiloNaMensagem(mensagem) {
 function gerarPromptDoEstilo(estilo) {
   const promptsEspecificos = {
     'funk mandela': `
+
+🧠 CONTEXTO TÉCNICO DE FUNK MANDELA:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou  (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
@@ -507,9 +543,15 @@ Diretrizes técnicas:
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
   - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
   - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `,
 
     'funk bruxaria': `
+
+🧠 CONTEXTO TÉCNICO DE FUNK BRUXARIA:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 CONTEXTO TÉCNICO ATIVO — FUNK BRUXARIA
 - 🧙‍♂️ Estilo sombrio: ambiências escuras, reverses, vozes distorcidas, batidas hipnóticas.
 - 🌑 Samples de risadas, sussurros, tons graves invertidos.
@@ -517,9 +559,15 @@ Diretrizes técnicas:
 - 🎛️ Técnicas: reverb e delay com automação, pitch + distorção + chorus nos vocais.
 - 🔊 EQ focado em "espaço sombrio" com subgraves e médios escuros.
 - 🔁 Estrutura repetitiva e hipnótica para vibe "ritualística".
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `,
 
     'funk sp': `
+
+🧠 CONTEXTO TÉCNICO DE FUNK SP:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 CONTEXTO TÉCNICO ATIVO — FUNK SP / BATIDÃO PAULISTA
 - 🥁 BPM 130-135, base marcada, batidão direto e seco.
 - 🔥 Kicks pesados e sintéticos, poucos elementos melódicos.
@@ -527,9 +575,15 @@ Diretrizes técnicas:
 - 🔊 Foco em grave recortado e batida de presença para carro.
 - 🧠 Simplicidade: refrão repetitivo, beat minimalista mas forte.
 - 💡 Mix com subgraves reforçados e compressão paralela nos kicks.
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `,
 
     'trap': `
+
+🧠 CONTEXTO TÉCNICO DE TRAP:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 CONTEXTO TÉCNICO ATIVO — TRAP
 - 🥁 BPM entre 140-180, hi-hats em tercinas (triplets), snare no 3° tempo.
 - 🔊 808s graves e sustentados, kicks punchados.
@@ -537,9 +591,15 @@ Diretrizes técnicas:
 - 🎛️ Sidechain sutil, reverb em snares, delay nos vocais.
 - 🔥 Layers de percussão: shakers, claps, tambourines.
 - 💡 Estrutura: intro, verse, chorus, bridge. Drops marcantes.
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `,
 
     'brega funk': `
+
+🧠 CONTEXTO TÉCNICO DE BREGA FUNK:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 CONTEXTO TÉCNICO ATIVO — BREGA FUNK
 - 🎵 Fusão de brega e funk: melodias românticas com batida pesada.
 - 🎹 Sintetizadores melódicos, progressões maiores e menores.
@@ -547,9 +607,15 @@ Diretrizes técnicas:
 - 🎤 Vocais melódicos com auto-tune sutil, harmonias.
 - 🔊 Bass lines pronunciadas, menos distorção que outros funks.
 - 💡 Estrutura pop: verso, refrão, ponte. Mais limpo na mixagem.
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `,
 
     'funk sujo': `
+
+🧠 CONTEXTO TÉCNICO DE FUNK SUJO:
+Use as informações abaixo como BASE INTERNA para gerar suas respostas. NÃO copie diretamente. Adapte conforme a pergunta:
+
 📚 CONTEXTO TÉCNICO ATIVO — FUNK SUJO
 - 🎚️ Máxima distorção: beats saturados, samples cortados e sujos.
 - 🔊 Kicks super distorcidos, sem limiter, punch extremo.
@@ -557,6 +623,8 @@ Diretrizes técnicas:
 - 🧠 Anti-mixagem: proposital falta de limpeza, ruído como textura.
 - 🔥 Samples de baixa qualidade, compressão extrema.
 - 💡 Estética lo-fi intencional, quebras bruscas, fade cuts.
+
+🎯 SEMPRE adapte essas informações conforme solicitado pelo usuário.
 `
   };
 
@@ -682,7 +750,20 @@ Responda com excelência absoluta.`;
 
   // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar se há contexto ativo
   if (contextoInfo.contextoAtivo && contextoInfo.promptEstilo) {
-    systemPrompt += contextoInfo.promptEstilo;
+    systemPrompt += `
+
+🧠 CONTEXTO TÉCNICO DE ${contextoInfo.estilo.toUpperCase()}:
+Use as informações técnicas abaixo como BASE INTERNA para gerar suas respostas. NÃO copie ou cole diretamente essas instruções. Adapte e expanda o conteúdo conforme a pergunta específica do usuário:
+
+${contextoInfo.promptEstilo}
+
+🎯 INSTRUÇÕES IMPORTANTES:
+- Use essas informações como FUNDAMENTO TÉCNICO, não como resposta direta
+- Adapte o conteúdo conforme a intenção do usuário (passo a passo, tutorial, explicação técnica, etc.)
+- Expanda e detalhe as informações quando solicitado
+- Mantenha a estrutura e formatação padrão do PROD.AI (emojis, tópicos, valores técnicos)
+- Gere respostas completas e educativas baseadas nesse conhecimento técnico
+`;
     console.log(`🎯 Contexto técnico ativo: ${contextoInfo.estilo}`);
   }
 
@@ -693,6 +774,9 @@ Responda com excelência absoluta.`;
   // ✅ Incluir instruções específicas para Funk BH se detectado (só se não há contexto ativo)
   if (isFunkBHQuestion && !contextoInfo.contextoAtivo) {
     systemPrompt += `
+
+🧠 BASE TÉCNICA PARA FUNK BH:
+Use as informações abaixo como FUNDAMENTO TÉCNICO INTERNO. NÃO cole diretamente estas instruções. Adapte e expanda conforme a pergunta específica do usuário:
 
 📚 INSTRUÇÕES AVANÇADAS — FUNK BH
 - 🔢 Use 130 BPM, que é o mais comum no Funk de BH.
@@ -707,6 +791,8 @@ Responda com excelência absoluta.`;
 - 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
 - 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas. utilize o 
 - 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 5, 4, 4, 1 
+
+🎯 IMPORTANTE: Adapte essas informações conforme a intenção do usuário (tutorial, passo a passo, explicação técnica, etc.). Nunca cole diretamente essas instruções.
 `;
   }
 
