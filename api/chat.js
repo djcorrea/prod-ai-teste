@@ -1105,19 +1105,23 @@ export default async function handler(req, res) {
                             respostaLower.includes("sp") ||
                             respostaLower.includes("zn");
 
-    // DETECÇÃO ESPECÍFICA: Só aparece se mencionar KICK + snap (não BEAT + snap)
-    const temExplicacaoKickEspecifica = (respostaLower.includes("snap em \"1/2 step\"") || 
-                                        respostaLower.includes("snap em '1/2 step'") ||
-                                        respostaLower.includes("utilize o snap em \"1/2 step\"") ||
-                                        respostaLower.includes("utilize o snap em '1/2 step'")) &&
-                                       (respostaLower.includes("kick") && 
-                                        (respostaLower.includes("primeiro kick") ||
-                                         respostaLower.includes("1º quadrado") ||
-                                         respostaLower.includes("base para começar"))) &&
-                                       !respostaLower.includes("beat") && !respostaLower.includes("percussão");
+    // DETECÇÃO MAIS FLEXÍVEL: Aparece se mencionar KICK + snap (mas não se for sobre BEAT)
+    const mencionaSnapKick = (respostaLower.includes("snap em \"1/2 step\"") || 
+                             respostaLower.includes("snap em '1/2 step'") ||
+                             respostaLower.includes("utilize o snap em \"1/2 step\"") ||
+                             respostaLower.includes("utilize o snap em '1/2 step'")) &&
+                            respostaLower.includes("kick");
+
+    // Verifica se NÃO está falando sobre beat/percussão no contexto do snap
+    const naoEhSobreBeatPercussao = !((respostaLower.includes("beat") || respostaLower.includes("percussão")) &&
+                                      respostaLower.includes("snap em"));
+
+    const temExplicacaoKickEspecifica = mencionaSnapKick && naoEhSobreBeatPercussao;
 
     console.log('🔍 DEBUG Funk ZN - Pergunta sobre funk zn:', ehPerguntaFunkZN);
     console.log('🔍 DEBUG Funk ZN - Resposta contém funk sp/zn:', ehRespostaFunkSP);
+    console.log('🔍 DEBUG Funk ZN - Menciona snap + kick:', mencionaSnapKick);
+    console.log('🔍 DEBUG Funk ZN - NÃO é sobre beat/percussão:', naoEhSobreBeatPercussao);
     console.log('🔍 DEBUG Funk ZN - Tem explicação KICK específica (não beat):', temExplicacaoKickEspecifica);
 
     // Inserir imagem APENAS se: (pergunta sobre funk zn OU resposta sobre funk sp) E tem explicação ESPECÍFICA do KICK (não beat)
@@ -1127,19 +1131,17 @@ export default async function handler(req, res) {
       // Inserir imagem logo após a explicação específica
       const imagemKickSPHTML = `<br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
       
-      // Estratégia 1: Inserir após "base para começar" (apenas se estiver em contexto de kick)
-      if (respostaLower.includes("base para começar") && respostaLower.includes("kick")) {
+      // Estratégia SIMPLIFICADA: Inserir após qualquer menção de snap no contexto de kick
+      if (respostaLower.includes("base para começar")) {
         const pattern1 = /(base para começar["']?\s*\.?)/gi;
         reply = reply.replace(pattern1, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "base para começar" no contexto KICK!');
+        console.log('✅ Imagem inserida após "base para começar"!');
       } 
-      // Estratégia 2: Inserir após explicação do snap (apenas se for sobre kick)
-      else if (respostaLower.includes("snap em") && respostaLower.includes("kick")) {
+      else if (respostaLower.includes("snap em")) {
         const pattern2 = /(snap em ["']1\/2 step["'][^.]*\.)/gi;
         reply = reply.replace(pattern2, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após explicação do snap no contexto KICK!');
+        console.log('✅ Imagem inserida após explicação do snap!');
       }
-      // Estratégia 3: Inserir após "primeiro kick"
       else if (respostaLower.includes("primeiro kick")) {
         const pattern3 = /(primeiro kick[^.]*\.)/gi;
         reply = reply.replace(pattern3, `$1${imagemKickSPHTML}`);
