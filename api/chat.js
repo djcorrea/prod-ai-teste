@@ -212,10 +212,44 @@ Diretrizes técnicas:
 `,
 
   funkSP: `
-🧠 INSTRUÇÃO BASE - FUNK SP / BATIDÃO PAULISTA:
-- BPM entre 130–135, base marcada, batidão direto e seco.
-- Groove constante, com variações simples e focado na pressão dos kicks.
-- Menos ambiência, mais impacto. Mixagem mais seca.
+  📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+🧠 INSTRUÇÃO BASE - FUNK SP / ZN:
+🥁 BEAT / SEQUÊNCIA DE KICK
+- Use um kick grave e seco, de preferência sem cauda longa.
+- ✂️ Corte o começo do sample (vento/silêncio) para evitar sujeira no som.
+- 🟦 A sequência principal segue um padrão quebrado, com kick no meio do 3º quadrado.
+- 🔁 Copie o primeiro kick e cole adiante, deslocando o terceiro kick para frente (além da batida tradicional).
+- 🔳 Insira outro kick a 1 quadrado e meio do anterior, criando o ritmo quebrado típico do estilo.
+- 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
+
+🪘 PERCUSSÃO / RITMO
+- 🪘 Corte o final de cada sample de percussão para evitar sobreposição.
+- 🥁 Posicione as percussões com base nas linhas centrais do grid para manter equilíbrio visual e rítmico.
+- 🎯 Adicione percussões entre os kicks para preencher o groove.
+- 🔁 Copie o loop com variações até a 5ª barra da timeline, mantendo pequenas quebras.
+- 🧠 Crie variações removendo elementos de seções específicas (ex: apagando a percussão da última barra).
+- 🗂️ Organize cada tipo de percussão em tracks diferentes no mixer para facilitar a mixagem individual.
+
+🎛️ MIXAGEM / ORGANIZAÇÃO
+- 🧽 Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
+- 📊 Use cores e nomes para os canais de bateria e percussão.
+- 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
+
+🎙️ VOZ / CAPELA
+- 🎤 Utilize capelas com rimas diretas, estilo favela, com frases agressivas ou chicletes.
+- 🗑️ Substitua a capela se não encaixar bem na batida — mantenha opções no projeto.
+- 🧠 Frases de efeito como “senta aí” ou “toma, toma” funcionam bem com vocais retos e repetitivos.
 `,
 
   funkBH: `
@@ -596,6 +630,18 @@ Diretrizes técnicas:
 `,
 
     'funk sp': `
+    📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 📚 CONTEXTO TÉCNICO ATIVO — FUNK SP / BATIDÃO PAULISTA
 - 🥁 BPM 130-135, base marcada, batidão direto e seco.
 - 🔥 Kicks pesados e sintéticos, poucos elementos melódicos.
@@ -790,7 +836,7 @@ Responda com excelência absoluta.`;
   if (!contextoInfo.contextoAtivo) {
     const isFunkMandela = /(mandelao|mandelão|funk mandela|mandela|mandela sp)/i.test(userMessage);
     const isFunkBruxaria = /(funk bruxaria|bruxaria|bruxo|dark funk)/i.test(userMessage);
-    const isFunkSP = /(funk sp|funk de sp|batida sp|batidão paulista|funk paulistano)/i.test(userMessage);
+    const isFunkSP = /(funk sp|funk zn|funk ritmado|beat zn|zn)/i.test(userMessage);
 
   // 🎵 Instruções específicas para cada subgênero já estão centralizadas no sistema de contexto
 
