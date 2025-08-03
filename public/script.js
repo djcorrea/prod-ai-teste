@@ -392,13 +392,17 @@ class ProdAIChatbot {
             const librariesLoaded = typeof gsap !== 'undefined' && typeof VANTA !== 'undefined';
             
             if (allImagesLoaded && librariesLoaded) {
+                // Aguardar as animações fadeInPush dos elementos terminarem (0.6s) + buffer
                 setTimeout(() => {
                     this.animateInitialAppearance();
-                }, 800);
+                }, 1000); // 0.6s animação + 0.4s buffer para sincronia suave
                 return; // PARAR O LOOP
             } else if (attempts >= maxAttempts) {
                 console.warn('⚠️ Timeout no carregamento, continuando...');
-                this.animateInitialAppearance();
+                // Mesmo com timeout, aguardar um pouco para não conflitar
+                setTimeout(() => {
+                    this.animateInitialAppearance();
+                }, 1000);
                 return; // PARAR O LOOP
             } else {
                 attempts++;
@@ -1246,15 +1250,18 @@ async function processMessage(message) {
 
 /* ============ INICIALIZAÇÃO CONSOLIDADA ============ */
 function initializeEverything() {
-    // Ativar fade-in inicial suave para todos os elementos simultaneamente
+    // Ativar fade-in suave apenas nos elementos principais (sem fundo)
     setTimeout(() => {
         const fadeElements = document.querySelectorAll('.fade-in-start');
-        fadeElements.forEach((element) => {
-            // Todos os elementos com mesmo timing - mais suave
+        
+        // Aplicar animação fadeInPush sincronizada a todos os elementos
+        fadeElements.forEach((element, index) => {
+            // Remover delay individual para sincronia perfeita
             element.style.animationDelay = '0ms';
-            element.classList.add('active');
+            element.style.animation = 'fadeInPush 0.6s ease-out forwards';
         });
-    }, 150);
+        
+    }, 200);
     
     // Injetar estilos CSS para respostas estilosas
     injetarEstilosRespostaEstilosa();

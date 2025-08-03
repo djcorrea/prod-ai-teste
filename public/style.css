@@ -11,21 +11,40 @@ body {
     background: #0a0a1a;
 }
 
-/* ============ ANIMAÇÃO FADE-IN INICIAL ============ */
+/* ============ ANIMAÇÃO FADE-IN INICIAL SUAVE ============ */
 .fade-in-start {
     opacity: 0;
-    transform: translateY(30px);
-    animation: fadeInStart 800ms ease-out forwards;
+    transform: translateY(20px);
+    animation: fadeInPush 0.6s ease-out forwards;
 }
 
-@keyframes fadeInStart {
-    from {
+@keyframes fadeInPush {
+    0% {
         opacity: 0;
-        transform: translateY(30px) scale(0.95);
+        transform: translateY(20px);
     }
-    to {
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============ ANIMAÇÃO LEGADA PRESERVADA ============ */
+@keyframes fadeInSuave {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+        filter: blur(2px);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(10px) scale(0.98);
+        filter: blur(0.5px);
+    }
+    100% {
         opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0);
     }
 }
 
@@ -44,7 +63,7 @@ body {
     object-fit: contain;
     image-rendering: auto;
     opacity: 0;
-    transform: translateY(50px) scale(0.9);
+    transform: translateY(20px); /* Estado inicial para fadeInPush */
     transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease;
     will-change: transform;
 }
@@ -69,7 +88,6 @@ body {
     object-fit: cover;
     opacity: 0.3;
     filter: blur(1px);
-    animation: fundoEntrance 0.8s ease-out forwards;
 }
 
 /* ============ ELEMENTOS DO CENÁRIO ============ */
@@ -82,7 +100,7 @@ body {
     /* Otimizado: Blur balanceado - visual preservado + performance */
     filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.3));
     /* Otimizado: Aumentamos duração para reduzir frequência de repaint */
-    animation: robotEntranceAndBreathing 1s ease-out forwards, robotBreathingOptimized 4s ease-in-out infinite 1s;
+    animation: fadeInPush 0.6s ease-out forwards, robotBreathingOptimized 4s ease-in-out infinite 0.6s;
 }
 
 .mesa {
@@ -94,7 +112,7 @@ body {
     z-index: 1;
     filter: drop-shadow(0 0 12px rgba(0, 150, 255, 0.2));
     /* CRÍTICO: Mesa precisa de animação para aparecer */
-    animation: fadeInUp 1s ease-out forwards;
+    animation: fadeInPush 0.6s ease-out forwards;
 }
 
 .notebook {
@@ -106,7 +124,7 @@ body {
     /* Otimizado: Blur balanceado - visual preservado + performance */
     filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.3));
     /* Otimizado: Duração aumentada de 3s para 5s */
-    animation: notebookEntranceAndGlow 1.2s ease-out forwards, subtleGlowOptimized 5s ease-in-out infinite 1.2s;
+    animation: fadeInPush 0.6s ease-out forwards, subtleGlowOptimized 5s ease-in-out infinite 0.6s;
 }
 
 .teclado {
@@ -118,26 +136,13 @@ body {
     /* Otimizado: Blur reduzido de 12px para 10px */
     filter: drop-shadow(0 0 8px rgba(0, 150, 255, 0.25));
     /* Otimizado: Duração aumentada de 2.5s para 4s */
-    animation: subtleGlowOptimized 4s ease-in-out infinite 0.5s;
-    opacity: 1 !important;
-    transform: none !important;
+    animation: fadeInPush 0.6s ease-out forwards, subtleGlowOptimized 4s ease-in-out infinite 0.6s;
 }
 
-/* ============ GARANTIR VISIBILIDADE DO NOTEBOOK E TECLADO ============ */
-.notebook {
-    opacity: 1 !important;
-    transform: none !important;
-}
-
-.teclado {
-    opacity: 1 !important;
-    transform: none !important;
-}
-
-/* ============ GARANTIR VISIBILIDADE DA MESA ============ */
-.mesa {
-    opacity: 1 !important;
-    transform: none !important;
+/* ============ GARANTIR ESTADO INICIAL CORRETO ============ */
+.notebook, .teclado, .mesa, .robo, .caixas {
+    opacity: 0;
+    transform: translateY(20px);
 }
 
 /* ============ ANIMAÇÃO DE ENTRADA PARA DESKTOP ============ */
@@ -155,7 +160,7 @@ body {
     max-height: 115vh;
     z-index: 2;
     filter: drop-shadow(0 0 15px rgba(138, 43, 226, 0.4));
-    animation: subtleGlowOptimized 3.5s ease-in-out infinite 1s;
+    animation: fadeInPush 0.6s ease-out forwards, subtleGlowOptimized 3.5s ease-in-out infinite 0.6s;
 }
 
 /* ============ OVERLAY DE PARTÍCULAS ============ */
@@ -168,7 +173,7 @@ body {
     z-index: 4;
     pointer-events: none;
     background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08) 0%, transparent 70%);
-    animation: particleFloatOptimized 10s ease-in-out infinite;
+    animation: fadeInPush 0.6s ease-out forwards, particleFloatOptimized 10s ease-in-out infinite 0.6s;
     will-change: transform;
 }
 
