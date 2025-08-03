@@ -36,85 +36,32 @@ const API_CONFIG = {
 
 console.log('🔗 API configurada para:', API_CONFIG.chatEndpoint);
 
-/* ============ GARANTIA DE FUNÇÕES GLOBAIS (ANTI-CACHE) ============ */
-// Forçar definição imediata das funções no escopo global
-(function() {
-    'use strict';
-    
-    // Garantir que testAPIConnection existe SEMPRE
-    if (!window.testAPIConnection) {
-        window.testAPIConnection = async function testAPIConnection() {
-            console.log('⚠️ [FALLBACK] testAPIConnection executada via fallback');
-            try {
-                if (!document.querySelector('#startSendBtn') && !document.querySelector('#sendBtn')) {
-                    console.log('📄 Página não requer teste de API');
-                    return;
-                }
-                
-                console.log('🧪 Testando conexão com API...');
-                const response = await fetch(API_CONFIG.chatEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: 'teste de conexão', userUid: 'test' })
-                });
-                
-                if (response.ok) {
-                    console.log('✅ API funcionando corretamente');
-                } else {
-                    console.log('⚠️ API respondeu com status:', response.status);
-                }
-            } catch (error) {
-                console.log('⚠️ Erro ao testar API (não crítico):', error.message);
-            }
-        };
+/* ============ FUNÇÕES GLOBAIS SIMPLIFICADAS ============ */
+// Versão otimizada - definições diretas sem verificações excessivas
+window.testAPIConnection = window.testAPIConnection || async function() {
+    try {
+        if (!document.querySelector('#startSendBtn') && !document.querySelector('#sendBtn')) return;
+        const response = await fetch(API_CONFIG.chatEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'teste de conexão', userUid: 'test' })
+        });
+        console.log(response.ok ? '✅ API OK' : '⚠️ API status:', response.status);
+    } catch (error) {
+        console.log('⚠️ API error:', error.message);
     }
-    
-    // Garantir que initParticleEffects existe SEMPRE
-    if (!window.initParticleEffects) {
-        window.initParticleEffects = function initParticleEffects() {
-            console.log('⚠️ [FALLBACK] initParticleEffects executada via fallback');
-            try {
-                console.log('✨ Inicializando efeitos de partículas...');
-                const heroSection = document.querySelector('.hero');
-                const ctaSection = document.querySelector('.cta');
-                
-                if (heroSection) heroSection.classList.add('particles-active');
-                if (ctaSection) ctaSection.classList.add('particles-active');
-                
-                console.log('✅ Efeitos de partículas inicializados');
-            } catch (error) {
-                console.log('⚠️ Efeitos de partículas não disponíveis nesta página:', error.message);
-            }
-        };
-    }
-    
-    // Garantir que setupEventListeners existe SEMPRE
-    if (!window.setupEventListeners) {
-        window.setupEventListeners = function setupEventListeners() {
-            console.log('⚠️ [FALLBACK] setupEventListeners executada via fallback');
-            try {
-                // Configurações básicas de eventos para compatibilidade
-                const startInput = document.getElementById('start-input');
-                const sendBtn = document.getElementById('startSendBtn');
-                
-                if (startInput && sendBtn) {
-                    console.log('✅ Configurando eventos básicos');
-                    // Eventos básicos já serão configurados pelo chatbot quando instanciado
-                } else {
-                    console.log('� Elementos de input não encontrados nesta página');
-                }
-            } catch (error) {
-                console.log('⚠️ Erro ao configurar event listeners (não crítico):', error.message);
-            }
-        };
-    }
-    
-    console.log('�🛡️ [ANTI-CACHE] Funções globais garantidas:', {
-        testAPIConnection: typeof window.testAPIConnection,
-        initParticleEffects: typeof window.initParticleEffects,
-        setupEventListeners: typeof window.setupEventListeners
-    });
-})();
+};
+
+window.initParticleEffects = window.initParticleEffects || function() {
+    const heroSection = document.querySelector('.hero');
+    const ctaSection = document.querySelector('.cta');
+    if (heroSection) heroSection.classList.add('particles-active');
+    if (ctaSection) ctaSection.classList.add('particles-active');
+};
+
+window.setupEventListeners = window.setupEventListeners || function() {
+    // Configurações básicas se necessário
+};
 
 /* ============ FUNÇÕES GLOBAIS (Declaradas no início para evitar erros) ============ */
 // Função testAPIConnection (definição completa no início)
@@ -277,20 +224,31 @@ function optimizeForMobile() {
     }
 }
 
-/* ============ REDIMENSIONAMENTO (Visual Novo) ============ */
+/* ============ REDIMENSIONAMENTO OTIMIZADO (Visual Novo) ============ */
+let resizeTimeout;
 function handleResize() {
-    const newIsDesktop = window.innerWidth > 768;
-    
-    if (newIsDesktop !== isDesktop) {
-        isDesktop = newIsDesktop;
+    // Throttle para evitar execução excessiva
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        const newIsDesktop = window.innerWidth > 768;
         
-        if (vantaEffect) {
-            vantaEffect.destroy();
-            setTimeout(initVantaBackground, 50);
+        if (newIsDesktop !== isDesktop) {
+            isDesktop = newIsDesktop;
+            
+            if (vantaEffect) {
+                vantaEffect.destroy();
+                setTimeout(initVantaBackground, 50);
+            }
+            
+            optimizeForMobile();
         }
         
-        optimizeForMobile();
-    }
+        // Combinar com a funcionalidade do indicator
+        const indicator = document.getElementById('messages-remaining-indicator');
+        if (indicator) {
+            indicator.style.display = window.innerWidth <= 767 ? 'none' : 'block';
+        }
+    }, 150); // Throttle de 150ms
 }
 
 /* ============ FUNÇÕES DO SISTEMA ANTIGO ============ */
@@ -301,7 +259,10 @@ function waitForFirebase() {
     const maxAttempts = 50; // Máximo 5 segundos (50 * 100ms)
     
     const checkFirebase = () => {
-      console.log('🔍 Verificando Firebase:', { auth: !!window.auth, firebaseReady: !!window.firebaseReady });
+      // Reduzir console.log excessivos - só logar na primeira e última tentativa
+      if (attempts === 0 || attempts >= maxAttempts - 1) {
+        console.log('🔍 Verificando Firebase:', { auth: !!window.auth, firebaseReady: !!window.firebaseReady });
+      }
       if (window.auth && window.firebaseReady) {
         console.log('✅ Firebase pronto!');
         resolve();
@@ -312,7 +273,9 @@ function waitForFirebase() {
         return; // PARAR O LOOP
       } else {
         attempts++;
-        console.log('⏳ Firebase ainda não está pronto, tentando novamente em 100ms...');
+        if (attempts === 1) {
+          console.log('⏳ Firebase ainda não está pronto, aguardando...');
+        }
         setTimeout(checkFirebase, 100);
       }
     };
@@ -404,15 +367,20 @@ class ProdAIChatbot {
         let attempts = 0;
         const maxAttempts = 200; // Máximo 10 segundos (200 * 50ms)
         
+        // Cache do querySelector para evitar consultas repetidas
+        const images = document.querySelectorAll('img');
+        
         const checkPageReady = () => {
-            const images = document.querySelectorAll('img');
+            // Otimizado: Não fazer querySelectorAll a cada loop
             let allImagesLoaded = true;
             
-            images.forEach(img => {
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
                 if (!img.complete || img.naturalHeight === 0) {
                     allImagesLoaded = false;
+                    break; // Early exit - mais eficiente que forEach
                 }
-            });
+            }
             
             const librariesLoaded = typeof gsap !== 'undefined' && typeof VANTA !== 'undefined';
             
@@ -1451,7 +1419,7 @@ if (document.readyState === 'loading') {
   initializeApp();
 }
 
-// Adicionar listener de redimensionamento
+// Listener único de redimensionamento (otimizado com throttle)
 window.addEventListener('resize', handleResize);
 
 // Expor funções globais (manter compatibilidade)
@@ -1511,15 +1479,7 @@ function initEntranceAnimations() {
             console.warn('⚠️ GSAP não encontrado, usando animações CSS de fallback');
         }
 
-// Listener para ocultar indicador de mensagens no mobile quando redimensionar
-window.addEventListener('resize', function() {
-    const indicator = document.getElementById('messages-remaining-indicator');
-    if (indicator && window.innerWidth <= 767) {
-        indicator.style.display = 'none';
-    } else if (indicator && window.innerWidth > 767) {
-        indicator.style.display = 'block';
-    }
-});
+// REMOVIDO: Listener duplicado de resize - agora está no handleResize otimizado
     } catch (error) {
         console.warn('⚠️ Erro no GSAP:', error);
         document.body.classList.add('fallback-animation');
