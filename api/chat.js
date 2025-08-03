@@ -555,7 +555,7 @@ function gerarPromptDoEstilo(estilo) {
 - O Funk Mandela, ou  (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
 - 🎚️ Para criar o beat utilize samples sujos, samples que podem ser encontrados em packs de samples na internet como Pack do DJ Ayzen, ou utilizar presets de synth em sintetizados como o vital, ou flex.**.
-- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota.
+- 🔁 Beat com estrutura repetitiva,  synth ou samples com repetições de variações no piano roll, utiliza como base a sequência 4x3x3x1, conte os quadradinhos de cada compasso e adicione uma nota. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
 - 🧠 Faça variações das notas do beat no piano até chegar em um resultado desejado, utilize tecnicas como subir e descer oitavas, uma dica é começar com o padrao 4x3x3x1 e ir trocando as notas por outras notas que combinem com o tom da voz.
 - 🧼 Adicione efeitos leve de reverb e delay para dar mais profundidade no beat, saturação e chorus também acostumam combinar.
 Diretrizes técnicas:
