@@ -174,6 +174,18 @@ async function handleUserLimits(db, uid, email) {
 // 🧠 Bases técnicas por estilo (instrução base) "Usuário Plus tem "funk mandela" no perfil"
 const instrucoesBase = {
   funkMandela: `
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
@@ -197,14 +209,6 @@ Diretrizes técnicas:
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
 - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
   - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
-🧠 IMPORTANTE:
-Estas instruções devem servir apenas como base de conhecimento. Quando o usuário fizer perguntas relacionadas a Funk Mandela, analise o contexto da pergunta e responda de forma aprofundada, técnica e personalizada.
-- Use as diretrizes como referência, mas NÃO copie ou repita literalmente.
-- Expanda o conteúdo conforme necessário para entregar a MELHOR resposta possível dentro do contexto da pergunta.
-- Sempre que fizer sentido, **explique como aplicar na prática cada técnica mencionada** — mostre o passo a passo, os parâmetros ideais, os plugins recomendados e os ajustes finos com base no estilo.
-- Dê exemplos de como usar as ferramentas (como equalizador, compressor, saturador, reverb, delay etc), incluindo valores padrão e variações possíveis.
-- Priorize clareza, estrutura com tópicos e emojis, e linguagem direta.
-- Dê respostas didáticas, com instruções como se estivesse ensinando um aluno a produzir exatamente aquele elemento.
 `,
 
   funkSP: `
@@ -492,6 +496,18 @@ function detectarEstiloNaMensagem(mensagem) {
 function gerarPromptDoEstilo(estilo) {
   const promptsEspecificos = {
     'funk mandela': `
+    📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura. Exemplo:  
+  🎛️ Equalização → explique, dê parâmetros e finalize com dica.  
+  ⚙️ Compressão → explique, valores típicos, parâmetros, onde aplicar, efeitos esperados.  
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 📚 INSTRUÇÕES AVANÇADAS — FUNK MANDELA / MANDELÃO
 - O Funk Mandela, ou  (Mandelão), é caracterizado por beats pesados, com samples mais sujos e distorcidos, utiliza tambem claps sequenciados, uma estrutura repetitiva e chiclete que marca o ritmo.
 🔥BEAT:
@@ -515,14 +531,6 @@ Diretrizes técnicas:
   - 🎙️ Vocais geralmente cortados de falas polêmicas ou proibidonas, com versos chicletes e repetitivos, em alguns contextos utilizam bastante reverb se for um estilo mais bruxaria, contêm mais destaque na região dos agudos.
   - 🧪 Equalização com foco em deixar a voz marcante e presente, pequeno corte nos graves, trabalhar os agudos e medios para que se destaquem.
   - 🔥 Utilziar metrônomo para encaixar a voz certinho com o beat.
- 🧠 IMPORTANTE:
-Estas instruções devem servir apenas como base de conhecimento. Quando o usuário fizer perguntas relacionadas a Funk Mandela, analise o contexto da pergunta e responda de forma aprofundada, técnica e personalizada.
-- Use as diretrizes como referência, mas NÃO copie ou repita literalmente.
-- Expanda o conteúdo conforme necessário para entregar a MELHOR resposta possível dentro do contexto da pergunta.
-- Sempre que fizer sentido, **explique como aplicar na prática cada técnica mencionada** — mostre o passo a passo, os parâmetros ideais, os plugins recomendados e os ajustes finos com base no estilo.
-- Dê exemplos de como usar as ferramentas (como equalizador, compressor, saturador, reverb, delay etc), incluindo valores padrão e variações possíveis.
-- Priorize clareza, estrutura com tópicos e emojis, e linguagem direta.
-- Dê respostas didáticas, com instruções como se estivesse ensinando um aluno a produzir exatamente aquele elemento.
 `,
 
     'funk bruxaria': `
