@@ -1014,288 +1014,97 @@ export default async function handler(req, res) {
     // Chamar OpenAI com dados completos do usuário para personalização e contexto técnico
     let reply = await callOpenAI(messages, userData, db, uid);
 
-    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK MANDELA
+    // 🎹 SISTEMA DE INSERÇÃO DE IMAGENS COM PALAVRAS-CHAVE EXCLUSIVAS
+    // Configuração das imagens com palavras-chave únicas para evitar conflitos
+    const imagensInstrucao = [
+      {
+        nome: "Kick 1x3 - Funk ZN",
+        link: "https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png",
+        palavrasChave: ["1x3", "kick 1x3", "sequência 1x3", "padrão 1x3"],
+        alt: "Sequência de Kick 1x3 no Piano Roll",
+        titulo: "Exemplo visual da sequência de kick 1x3 no piano roll:"
+      },
+      {
+        nome: "Beat 6, 4, 4, 1 - Funk SP/BH",
+        link: "https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png",
+        palavrasChave: ["6, 4, 4, 1", "beat 6, 4, 4, 1", "sequência 6, 4, 4, 1", "padrão 6, 4, 4, 1"],
+        alt: "Sequência Beat 6, 4, 4, 1 no Piano Roll",
+        titulo: "Exemplo visual da sequência 6, 4, 4, 1 no piano roll:"
+      },
+      {
+        nome: "Beat 4x3x3x1 - Funk Mandela",
+        link: "https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png",
+        palavrasChave: ["4x3x3x1", "beat 4x3x3x1", "sequência 4x3x3x1", "padrão 4x3x3x1"],
+        alt: "Sequência Beat 4x3x3x1 Funk Mandela",
+        titulo: "Exemplo visual da sequência 4x3x3x1 no piano roll:"
+      }
+    ];
+
+    // Debug: Log das variáveis para verificar detecção
     const estilo = userData.perfil?.estilo?.toLowerCase() || "";
     const perguntaLower = message.toLowerCase();
     const respostaLower = reply.toLowerCase();
-
-    // Debug: Log das variáveis para verificar detecção
+    
     console.log('🔍 DEBUG - Estilo:', estilo);
-    console.log('🔍 DEBUG - Pergunta contém mandela:', perguntaLower.includes("mandela") || perguntaLower.includes("mandelão"));
-    console.log('🔍 DEBUG - Resposta contém 4x3x3x1:', respostaLower.includes("4x3x3x1"));
+    console.log('🔍 DEBUG - Pergunta:', perguntaLower.substring(0, 100));
+    console.log('🔍 DEBUG - Resposta:', respostaLower.substring(0, 100));
 
-    // Verifica se é Funk Mandela (detecção ampliada)
-    const ehMandela = estilo.includes("mandela") || 
-                      perguntaLower.includes("mandela") || 
-                      perguntaLower.includes("mandelão") ||
-                      perguntaLower.includes("funk mandela") ||
-                      respostaLower.includes("mandela") ||
-                      respostaLower.includes("mandelão");
+    // Função para inserir imagens baseada em palavras-chave exclusivas
+    function inserirImagensPorPalavrasChave(respostaTexto) {
+      let respostaAtualizada = respostaTexto;
+      let imagensInseridas = [];
 
-    // Verifica se menciona especificamente BEAT + sequência 4x3x3x1
-    const mencionaBeat4x3x3x1 = (respostaLower.includes("beat") && respostaLower.includes("4x3x3x1")) ||
-                                (respostaLower.includes("sequencia") && respostaLower.includes("4x3x3x1")) ||
-                                (respostaLower.includes("piano roll") && respostaLower.includes("4x3x3x1"));
-
-    console.log('🔍 DEBUG - É Mandela:', ehMandela);
-    console.log('🔍 DEBUG - Menciona Beat + 4x3x3x1:', mencionaBeat4x3x3x1);
-
-    if (ehMandela && mencionaBeat4x3x3x1) {
-      console.log('🎯 Condições atendidas - Inserindo imagem no contexto do BEAT...');
-      
-      // Inserir imagem apenas uma vez na primeira ocorrência encontrada
-      const imagemHTML = `<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/154Zyrp6/Captura-de-tela-2025-08-02-175821.png" alt="Sequência Funk Mandela" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
-      
-      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
-      if (/(beat.*?4x3x3x1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(beat.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
-      } else if (/(sequencia.*?4x3x3x1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(sequencia.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
-      } else if (/(piano roll.*?4x3x3x1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(piano roll.*?4x3x3x1.*?\.)/, `$1${imagemHTML}`);
-      }
-      
-      console.log('✅ Imagem do Funk Mandela inserida com sucesso no contexto do BEAT!');
-    } else {
-      console.log('❌ Condições não atendidas - não é sobre BEAT + 4x3x3x1');
-    }
-
-    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK BH
-    // Verifica se é Funk BH (detecção ampliada)
-    const ehFunkBH = estilo.includes("bh") || 
-                     estilo.includes("mtg") ||
-                     perguntaLower.includes("funk bh") || 
-                     perguntaLower.includes("funk de bh") ||
-                     perguntaLower.includes("mtg") ||
-                     perguntaLower.includes("funkbh") ||
-                     respostaLower.includes("funk bh") ||
-                     respostaLower.includes("bh");
-
-    // Verifica se menciona especificamente BEAT + sequência 6, 4, 4, 1
-    const mencionaBeat6441 = (respostaLower.includes("beat") && respostaLower.includes("6, 4, 4, 1")) ||
-                             (respostaLower.includes("sequencia") && respostaLower.includes("6, 4, 4, 1")) ||
-                             (respostaLower.includes("piano roll") && respostaLower.includes("6, 4, 4, 1"));
-
-    // 🚨 VERIFICAÇÃO ANTI-DUPLICAÇÃO: Se Funk BH menciona tanto 1/2 step quanto 6,4,4,1
-    const mencionaAmbos12StepE6441 = respostaLower.includes("1/2 step") && respostaLower.includes("6, 4, 4, 1");
-
-    console.log('🔍 DEBUG - É Funk BH:', ehFunkBH);
-    console.log('🔍 DEBUG - Menciona Beat + 6, 4, 4, 1:', mencionaBeat6441);
-    console.log('🔍 DEBUG - Menciona AMBOS (1/2 step + 6,4,4,1):', mencionaAmbos12StepE6441);
-
-    if (ehFunkBH && mencionaBeat6441) {
-      console.log('🎯 Condições atendidas - Inserindo imagem do Funk BH no contexto do BEAT...');
-      
-      // Inserir imagem apenas uma vez na primeira ocorrência encontrada
-      const imagemBHHTML = `<br><br>🎹 <b>Exemplo visual da sequência 6, 4, 4, 1 no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Sequência Funk BH 6,4,4,1" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
-      
-      // 🚨 LÓGICA ANTI-DUPLICAÇÃO: Se menciona ambos, priorizar inserção após 1/2 step
-      if (mencionaAmbos12StepE6441) {
-        console.log('🛡️ Detectado menção de ambos 1/2 step e 6,4,4,1 - Inserindo apenas UMA vez após 1/2 step');
-        
-        // Inserir preferencialmente após 1/2 step para evitar duplicação
-        if (/(1\/2 step.*?\.)/gi.test(reply)) {
-          reply = reply.replace(/(1\/2 step.*?\.)/, `$1${imagemBHHTML}`);
-        } else if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-          reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+      imagensInstrucao.forEach((item) => {
+        // Verifica se já foi inserida esta imagem para evitar duplicação
+        if (respostaAtualizada.includes(item.link)) {
+          console.log(`🛡️ Imagem ${item.nome} já presente - pulando inserção`);
+          return;
         }
-      } else {
-        // Comportamento normal quando só menciona 6, 4, 4, 1
-        if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-          reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
-        } else if (/(sequencia.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-          reply = reply.replace(/(sequencia.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
-        } else if (/(piano roll.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-          reply = reply.replace(/(piano roll.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
-        }
-      }
-      
-      console.log('✅ Imagem do Funk BH inserida com sucesso no contexto do BEAT!');
-    } else {
-      console.log('❌ Condições não atendidas para Funk BH - não é sobre BEAT + 6, 4, 4, 1');
-    }
 
-    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP - SEQUÊNCIA DE BEAT COM 1/2 STEP
-    // Verifica se é Funk SP (detecção ampliada) E NÃO é Funk BH para evitar conflito
-    const ehFunkSP = (estilo.includes("sp") || 
-                     estilo.includes("paulista") ||
-                     perguntaLower.includes("funk sp") || 
-                     perguntaLower.includes("funk de sp") ||
-                     perguntaLower.includes("funk zn") ||
-                     perguntaLower.includes("beat zn") ||
-                     respostaLower.includes("funk sp") ||
-                     respostaLower.includes("funk zn") ||
-                     respostaLower.includes("sp") ||
-                     respostaLower.includes("zn")) &&
-                     !ehFunkBH; // 🚨 NÃO processar se for Funk BH
+        // Procura por qualquer palavra-chave específica desta imagem
+        const palavraEncontrada = item.palavrasChave.find(chave => 
+          respostaAtualizada.toLowerCase().includes(chave.toLowerCase())
+        );
 
-    // Verifica se menciona especificamente BEAT + 1/2 step
-    const mencionaBeat12Step = (respostaLower.includes("beat") && 
-                               (respostaLower.includes("1/2 step") || 
-                                respostaLower.includes("meia divisão") || 
-                                respostaLower.includes("1/2 step beat") ||
-                                respostaLower.includes("progressões rítmicas marcantes"))) ||
-                              (respostaLower.includes("sequencia") && respostaLower.includes("1/2 step")) ||
-                              (respostaLower.includes("piano roll") && respostaLower.includes("1/2 step")) ||
-                              (respostaLower.includes("grid") && respostaLower.includes("1/2 step"));
-
-    console.log('🔍 DEBUG - É Funk SP (não BH):', ehFunkSP);
-    console.log('🔍 DEBUG - Menciona Beat + 1/2 step:', mencionaBeat12Step);
-
-    if (ehFunkSP && mencionaBeat12Step) {
-      console.log('🎯 Condições atendidas - Inserindo imagem do Funk SP no contexto do BEAT 1/2 step...');
-      
-      // Reutilizar a mesma imagem do Funk BH para ilustrar o conceito de 1/2 step
-      const imagemSPHTML = `<br><br>🎹 <b>Exemplo visual do 1/2 step no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Grid 1/2 step Funk SP" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
-      
-      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
-      if (/(beat.*?1\/2 step.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(beat.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
-      } else if (/(grid.*?1\/2 step.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(grid.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
-      } else if (/(sequencia.*?1\/2 step.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(sequencia.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
-      } else if (/(piano roll.*?1\/2 step.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(piano roll.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
-      } else if (/(meia divisão.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(meia divisão.*?\.)/, `$1${imagemSPHTML}`);
-      }
-      
-      console.log('✅ Imagem do Funk SP (1/2 step) inserida com sucesso no contexto do BEAT!');
-    } else {
-      console.log('❌ Condições não atendidas para Funk SP - não é sobre BEAT + 1/2 step');
-    }
-
-    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP/ZN - SEQUÊNCIA DE KICK ESPECÍFICA
-    // Detecção SIMPLES e DIRETA para KICK do Funk ZN
-    const ehPerguntaFunkZN = perguntaLower.includes("funk zn") || 
-                             perguntaLower.includes("como produzir") ||
-                             perguntaLower.includes("como fazer");
-
-    // DETECÇÃO SUPER ESPECÍFICA: Snap + kick = imagem
-    const temSnapEKick = (respostaLower.includes("snap em \"1/2 step\"") || 
-                         respostaLower.includes("snap em '1/2 step'") ||
-                         respostaLower.includes("utilize o snap em")) &&
-                        (respostaLower.includes("🥁 kick:") || 
-                         respostaLower.includes("kick") ||
-                         respostaLower.includes("ajustar a precisão do kick"));
-
-    // NÃO inserir se estiver falando de beat/percussão
-    const naoEhBeatOuPercussao = !(respostaLower.includes("🪘 percussão") || 
-                                  (respostaLower.includes("percussão / beat")) ||
-                                  (respostaLower.includes("beat:") && !respostaLower.includes("kick")));
-
-    console.log('🔍 DEBUG Funk ZN - Pergunta funk zn:', ehPerguntaFunkZN);
-    console.log('🔍 DEBUG Funk ZN - Tem snap + kick:', temSnapEKick);
-    console.log('🔍 DEBUG Funk ZN - NÃO é beat/percussão:', naoEhBeatOuPercussao);
-
-    // CONDIÇÃO FINAL: Pergunta funk + snap + kick + não é beat
-    if (ehPerguntaFunkZN && temSnapEKick && naoEhBeatOuPercussao) {
-      console.log('🎯 IMAGEM DO KICK SERÁ INSERIDA! Condições atendidas...');
-      
-      const imagemKickSPHTML = `<br><br>🎹 <b>Exemplo visual da precisão do kick no piano roll:</b><br><img src="https://i.postimg.cc/7LhwSQzz/Captura-de-tela-2025-08-03-192947.png" alt="Sequência de Kick no Piano Roll" style="max-width: 100%; margin-top: 10px; border-radius: 8px;">`;
-      
-      // ESTRATÉGIA GARANTIDA: Inserir após menção do snap no kick
-      if (respostaLower.includes("ajustar a precisão do kick")) {
-        reply = reply.replace(/(ajustar a precisão do kick[^.]*\.)/gi, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "ajustar a precisão do kick"!');
-      }
-      else if (respostaLower.includes("utilize o snap em")) {
-        reply = reply.replace(/(utilize o snap em [^.]*\.)/gi, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "utilize o snap em"!');
-      }
-      else if (respostaLower.includes("🥁 kick:")) {
-        reply = reply.replace(/(🥁 kick:[^.]*\.)/gi, `$1${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida após "🥁 kick:"!');
-      }
-      else {
-        // Fallback: inserir no final da primeira linha sobre kick
-        reply = reply.replace(/kick/i, `kick${imagemKickSPHTML}`);
-        console.log('✅ Imagem inserida com fallback após primeira menção de kick!');
-      }
-    } else {
-      console.log('❌ Condições NÃO atendidas para imagem do kick');
-      console.log('   - Pergunta funk zn:', ehPerguntaFunkZN);
-      console.log('   - Tem snap + kick:', temSnapEKick);
-      console.log('   - Não é beat/percussão:', naoEhBeatOuPercussao);
-    }
-
-    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE - INSTRUÇÕES GERAIS DE BEAT/KICK FUNK ZN/SP
-    // Detecta se é Funk ZN ou SP e se já não foi inserida nenhuma imagem
-    const ehFunkZNouSP = perguntaLower.includes("funk zn") || 
-                         perguntaLower.includes("funk sp") ||
-                         perguntaLower.includes("como produzir") ||
-                         perguntaLower.includes("como fazer") ||
-                         respostaLower.includes("funk zn") ||
-                         respostaLower.includes("funk sp");
-
-    // Detecta instruções de beat/kick na resposta
-    const temInstrucoesBeatKick = respostaLower.includes("coloca no meio do terceiro quadrado") ||
-                                 respostaLower.includes("posicione o kick no 1/2 step") ||
-                                 respostaLower.includes("a sequência do kick") ||
-                                 respostaLower.includes("beat padrão do funk") ||
-                                 respostaLower.includes("use 1/2 step para montar o beat") ||
-                                 respostaLower.includes("grid em 1/2 step") ||
-                                 respostaLower.includes("meio do terceiro quadrado") ||
-                                 respostaLower.includes("terceiro quadrado") ||
-                                 respostaLower.includes("posicione o kick") ||
-                                 respostaLower.includes("sequência de kick") ||
-                                 respostaLower.includes("beat do funk zn") ||
-                                 respostaLower.includes("beat do funk sp");
-
-    // Verifica se já tem alguma imagem na resposta para evitar duplicação
-    const jatemImagem = reply.includes('<img') || reply.includes('postimg.cc');
-
-    console.log('🔍 DEBUG Instruções Beat/Kick - É Funk ZN/SP:', ehFunkZNouSP);
-    console.log('🔍 DEBUG Instruções Beat/Kick - Tem instruções:', temInstrucoesBeatKick);
-    console.log('🔍 DEBUG Instruções Beat/Kick - Já tem imagem:', jatemImagem);
-
-    // Inserir imagem apenas se: é Funk ZN/SP + tem instruções + ainda não tem imagem
-    if (ehFunkZNouSP && temInstrucoesBeatKick && !jatemImagem) {
-      console.log('🎯 Inserindo imagem do piano roll para instruções gerais de beat/kick...');
-      
-      const imagemPianoRollHTML = `<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Piano Roll Funk ZN/SP" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
-      
-      // Estratégia de inserção em ordem de prioridade
-      if (/(meio do terceiro quadrado.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(meio do terceiro quadrado.*?\.)/, `$1${imagemPianoRollHTML}`);
-        console.log('✅ Imagem inserida após "meio do terceiro quadrado"!');
-      }
-      else if (/(posicione o kick.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(posicione o kick.*?\.)/, `$1${imagemPianoRollHTML}`);
-        console.log('✅ Imagem inserida após "posicione o kick"!');
-      }
-      else if (/(grid em 1\/2 step.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(grid em 1\/2 step.*?\.)/, `$1${imagemPianoRollHTML}`);
-        console.log('✅ Imagem inserida após "grid em 1/2 step"!');
-      }
-      else if (/(beat padrão.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(beat padrão.*?\.)/, `$1${imagemPianoRollHTML}`);
-        console.log('✅ Imagem inserida após "beat padrão"!');
-      }
-      else if (/(sequência.*?kick.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(sequência.*?kick.*?\.)/, `$1${imagemPianoRollHTML}`);
-        console.log('✅ Imagem inserida após "sequência...kick"!');
-      }
-      else {
-        // Fallback: inserir após primeiro parágrafo sobre beat ou kick
-        if (reply.includes('🥁') || reply.includes('🎹')) {
-          const beatIndex = reply.search(/🥁|🎹/);
-          if (beatIndex !== -1) {
-            const nextParagraph = reply.indexOf('\n', beatIndex);
-            if (nextParagraph !== -1) {
-              reply = reply.slice(0, nextParagraph) + imagemPianoRollHTML + reply.slice(nextParagraph);
-              console.log('✅ Imagem inserida após primeiro parágrafo de beat/kick!');
+        if (palavraEncontrada) {
+          console.log(`🎯 Palavra-chave encontrada: "${palavraEncontrada}" para ${item.nome}`);
+          
+          // Gera o HTML da imagem
+          const imagemHTML = `<br><br>🎹 <b>${item.titulo}</b><br><img src="${item.link}" alt="${item.alt}" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
+          
+          // Estratégia de inserção: busca a primeira ocorrência da palavra-chave e insere após ela
+          const regex = new RegExp(`(${palavraEncontrada.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^.]*\\.)`, 'gi');
+          
+          if (regex.test(respostaAtualizada)) {
+            respostaAtualizada = respostaAtualizada.replace(regex, `$1${imagemHTML}`);
+            imagensInseridas.push(item.nome);
+            console.log(`✅ Imagem ${item.nome} inserida com sucesso após "${palavraEncontrada}"!`);
+          } else {
+            // Fallback: inserir após a primeira menção da palavra-chave
+            const index = respostaAtualizada.toLowerCase().indexOf(palavraEncontrada.toLowerCase());
+            if (index !== -1) {
+              const insertPos = respostaAtualizada.indexOf('.', index) + 1;
+              if (insertPos > 0) {
+                respostaAtualizada = respostaAtualizada.slice(0, insertPos) + imagemHTML + respostaAtualizada.slice(insertPos);
+                imagensInseridas.push(item.nome);
+                console.log(`✅ Imagem ${item.nome} inserida via fallback após "${palavraEncontrada}"!`);
+              }
             }
           }
         }
+      });
+
+      if (imagensInseridas.length > 0) {
+        console.log(`🎉 Total de imagens inseridas: ${imagensInseridas.length} - ${imagensInseridas.join(', ')}`);
+      } else {
+        console.log('ℹ️ Nenhuma palavra-chave exclusiva encontrada - nenhuma imagem inserida');
       }
-    } else {
-      console.log('❌ Condições NÃO atendidas para imagem de instruções gerais');
-      console.log('   - É Funk ZN/SP:', ehFunkZNouSP);
-      console.log('   - Tem instruções beat/kick:', temInstrucoesBeatKick);
-      console.log('   - Já tem imagem:', jatemImagem);
+
+      return respostaAtualizada;
     }
+
+    // Aplicar o sistema de inserção de imagens
+    reply = inserirImagensPorPalavrasChave(reply);
 
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
