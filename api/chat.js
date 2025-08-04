@@ -603,15 +603,6 @@ Diretrizes técnicas:
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 - Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
 - Use todos os conteudos abaixo.
-
-🚨 ORDEM OBRIGATÓRIA PARA FUNK BRUXARIA:
-**SEMPRE RESPONDA NESTA ORDEM EXATA:**
-1️⃣ **PRIMEIRO: 🎙️ VOZ/ACAPELLA** 
-2️⃣ **SEGUNDO: 🔥 BEAT/RITMO**  
-3️⃣ **TERCEIRO: 🎹 MELODIA/HARMONIA** 
-4️⃣ **QUARTO: 🥁 KICK** 
-5️⃣ **QUINTO: ⚙️ MIXAGEM/PRODUÇÃO**
-
 SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 📚 CONTEXTO TÉCNICO A— FUNK BRUXARIA
 🧙‍♂️ **Estilo sombrio:**  
@@ -619,50 +610,39 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 - Estilo bem experimental, livre e sem regras fixas.
 - Surgiu na Zona Sul de SP e ganhou força em bailes como o da 17.
 - BPM entre **130 e 135**, muitas vezes um estilo mais acelerado”.
-🎙️ **1º - ACAPELLA/VOZ (SEMPRE PRIMEIRO):**
+🎙️ **Acapella:**
 - A estrutura nasce **a partir da voz**.
 - Usar falas repetitivas, proibidonas (ex: "sarra", "vou te colocar").
 - Criar **repiques, cortes e manipulações** com esticamento e variações tonais.
 - Aplicar pitch shifting (12st ou -12st), automação de volume e reverb reverse para dar identidade.
-- Equalização com foco em deixar a voz marcante: corte leve nos graves (abaixo 100Hz), realce nos médios (1-5kHz) e agudos (8-15kHz).
-- Compressão com ratio 3:1, attack rápido (1-3ms), release 100-200ms.
-- Reverb com decay curto (0.8-1.5s) e delay com feedback baixo (15-25%).
-
-🔥 **2º - BEAT/RITMO (SEMPRE SEGUNDO):**
-- Samples sujos e distorcidos funcionam bem. Packs como **Favela Beat**, **DJ Ayzen** são ótimas fontes.
-- Você pode usar também presets de synths como o Vital e Serum.
-- Pode se utilizar Bass pesados como beat principal, fazendo uma verdadeira pressão sonora.
-- Padrão rítmico: Use Snap "Line" e faça a sequência **4x3x3x1** no piano roll.
-- Como fazer na prática: no primeiro compasso, conta 3 casas e na 4ª você coloca uma nota, no segundo compasso conta 2 casas e na 3ª adiciona uma nota, e assim vai.
-- Estrutura repetitiva, ritualística, com **variações sutis** ao longo da faixa.
-- Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
-
-🎹 **3º - MELODIA/HARMONIA (SEMPRE TERCEIRO):**
-🎹 **3º - MELODIA/HARMONIA (SEMPRE TERCEIRO):**
+🎹 **Melodia / Harmonia:**
 - Usar plugins como **Vital**, **Flex**, **Nexus** ou **Harmor**, escolhendo timbres escuros e densos (pads, leads graves).
 - Criar uma sequência de **notas graves com notas agudas simultâneas** para contraste de textura.
 - Usar escalas menores e notas dissonantes para criar tensão.
 - Pode utilizar também **vozes sampleadas** com efeitos de **pitch**, **formant shift**, **distorção** e **reverses**.
 - Sons com ambiência estéreo, modulação, e LFOs lentos ajudam na sensação hipnótica.
+🔥 **Beat:**
+- Samples sujos e distorcidos funcionam bem. Packs como **Favela Beat**, **DJ Ayzen** são otimas fontes. Você pode usar tambem presets de synths como o Vital e Serum.
+- Pode se utilizar Bass pesados como beat principal, fazendo uma verdadeira pressão sonora. Padrão rítmico do beat: Use Snap "Line" e faça a sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
 
-🥁 **4º - KICK (SEMPRE QUARTO):**
+- Padrão rítmico do beat: Use Snap "Line" e faça a sequência 4x3x3x1 no piano roll, contando os quadradinhos por nota. Essa é somente a base, use ela como ponto de partida. como fazer na pratica: no primeiro compasso, conta 3 casas e na 4 você coloca uma nota, no segundo compasso conta 2 casas e na 3º adiciona uma nota, e assim vai.
+- Estrutura repetitiva, ritualística, com **variações sutis** ao longo da faixa.
+- Teste transposição de oitavas, reverse, granularização ou pitching manual para gerar timbres únicos.
+🥁 **Kick:**
 - Escolher um kick **seco, com punch**, entre 50–70Hz.
 - Sidechain leve se estiver usando bass/synth grave junto.
 - Pode duplicar e processar com **saturação paralela**.
-- EQ: realce em 60-80Hz, corte em 200-400Hz para clareza, leve boost em 2-5kHz para presença.
-
-⚙️ **5º - MIXAGEM/PRODUÇÃO (SEMPRE QUINTO):**
-- EQ voltado para deixar os graves mais fortes e os agudos mais claros.
+⚙️ **Produção / Mixagem:**
+- EQ voltado para deixar os graves mais fortes. e os agudos mais claros
 - Delay curto (Ping Pong com feedback baixo), reverb com decay menor que 1.5s.
 - Chorus e flanger em estéreo para elementos de ambiência.
 - Trabalhar com **testes e variações constantes** — o estilo é baseado em exploração.
-- Compressão paralela nos grupos, saturação sutil para adicionar harmônicos.
 
 🌍 **Destaque internacional:**
 - Funk bruxaria já apareceu em vídeos da Europa, e **Kanye West** sampleou beats do estilo.
 - Brasileiros estão levando o som underground para festivais gringos.
 
-📎 **Lembrete final:** SEMPRE RESPONDA NA ORDEM: 1º VOZ → 2º BEAT → 3º MELODIA → 4º KICK → 5º MIXAGEM. Este conteúdo é apenas uma base. Sempre expanda tecnicamente as respostas conforme o contexto da pergunta, entregando o máximo de profundidade, clareza e aplicabilidade possível.
+📎 **Lembrete final:** Este conteúdo é apenas uma base. Sempre expanda tecnicamente as respostas conforme o contexto da pergunta, entregando o máximo de profundidade, clareza e aplicabilidade possível.
 
 `,
 
@@ -916,15 +896,6 @@ Responda com excelência absoluta.`;
     } else {
       // Aplicação normal do contexto para primeira menção do estilo
       systemPrompt += `\n\n${contextoInfo.promptEstilo}`;
-      
-      // FORÇA A ORDEM ESPECÍFICA PARA FUNK BRUXARIA
-      if (contextoInfo.estilo.toLowerCase().includes('bruxaria')) {
-        systemPrompt += `\n\n🚨 INSTRUÇÃO CRÍTICA PARA FUNK BRUXARIA:
-**SEMPRE RESPONDA EXATAMENTE NESTA ORDEM OBRIGATÓRIA:**
-1º VOZ/ACAPELLA → 2º BEAT/RITMO → 3º MELODIA/HARMONIA → 4º KICK → 5º MIXAGEM/PRODUÇÃO
-NUNCA MUDE ESTA SEQUÊNCIA! A VOZ DEVE SEMPRE VIR PRIMEIRO!`;
-      }
-      
       console.log(`🎯 Contexto técnico ativo aplicado: ${contextoInfo.estilo}`);
     }
   }
@@ -1044,17 +1015,13 @@ export default async function handler(req, res) {
     console.log('🔍 DEBUG - Pergunta contém mandela:', perguntaLower.includes("mandela") || perguntaLower.includes("mandelão"));
     console.log('🔍 DEBUG - Resposta contém 4x3x3x1:', respostaLower.includes("4x3x3x1"));
 
-    // Verifica se é Funk Mandela (detecção ampliada) 
+    // Verifica se é Funk Mandela (detecção ampliada)
     const ehMandela = estilo.includes("mandela") || 
-                      estilo.includes("bruxaria") ||
                       perguntaLower.includes("mandela") || 
                       perguntaLower.includes("mandelão") ||
                       perguntaLower.includes("funk mandela") ||
-                      perguntaLower.includes("funk bruxaria") ||
-                      perguntaLower.includes("bruxaria") ||
                       respostaLower.includes("mandela") ||
-                      respostaLower.includes("mandelão") ||
-                      respostaLower.includes("bruxaria");
+                      respostaLower.includes("mandelão");
 
     // Verifica se menciona especificamente BEAT + sequência 4x3x3x1
     const mencionaBeat4x3x3x1 = (respostaLower.includes("beat") && respostaLower.includes("4x3x3x1")) ||
@@ -1121,6 +1088,56 @@ export default async function handler(req, res) {
       console.log('✅ Imagem do Funk BH inserida com sucesso no contexto do BEAT!');
     } else {
       console.log('❌ Condições não atendidas para Funk BH - não é sobre BEAT + 6, 4, 4, 1');
+    }
+
+    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP - SEQUÊNCIA DE BEAT COM 1/2 STEP
+    // Verifica se é Funk SP (detecção ampliada)
+    const ehFunkSP = estilo.includes("sp") || 
+                     estilo.includes("paulista") ||
+                     perguntaLower.includes("funk sp") || 
+                     perguntaLower.includes("funk de sp") ||
+                     perguntaLower.includes("funk zn") ||
+                     perguntaLower.includes("beat zn") ||
+                     respostaLower.includes("funk sp") ||
+                     respostaLower.includes("funk zn") ||
+                     respostaLower.includes("sp") ||
+                     respostaLower.includes("zn");
+
+    // Verifica se menciona especificamente BEAT + 1/2 step
+    const mencionaBeat12Step = (respostaLower.includes("beat") && 
+                               (respostaLower.includes("1/2 step") || 
+                                respostaLower.includes("meia divisão") || 
+                                respostaLower.includes("1/2 step beat") ||
+                                respostaLower.includes("progressões rítmicas marcantes"))) ||
+                              (respostaLower.includes("sequencia") && respostaLower.includes("1/2 step")) ||
+                              (respostaLower.includes("piano roll") && respostaLower.includes("1/2 step")) ||
+                              (respostaLower.includes("grid") && respostaLower.includes("1/2 step"));
+
+    console.log('🔍 DEBUG - É Funk SP:', ehFunkSP);
+    console.log('🔍 DEBUG - Menciona Beat + 1/2 step:', mencionaBeat12Step);
+
+    if (ehFunkSP && mencionaBeat12Step) {
+      console.log('🎯 Condições atendidas - Inserindo imagem do Funk SP no contexto do BEAT 1/2 step...');
+      
+      // Reutilizar a mesma imagem do Funk BH para ilustrar o conceito de 1/2 step
+      const imagemSPHTML = `<br><br>🎹 <b>Exemplo visual do 1/2 step no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Grid 1/2 step Funk SP" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
+      
+      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
+      if (/(beat.*?1\/2 step.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(beat.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
+      } else if (/(grid.*?1\/2 step.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(grid.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
+      } else if (/(sequencia.*?1\/2 step.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(sequencia.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
+      } else if (/(piano roll.*?1\/2 step.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(piano roll.*?1\/2 step.*?\.)/, `$1${imagemSPHTML}`);
+      } else if (/(meia divisão.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(meia divisão.*?\.)/, `$1${imagemSPHTML}`);
+      }
+      
+      console.log('✅ Imagem do Funk SP (1/2 step) inserida com sucesso no contexto do BEAT!');
+    } else {
+      console.log('❌ Condições não atendidas para Funk SP - não é sobre BEAT + 1/2 step');
     }
 
     // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP/ZN - SEQUÊNCIA DE KICK ESPECÍFICA
