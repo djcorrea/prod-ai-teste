@@ -437,6 +437,8 @@ Responda com excelência absoluta.`;
       estiloBase = instrucoesBase.funkBH;
     } else if (estiloLower.includes('bruxaria') || estiloLower.includes('bruxo')) {
       estiloBase = instrucoesBase.funkBruxaria;
+    } else if (estiloLower.includes('phonk')) {
+      estiloBase = instrucoesBase.phonk;
     }
   }
 
@@ -513,6 +515,7 @@ function detectarEstiloNaMensagem(mensagem) {
     { keywords: ['funk bh', 'funk de bh', 'mtg', 'funkbh'], nome: 'funk bh' },
     { keywords: ['funk bruxaria', 'bruxaria', 'bruxo', 'dark funk'], nome: 'funk bruxaria' },
     { keywords: ['funk sp', 'funk de sp', 'funk zn', 'batida sp', 'batidão paulista', 'funk paulistano', 'beat zn', 'zn'], nome: 'funk sp' },
+    { keywords: ['brazilian phonk', 'phonk', 'phonk brasileiro', 'phonk br'], nome: 'phonk' },
     { keywords: ['trap', 'trap nacional'], nome: 'trap' },
     { keywords: ['brega funk', 'bregafunk'], nome: 'brega funk' },
     { keywords: ['funk sujo'], nome: 'funk sujo' }
@@ -657,6 +660,65 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 
 `,
 
+  phonk: `
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como **base técnica de referência**.
+- Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- **Explique como aplicar cada técnica na prática**: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura.
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+- Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
+
+SIGA ESSA SEQUÊNCIA NAS RESPOSTAS:
+
+🎧 CONTEXTO TÉCNICO ATIVO – PHONK
+
+🎤 Vocais e efeitos:
+- Grave vocais curtos e com personalidade, frases como: "eu vou macetando", "passando", etc.
+- Depois de gravado: Use formant shift, distorção leve, delay e reverb com automação.
+- Teste versões slow + reverb, principalmente em drops e pausas.
+- Faça variações com pitch shift e duplicação de camada.
+- Vocais precisam ter impacto e soar "prontos pra meme".
+- Use reverb com automação, delay com mix ajustado, e finalize com Air Fresh ou excitador de harmônicos.
+- Recortes criativos (tipo "Ela tá querendo, tá?") funcionam muito bem — busque vocais sem palavrão se for algo mais TikTok friendly.
+- Duplicar e encaixar vocais com variações de pitch dá identidade aos drops.
+
+🎹 Melodia e construção harmônica:
+- Crie melodias simples, repetitivas e grudentas, com forte apelo rítmico e timbre agudo ou metálico.
+- Pesquise por packs de phonk na internet, esses packs vem com uma grande variedades de samples, efeitos, percussões etc.
+- Use sintetizadores como o Vital para criar sons plucky ou wampy.
+- Adicione reverb leve, OTT (18–57% depth), um toque de hyper chorus, delay estéreo e equalização com corte de graves e agudos.
+- Para intensificar, adicione Diablo, Soft Clipper ou Airwindows para aumentar presença.
+
+🧱 Construção do beat e groove:
+- O beat precisa ser impactante e seco, no estilo bruxaria ou também na pegada melódica.
+- Use kicks específicos de phonk encontrados em packs de phonk.
+- Em estilos como funk TikTok ou montagem, o groove pode parecer "tonto", mas propositalmente cria movimento.
+- Exemplo prático de sequência para base do beat: 4x3x3x1
+- Utilize apenas como ponto de partida, adicione mais notas e de mais variações criativas no piano.
+
+🔊 Bassline e subgrave:
+- O sub é forte, distorcido, exagerado com forte pressão sonora.
+- Coloque o sub em mono, com overdrive intenso e sidechain para encaixar no kick.
+- Use compressão multibanda, equalização cirúrgica e Clipper para atingir a crocância máxima.
+- Frequência ideal: entre 40 Hz e 90 Hz, com boost em 60 Hz e corte abaixo de 30 Hz.
+
+🎛️ Mixagem e sonoridade final:
+- A mix tem que ser alta, agressiva e intensa.
+- Use EQ antes do Soft Clipper, compressor multibanda e aumente o volume até o limite desconfortável (buscando LUFS entre -8 a -5, se o estilo pedir).
+- O som final precisa ser "crocante", sem destruir os alto-falantes.
+- Lembre-se: mixagem ruim soa boa quando o beat é forte e bem pensado.
+
+🧪 Estética, variações e feeling de produtor:
+- Vá pelo ouvido — nesse ritmo a teoria musical não importa tanto quanto o feeling da parada.
+- Faça versões slowed + reverb, fácil de fazer e pode multiplicar sua receita caso a musica venha a explodir!
+- Estilos como montagem exigem variações curtas, repetitivas e com timbres reconhecíveis.
+`,
+
     'funk sp': `
     📌 DIRETRIZES OBRIGATÓRIAS:
 - Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
@@ -713,6 +775,8 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 `,
 
     'funk bh': instrucoesBase.funkBH,
+
+    'phonk': instrucoesBase.phonk,
 
     'trap': `
 📚 CONTEXTO TÉCNICO ATIVO — TRAP
