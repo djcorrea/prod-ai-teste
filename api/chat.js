@@ -1304,6 +1304,13 @@ export default async function handler(req, res) {
         alt: "Sequência Beat 4x3x3x1 Funk Mandela",
         titulo: "Exemplo visual da sequência 4x3x3x1 no piano roll:"
       },
+      {
+        nome: "Beat 1-4-3-3-1 - Funk Automotivo",
+        link: "https://i.postimg.cc/FKZs2qPs/Captura-de-tela-2025-08-04-193208.png",
+        palavrasChave: ["1-4-3-3-1", "1433", "sequência 1-4-3-3-1", "padrão 1-4-3-3-1", "beat 1-4-3-3-1"],
+        alt: "Sequência Beat 1-4-3-3-1 Funk Automotivo",
+        titulo: "Exemplo visual da sequência 1-4-3-3-1 no piano roll:"
+      },
       
       // 🆕 EXEMPLOS DE COMO ADICIONAR NOVAS IMAGENS FACILMENTE:
       
