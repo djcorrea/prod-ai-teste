@@ -363,6 +363,65 @@ SIGA ESSA SEQUÊNCIA NAS RESPOSTAS:
 - Vá pelo ouvido — nesse ritmo a teoria musical não importa tanto quanto o feeling da parada.
 - Faça versões slowed + reverb, fácil de fazer e pode multiplicar sua receita caso a musica venha a explodir!
 - Estilos como montagem exigem variações curtas, repetitivas e com timbres reconhecíveis.
+`,
+
+  funkAutomotivo: `
+📌 DIRETRIZES:
+- Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
+- Use os conteúdos abaixo apenas como base técnica de referência.
+- Ao responder, analise o contexto exato da pergunta do usuário e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
+- Explique como aplicar cada técnica na prática: forneça parâmetros exatos (Hz, dB, ms), nome de plugins, valores sugeridos, variações avançadas, ordem de processamento e dicas profissionais.
+- Sempre que for mencionado compressão, saturação, sidechain, equalização, automação, timbres, sound design ou mixagem, **detalhe como fazer no DAW (ex: FL Studio), com instruções de onde clicar e como configurar**.
+- Seja extremamente técnico, mas sem perder a clareza: ensine com estrutura, passo a passo e com exemplos reais.
+- Use estrutura com emojis para facilitar a leitura.
+- Evite respostas genéricas, rasas ou que apenas repitam a base. Aprofunde cada conceito como se estivesse em um curso avançado.
+- Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
+- Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
+
+SIGA ESSA SEQUÊNCIA NAS RESPOSTAS:
+
+🎧 CONTEXTO TÉCNICO ATIVO – FUNK AUTOMOTIVO
+O Funk Automotivo é um subgênero do funk em constante ascensão, conhecido por sua pegada dançante e batidas sequenciadas . Carrega uma identidade sonora única, podendo seguir linhas mais melódicas, com synths envolventes e harmonias, ou versões mais sujas, com graves distorcidos e agressividade na mixagem.
+
+🎤 Acapellas:
+- Pode-se usar vozes ritmadas, com frases repetitivas, ou se quiser produzir um funk automotivo melódico use alguma voz mais cantada, marcante e harmônica.
+- Faça uma mixagem limpa na voz, corte os graves entre 20 Hz a 80 Hz.
+- Utilize efeitos de reverb e delay conforme o necessário.
+- Faça automações ou ajustes no volume para encaixar com dinâmica.
+
+🥁 BPM e Estrutura:
+- O BPM mais comum do automotivo gira entre 130 e 135, sendo 130 BPM o padrão mais usado.
+
+🎹 Sample Base e Melodia:
+- Baixe packs de samples e encontre samples que combinem com o Funk Automotivo ou use qualquer sintetizador e crie synths utilizando presets de leads ou bass.
+- O beat é mais sequenciado, mantendo uma sequência intensa com variações como 1-4-3-3-1, criando uma batida sequencial.
+- Afine o sample com o pitch, ou suba as oitavas das notas para criar variações no som.
+- Use essa sequência base do beat somente como ponto de partida, faça variações na progressão ajustando a posição das notas recuando ligeiramente certas notas ou adicionando em outras posições estratégicas do piano roll.
+- Brinque com as notas, com foco em repetição e variações rítmicas.
+- Copie toda a progressão do beat e cole uma oitava acima ou abaixo para deixar o som com mais corpo.
+
+🔊 Kick Automotivo:
+- Use um kick forte e grave com boa resposta nos 50-100Hz e transiente firme.
+- Siga exatamente essa sequência: 4x4, ou seja a cada compasso o kick toca 4 vezes.
+- Para viradas, adicione kicks extras no contratempo para criar variações.
+- Equalize para tirar agudos indesejados e deixar o som mais "fofo".
+
+🧩 Sidechain e Mix Automotiva:
+- Se estiver tocando um bass junto com o kick, faça sidechain para abaixar o volume do bass sempre que o kick bater, evitando conflito entre as frequências graves.
+- Ajuste os parâmetros: Threshold, Ratio, Release para criar aquele pum-pum seco característico.
+- Faça uma mixagem limpa mas sem perder o pump.
+- Pan center : Kick, bass e beat sempre centralizado, efeitos e outros instrumentos distribua para os lados.
+- Retire o Fruity Limiter do master e adicione um Fruity Soft Clipper, subindo o threshold para dar mais punch no som.
+
+🎛️ Efeitos no Synth / Sample:
+- Reverb: Adicione para dar mais eco no sample e deixar com mais profundidade.
+- Equalização: Corte nos graves desnecessários.
+- Estereo Spread: Use estéreo enhancer para dar largura ao sample principal (efeito de "abrir" o som nos fones).
+
+🧪 Toques Finais:
+- Use pontinhos de voz recortados no tempo certo (ex: "vai, vai, vai") para swingar a track.
+- Sidechain e Clipper garantem o efeito de pressão do som automotivo.
+- A estrutura básica com kick + sample já segura o groove. O resto é criatividade com pontinhos, viradas e ambiências.
 `
 };
 
@@ -498,6 +557,8 @@ Responda com excelência absoluta.`;
       estiloBase = instrucoesBase.funkBruxaria;
     } else if (estiloLower.includes('phonk')) {
       estiloBase = instrucoesBase.phonk;
+    } else if (estiloLower.includes('automotivo')) {
+      estiloBase = instrucoesBase.funkAutomotivo;
     }
   }
 
@@ -575,6 +636,7 @@ function detectarEstiloNaMensagem(mensagem) {
     { keywords: ['funk bruxaria', 'bruxaria', 'bruxo', 'dark funk'], nome: 'funk bruxaria' },
     { keywords: ['funk sp', 'funk de sp', 'funk zn', 'batida sp', 'batidão paulista', 'funk paulistano', 'beat zn', 'zn'], nome: 'funk sp' },
     { keywords: ['brazilian phonk', 'phonk', 'phonk brasileiro', 'phonk br'], nome: 'phonk' },
+    { keywords: ['funk automotivo', 'beat automotivo', 'automotivo', 'automotivo melódico'], nome: 'funk automotivo' },
     { keywords: ['trap', 'trap nacional'], nome: 'trap' },
     { keywords: ['brega funk', 'bregafunk'], nome: 'brega funk' },
     { keywords: ['funk sujo'], nome: 'funk sujo' }
@@ -837,6 +899,8 @@ SIGA ESSA SEQUÊNCIA NAS RESPOSTAS:
 
     'phonk': instrucoesBase.phonk,
 
+    'funk automotivo': instrucoesBase.funkAutomotivo,
+
     'trap': `
 📚 CONTEXTO TÉCNICO ATIVO — TRAP
 - 🥁 BPM entre 140-180, hi-hats em tercinas (triplets), snare no 3° tempo.
@@ -1088,6 +1152,19 @@ VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
 
 ⚠️ SE VOCÊ PULAR QUALQUER SEÇÃO ACIMA, A RESPOSTA SERÁ CONSIDERADA INCORRETA.
 ⚠️ SEMPRE MENCIONE A SEQUÊNCIA NUMÉRICA ESPECÍFICA (4x3x3x1).
+⚠️ SIGA A ORDEM EXATA, MESMO SE A PERGUNTA FOR ESPECÍFICA SOBRE UM TÓPICO.`;
+      } else if (contextoInfo.estilo === 'funk automotivo') {
+        systemPrompt += `\n\n🚨 **INSTRUÇÃO CRÍTICA DE ORDEM OBRIGATÓRIA**:
+VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
+1º) CONTEXTO E ACAPELLAS (obrigatório falar sobre voz adaptada ao automotivo)
+2º) BPM E ESTRUTURA (obrigatório mencionar 130-135 BPM)
+3º) SAMPLES E MELODIA (obrigatório falar sobre sintetizadores e samples automotivos)
+4º) KICK E PADRÃO RÍTMICO (obrigatório mencionar 4x4 e sidechain)
+5º) SIDECHAIN E MIXAGEM (obrigatório falar sobre compressão)
+6º) EFEITOS E FINALIZAÇÃO (obrigatório falar sobre master e espacialização)
+
+⚠️ SE VOCÊ PULAR QUALQUER SEÇÃO ACIMA, A RESPOSTA SERÁ CONSIDERADA INCORRETA.
+⚠️ SEMPRE MENCIONE BPM 130-135 E PADRÃO 4x4.
 ⚠️ SIGA A ORDEM EXATA, MESMO SE A PERGUNTA FOR ESPECÍFICA SOBRE UM TÓPICO.`;
       }
       
