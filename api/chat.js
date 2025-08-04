@@ -658,7 +658,7 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 `,
 
     'funk sp': `
-    📌 DIRETRIZES:
+    📌 DIRETRIZES OBRIGATÓRIAS:
 - Responda com altíssimo nível técnico, explicando cada conceito com profundidade e clareza, como se estivesse ensinando um aluno que deseja se tornar profissional.
 - Use os conteúdos abaixo apenas como **base técnica de referência**.
 - Ao responder, **analise o contexto exato da pergunta do usuário** e entregue a melhor resposta possível, totalmente personalizada para o caso dele.
@@ -672,30 +672,41 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS:
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 - Garanta de entregar as respostas melhores que o proprio ChatGPT, tornado-se referência para quem produz.
 - Use todos os conteudos abaixo.
-SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS NÃO PULE NADA:
+
+🚨 **REGRA OBRIGATÓRIA**: SIGA EXATAMENTE ESSA SEQUÊNCIA NAS RESPOSTAS - NÃO PULE NENHUMA SEÇÃO:
+
+1º) **SEMPRE** comece falando sobre VOZ/ACAPELLA
+2º) **OBRIGATORIAMENTE** fale sobre KICK (incluindo a sequência 1x3)
+3º) **SEMPRE** explique PERCUSSÃO/BEAT (incluindo sequência 6,4,4,1)
+4º) **FINALIZE** com MIXAGEM/ORGANIZAÇÃO
+
+⚠️ **ATENÇÃO**: Se você pular qualquer uma dessas 4 seções, a resposta será considerada INCOMPLETA. Sempre inclua TODAS as 4 seções, mesmo que adapte o conteúdo à pergunta específica.
+
 🧠 INSTRUÇÃO INTRODUÇÃO BASE - FUNK SP / ZN:
-🎙️ VOZ / ACAPELA
+
+🎙️ VOZ / ACAPELLA (SEÇÃO 1 - OBRIGATÓRIA)
 - 🎤 Utilize acapelas com rimas diretas, estilo inspirado em tendências atuais, com frases agressivas ou chicletes.
 - 🗑️ Faça cortes sequenciados em algumas partes da voz, criando um efeito mais dinamico.
 - 🧠 Faça um tratamento de voz adequado para que a voz se destaque na música, faça uma equalização com foco em reduzir os graves e aumentar os agudos, faça uma compressão multibanda, adicione reverb e delay se for preciso.
-🥁KICK
+
+🥁 KICK (SEÇÃO 2 - OBRIGATÓRIA - SEMPRE MENCIONE A SEQUÊNCIA 1x3)
 - Use um kick grave e seco, de preferência sem cauda longa.
 - ✂️ Corte o começo do kick (vento/silêncio) para evitar sujeira no som.
-- 🔁 Para a linha do kick, utilize o snap em "1/2 step com a sequencia 1x3. Adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma "Base para começar"
+- 🔁 **IMPORTANTE**: Para a linha do kick, utilize o snap em "1/2 step" com a sequência 1x3. Adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o próximo 3 casas atrás do 2º compasso, continua com essa sequência para criar uma "Base para começar"
 - 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
 
-🪘 PERCUSSÃO / BEAT
-- 🪘 Use percurssões como (Sinos, samples metalicas, samples curtas, efeitos curtos, caixas)
+🪘 PERCUSSÃO / BEAT (SEÇÃO 3 - OBRIGATÓRIA - SEMPRE MENCIONE A SEQUÊNCIA 6,4,4,1)
+- 🪘 Use percussões como (Sinos, samples metálicas, samples curtas, efeitos curtos, caixas)
 - 🥁 Adicione efeitos como: reverb para deixar mais longo o sample, delay em alguns casos para criar mais profundidade.
-- 🔉 Para fazer um beat base para ponto de partida: use o snap em "1/2 step" para o ajustar melhor o grid para fazer progressões ritimadas.
-- 🎹 Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
-- 🎹 Adicione samples ou percursões secundárias no fundo, para dar mais vida para o beat, faça combinações entre percursões (subindo, descendo as notas, desce oitavas) para fazer o verdadeiro "Beat Ritmado"
+- 🔉 Para fazer um beat base para ponto de partida: use o snap em "1/2 step" para ajustar melhor o grid para fazer progressões ritmadas.
+- 🎹 **IMPORTANTE**: Coloque as notas nos quadradinhos de cada compasso nessa sequência: 6, 4, 4, 1, como fazer na prática: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
+- 🎹 Adicione samples ou percussões secundárias no fundo, para dar mais vida para o beat, faça combinações entre percussões (subindo, descendo as notas, desce oitavas) para fazer o verdadeiro "Beat Ritmado"
 - 🎯 Adicione percussões entre os kicks para preencher o groove.
 - 🔁 Copie o loop com variações e repita, mantendo pequenas quebras.
 - 🧠 Crie variações removendo elementos de seções específicas (ex: apagando a percussão da última barra).
 - 🗂️ Organize cada tipo de percussão em tracks diferentes no mixer para facilitar a mixagem individual.
 
-🎛️ MIXAGEM / ORGANIZAÇÃO
+🎛️ MIXAGEM / ORGANIZAÇÃO (SEÇÃO 4 - OBRIGATÓRIA)
 - 🧽 Mixe cada percussão separadamente — deixe o projeto limpo e organizado.
 - 📊 Use cores e nomes para os canais de bateria e percussão.
 - 🔉 Evite compressão exagerada — foco em volume equilibrado e elementos bem posicionados.
@@ -906,7 +917,47 @@ Responda com excelência absoluta.`;
     } else {
       // Aplicação normal do contexto para primeira menção do estilo
       systemPrompt += `\n\n${contextoInfo.promptEstilo}`;
+      
+      // 🚨 FORÇAR ORDEM OBRIGATÓRIA ESPECÍFICA POR ESTILO
+      if (contextoInfo.estilo === 'funk sp' || contextoInfo.estilo === 'funk zn') {
+        systemPrompt += `\n\n🚨 **INSTRUÇÃO CRÍTICA DE ORDEM OBRIGATÓRIA**:
+VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
+1º) VOZ/ACAPELLA (obrigatório falar sobre tratamento de voz)
+2º) KICK (obrigatório mencionar sequência 1x3)
+3º) PERCUSSÃO/BEAT (obrigatório mencionar sequência 6,4,4,1)
+4º) MIXAGEM/ORGANIZAÇÃO (obrigatório falar sobre organização)
+
+⚠️ SE VOCÊ PULAR QUALQUER SEÇÃO ACIMA, A RESPOSTA SERÁ CONSIDERADA INCORRETA.
+⚠️ SEMPRE MENCIONE AS SEQUÊNCIAS NUMÉRICAS ESPECÍFICAS (1x3 e 6,4,4,1).
+⚠️ SIGA A ORDEM EXATA, MESMO SE A PERGUNTA FOR ESPECÍFICA SOBRE UM TÓPICO.`;
+      } else if (contextoInfo.estilo === 'funk bruxaria') {
+        systemPrompt += `\n\n🚨 **INSTRUÇÃO CRÍTICA DE ORDEM OBRIGATÓRIA**:
+VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
+1º) VOZ/ACAPELLA (obrigatório falar sobre manipulação vocal)
+2º) BEAT (obrigatório mencionar sequência 4x3x3x1)
+3º) MELODIA/HARMONIA (obrigatório falar sobre timbres escuros)
+4º) KICK (obrigatório falar sobre punch)
+5º) MIXAGEM (obrigatório falar sobre espacialização)
+
+⚠️ SE VOCÊ PULAR QUALQUER SEÇÃO ACIMA, A RESPOSTA SERÁ CONSIDERADA INCORRETA.
+⚠️ SEMPRE MENCIONE A SEQUÊNCIA NUMÉRICA ESPECÍFICA (4x3x3x1).
+⚠️ SIGA A ORDEM EXATA, MESMO SE A PERGUNTA FOR ESPECÍFICA SOBRE UM TÓPICO.`;
+      } else if (contextoInfo.estilo === 'funk mandela') {
+        systemPrompt += `\n\n🚨 **INSTRUÇÃO CRÍTICA DE ORDEM OBRIGATÓRIA**:
+VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
+1º) VOZ/ACAPELLA (obrigatório falar sobre equalização vocal)
+2º) BEAT (obrigatório mencionar sequência 4x3x3x1)
+3º) DESENVOLVIMENTO DA FAIXA (obrigatório falar sobre estrutura)
+4º) KICK (obrigatório falar sobre graves e punch)
+5º) MIXAGEM (obrigatório falar sobre saturação e presença)
+
+⚠️ SE VOCÊ PULAR QUALQUER SEÇÃO ACIMA, A RESPOSTA SERÁ CONSIDERADA INCORRETA.
+⚠️ SEMPRE MENCIONE A SEQUÊNCIA NUMÉRICA ESPECÍFICA (4x3x3x1).
+⚠️ SIGA A ORDEM EXATA, MESMO SE A PERGUNTA FOR ESPECÍFICA SOBRE UM TÓPICO.`;
+      }
+      
       console.log(`🎯 Contexto técnico ativo aplicado: ${contextoInfo.estilo}`);
+      console.log(`🚨 Ordem obrigatória ativada para: ${contextoInfo.estilo}`);
     }
   }
 
@@ -1016,7 +1067,9 @@ export default async function handler(req, res) {
     let reply = await callOpenAI(messages, userData, db, uid);
 
     // 🎹 SISTEMA DE INSERÇÃO DE IMAGENS COM PALAVRAS-CHAVE EXCLUSIVAS
-    // Configuração das imagens com palavras-chave únicas para evitar conflitos
+    // 📋 CONFIGURAÇÃO CENTRALIZADA - FÁCIL MANUTENÇÃO
+    // ✅ Para adicionar nova imagem: apenas copie um objeto e edite os campos
+    // ⚠️ IMPORTANTE: Use palavras-chave exclusivas para evitar conflitos entre imagens
     const imagensInstrucao = [
       {
         nome: "Kick 1x3 - Funk ZN",
@@ -1038,7 +1091,54 @@ export default async function handler(req, res) {
         palavrasChave: ["4x3x3x1", "beat 4x3x3x1", "sequência 4x3x3x1", "padrão 4x3x3x1"],
         alt: "Sequência Beat 4x3x3x1 Funk Mandela",
         titulo: "Exemplo visual da sequência 4x3x3x1 no piano roll:"
+      },
+      
+      // 🆕 EXEMPLOS DE COMO ADICIONAR NOVAS IMAGENS FACILMENTE:
+      
+      // Exemplo 1: Imagem de Equalização
+      {
+        nome: "EQ Funk - Frequências",
+        link: "https://i.postimg.cc/LINK-EXEMPLO-EQ.png",
+        palavrasChave: ["equalização funk", "eq funk", "frequências funk", "corte de graves"],
+        alt: "Exemplo de Equalização no Funk",
+        titulo: "Configuração de EQ para funk:"
+      },
+      
+      // Exemplo 2: Imagem de Compressão
+      {
+        nome: "Compressor Voz Funk",
+        link: "https://i.postimg.cc/LINK-EXEMPLO-COMP.png", 
+        palavrasChave: ["compressão voz", "compressor vocal", "parâmetros compressão"],
+        alt: "Configuração de Compressor para Voz",
+        titulo: "Parâmetros de compressão para voz no funk:"
+      },
+      
+      // Exemplo 3: Imagem de Mixagem
+      {
+        nome: "Mixer Funk Layout",
+        link: "https://i.postimg.cc/LINK-EXEMPLO-MIX.png",
+        palavrasChave: ["organização mixer", "mixer funk", "tracks organizadas"],
+        alt: "Layout de Mixer Organizado",
+        titulo: "Organização do mixer para produção de funk:"
       }
+      
+      // 📝 INSTRUÇÕES PARA GABRIEL:
+      // 1. Para adicionar nova imagem: copie um dos exemplos acima
+      // 2. Edite apenas os campos: nome, link, palavrasChave, alt, titulo
+      // 3. Use palavras-chave ESPECÍFICAS e ÚNICAS para evitar conflitos
+      // 4. Teste adicionando uma palavra-chave na resposta do chatbot
+      // 5. A imagem aparecerá automaticamente quando a palavra for mencionada!
+      
+      // 🆕 TEMPLATE PARA NOVAS IMAGENS - COPIE E COLE ABAIXO:
+      /*
+      {
+        nome: "Nome Descritivo da Imagem",
+        link: "https://i.postimg.cc/LINK-DA-SUA-IMAGEM.png",
+        palavrasChave: ["palavra1", "palavra2", "frase específica"],
+        alt: "Descrição alternativa da imagem",
+        titulo: "Título que aparece antes da imagem:"
+      }
+      */
     ];
 
     // Debug: Log das variáveis para verificar detecção
@@ -1050,55 +1150,72 @@ export default async function handler(req, res) {
     console.log('🔍 DEBUG - Pergunta:', perguntaLower.substring(0, 100));
     console.log('🔍 DEBUG - Resposta:', respostaLower.substring(0, 100));
 
-    // Função para inserir imagens baseada em palavras-chave exclusivas
+    // 🔍 FUNÇÃO INTELIGENTE DE INSERÇÃO DE IMAGENS
+    // ✅ Sistema automático, robusto e com logs detalhados
     function inserirImagensPorPalavrasChave(respostaTexto) {
       let respostaAtualizada = respostaTexto;
       let imagensInseridas = [];
+      let totalProcessadas = 0;
 
-      imagensInstrucao.forEach((item) => {
-        // Verifica se já foi inserida esta imagem para evitar duplicação
+      console.log(`🎬 Iniciando verificação de ${imagensInstrucao.length} imagens configuradas...`);
+
+      imagensInstrucao.forEach((item, index) => {
+        totalProcessadas++;
+        console.log(`📋 [${index + 1}/${imagensInstrucao.length}] Processando: ${item.nome}`);
+
+        // 🛡️ VERIFICAÇÃO ANTI-DUPLICAÇÃO
         if (respostaAtualizada.includes(item.link)) {
-          console.log(`🛡️ Imagem ${item.nome} já presente - pulando inserção`);
+          console.log(`🛡️ [${item.nome}] Imagem já presente - pulando inserção`);
           return;
         }
 
-        // Procura por qualquer palavra-chave específica desta imagem
+        // 🔍 BUSCA POR PALAVRAS-CHAVE EXCLUSIVAS
         const palavraEncontrada = item.palavrasChave.find(chave => 
           respostaAtualizada.toLowerCase().includes(chave.toLowerCase())
         );
 
         if (palavraEncontrada) {
-          console.log(`🎯 Palavra-chave encontrada: "${palavraEncontrada}" para ${item.nome}`);
+          console.log(`🎯 [${item.nome}] Palavra-chave encontrada: "${palavraEncontrada}"`);
           
-          // Gera o HTML da imagem
+          // 🖼️ GERAÇÃO DO HTML DA IMAGEM
           const imagemHTML = `<br><br>🎹 <b>${item.titulo}</b><br><img src="${item.link}" alt="${item.alt}" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
           
-          // Estratégia de inserção: busca a primeira ocorrência da palavra-chave e insere após ela
-          const regex = new RegExp(`(${palavraEncontrada.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^.]*\\.)`, 'gi');
+          // 🎯 ESTRATÉGIA DE INSERÇÃO INTELIGENTE
+          // Tenta inserir após a primeira frase que contém a palavra-chave
+          const palavraEscapada = palavraEncontrada.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(${palavraEscapada}[^.]*\\.)`, 'gi');
           
           if (regex.test(respostaAtualizada)) {
+            // Inserção principal: após a frase completa
             respostaAtualizada = respostaAtualizada.replace(regex, `$1${imagemHTML}`);
             imagensInseridas.push(item.nome);
-            console.log(`✅ Imagem ${item.nome} inserida com sucesso após "${palavraEncontrada}"!`);
+            console.log(`✅ [${item.nome}] Inserida após frase completa com "${palavraEncontrada}"`);
           } else {
-            // Fallback: inserir após a primeira menção da palavra-chave
+            // 🔄 FALLBACK: inserir após primeira menção da palavra-chave
             const index = respostaAtualizada.toLowerCase().indexOf(palavraEncontrada.toLowerCase());
             if (index !== -1) {
               const insertPos = respostaAtualizada.indexOf('.', index) + 1;
               if (insertPos > 0) {
                 respostaAtualizada = respostaAtualizada.slice(0, insertPos) + imagemHTML + respostaAtualizada.slice(insertPos);
                 imagensInseridas.push(item.nome);
-                console.log(`✅ Imagem ${item.nome} inserida via fallback após "${palavraEncontrada}"!`);
+                console.log(`✅ [${item.nome}] Inserida via fallback após "${palavraEncontrada}"`);
               }
             }
           }
+        } else {
+          console.log(`ℹ️ [${item.nome}] Nenhuma palavra-chave encontrada: ${item.palavrasChave.join(', ')}`);
         }
       });
 
+      // 📊 RELATÓRIO FINAL
+      console.log(`📊 RELATÓRIO DE INSERÇÃO:`);
+      console.log(`   • Total de imagens processadas: ${totalProcessadas}`);
+      console.log(`   • Imagens inseridas: ${imagensInseridas.length}`);
       if (imagensInseridas.length > 0) {
-        console.log(`🎉 Total de imagens inseridas: ${imagensInseridas.length} - ${imagensInseridas.join(', ')}`);
+        console.log(`   • Lista: ${imagensInseridas.join(', ')}`);
+        console.log(`🎉 Sistema funcionando perfeitamente!`);
       } else {
-        console.log('ℹ️ Nenhuma palavra-chave exclusiva encontrada - nenhuma imagem inserida');
+        console.log(`ℹ️ Nenhuma palavra-chave exclusiva encontrada nesta resposta`);
       }
 
       return respostaAtualizada;
