@@ -1211,6 +1211,83 @@ export default async function handler(req, res) {
       console.log('   - Não é beat/percussão:', naoEhBeatOuPercussao);
     }
 
+    // 🎹 INSERIR IMAGEM AUTOMATICAMENTE - INSTRUÇÕES GERAIS DE BEAT/KICK FUNK ZN/SP
+    // Detecta se é Funk ZN ou SP e se já não foi inserida nenhuma imagem
+    const ehFunkZNouSP = perguntaLower.includes("funk zn") || 
+                         perguntaLower.includes("funk sp") ||
+                         perguntaLower.includes("como produzir") ||
+                         perguntaLower.includes("como fazer") ||
+                         respostaLower.includes("funk zn") ||
+                         respostaLower.includes("funk sp");
+
+    // Detecta instruções de beat/kick na resposta
+    const temInstrucoesBeatKick = respostaLower.includes("coloca no meio do terceiro quadrado") ||
+                                 respostaLower.includes("posicione o kick no 1/2 step") ||
+                                 respostaLower.includes("a sequência do kick") ||
+                                 respostaLower.includes("beat padrão do funk") ||
+                                 respostaLower.includes("use 1/2 step para montar o beat") ||
+                                 respostaLower.includes("grid em 1/2 step") ||
+                                 respostaLower.includes("meio do terceiro quadrado") ||
+                                 respostaLower.includes("terceiro quadrado") ||
+                                 respostaLower.includes("posicione o kick") ||
+                                 respostaLower.includes("sequência de kick") ||
+                                 respostaLower.includes("beat do funk zn") ||
+                                 respostaLower.includes("beat do funk sp");
+
+    // Verifica se já tem alguma imagem na resposta para evitar duplicação
+    const jatemImagem = reply.includes('<img') || reply.includes('postimg.cc');
+
+    console.log('🔍 DEBUG Instruções Beat/Kick - É Funk ZN/SP:', ehFunkZNouSP);
+    console.log('🔍 DEBUG Instruções Beat/Kick - Tem instruções:', temInstrucoesBeatKick);
+    console.log('🔍 DEBUG Instruções Beat/Kick - Já tem imagem:', jatemImagem);
+
+    // Inserir imagem apenas se: é Funk ZN/SP + tem instruções + ainda não tem imagem
+    if (ehFunkZNouSP && temInstrucoesBeatKick && !jatemImagem) {
+      console.log('🎯 Inserindo imagem do piano roll para instruções gerais de beat/kick...');
+      
+      const imagemPianoRollHTML = `<br><br>🎹 <b>Exemplo visual no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Piano Roll Funk ZN/SP" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
+      
+      // Estratégia de inserção em ordem de prioridade
+      if (/(meio do terceiro quadrado.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(meio do terceiro quadrado.*?\.)/, `$1${imagemPianoRollHTML}`);
+        console.log('✅ Imagem inserida após "meio do terceiro quadrado"!');
+      }
+      else if (/(posicione o kick.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(posicione o kick.*?\.)/, `$1${imagemPianoRollHTML}`);
+        console.log('✅ Imagem inserida após "posicione o kick"!');
+      }
+      else if (/(grid em 1\/2 step.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(grid em 1\/2 step.*?\.)/, `$1${imagemPianoRollHTML}`);
+        console.log('✅ Imagem inserida após "grid em 1/2 step"!');
+      }
+      else if (/(beat padrão.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(beat padrão.*?\.)/, `$1${imagemPianoRollHTML}`);
+        console.log('✅ Imagem inserida após "beat padrão"!');
+      }
+      else if (/(sequência.*?kick.*?\.)/gi.test(reply)) {
+        reply = reply.replace(/(sequência.*?kick.*?\.)/, `$1${imagemPianoRollHTML}`);
+        console.log('✅ Imagem inserida após "sequência...kick"!');
+      }
+      else {
+        // Fallback: inserir após primeiro parágrafo sobre beat ou kick
+        if (reply.includes('🥁') || reply.includes('🎹')) {
+          const beatIndex = reply.search(/🥁|🎹/);
+          if (beatIndex !== -1) {
+            const nextParagraph = reply.indexOf('\n', beatIndex);
+            if (nextParagraph !== -1) {
+              reply = reply.slice(0, nextParagraph) + imagemPianoRollHTML + reply.slice(nextParagraph);
+              console.log('✅ Imagem inserida após primeiro parágrafo de beat/kick!');
+            }
+          }
+        }
+      }
+    } else {
+      console.log('❌ Condições NÃO atendidas para imagem de instruções gerais');
+      console.log('   - É Funk ZN/SP:', ehFunkZNouSP);
+      console.log('   - Tem instruções beat/kick:', temInstrucoesBeatKick);
+      console.log('   - Já tem imagem:', jatemImagem);
+    }
+
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
     } else {
