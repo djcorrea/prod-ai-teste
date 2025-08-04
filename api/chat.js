@@ -1067,8 +1067,12 @@ export default async function handler(req, res) {
                              (respostaLower.includes("sequencia") && respostaLower.includes("6, 4, 4, 1")) ||
                              (respostaLower.includes("piano roll") && respostaLower.includes("6, 4, 4, 1"));
 
+    // 🚨 VERIFICAÇÃO ANTI-DUPLICAÇÃO: Se Funk BH menciona tanto 1/2 step quanto 6,4,4,1
+    const mencionaAmbos12StepE6441 = respostaLower.includes("1/2 step") && respostaLower.includes("6, 4, 4, 1");
+
     console.log('🔍 DEBUG - É Funk BH:', ehFunkBH);
     console.log('🔍 DEBUG - Menciona Beat + 6, 4, 4, 1:', mencionaBeat6441);
+    console.log('🔍 DEBUG - Menciona AMBOS (1/2 step + 6,4,4,1):', mencionaAmbos12StepE6441);
 
     if (ehFunkBH && mencionaBeat6441) {
       console.log('🎯 Condições atendidas - Inserindo imagem do Funk BH no contexto do BEAT...');
@@ -1076,13 +1080,25 @@ export default async function handler(req, res) {
       // Inserir imagem apenas uma vez na primeira ocorrência encontrada
       const imagemBHHTML = `<br><br>🎹 <b>Exemplo visual da sequência 6, 4, 4, 1 no piano roll:</b><br><img src="https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png" alt="Sequência Funk BH 6,4,4,1" style="max-width:100%;border-radius:8px;margin-top:10px;">`;
       
-      // Tentar substituir em ordem de prioridade (apenas o primeiro match)
-      if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
-      } else if (/(sequencia.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(sequencia.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
-      } else if (/(piano roll.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
-        reply = reply.replace(/(piano roll.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+      // 🚨 LÓGICA ANTI-DUPLICAÇÃO: Se menciona ambos, priorizar inserção após 1/2 step
+      if (mencionaAmbos12StepE6441) {
+        console.log('🛡️ Detectado menção de ambos 1/2 step e 6,4,4,1 - Inserindo apenas UMA vez após 1/2 step');
+        
+        // Inserir preferencialmente após 1/2 step para evitar duplicação
+        if (/(1\/2 step.*?\.)/gi.test(reply)) {
+          reply = reply.replace(/(1\/2 step.*?\.)/, `$1${imagemBHHTML}`);
+        } else if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+          reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+        }
+      } else {
+        // Comportamento normal quando só menciona 6, 4, 4, 1
+        if (/(beat.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+          reply = reply.replace(/(beat.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+        } else if (/(sequencia.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+          reply = reply.replace(/(sequencia.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+        } else if (/(piano roll.*?6, 4, 4, 1.*?\.)/gi.test(reply)) {
+          reply = reply.replace(/(piano roll.*?6, 4, 4, 1.*?\.)/, `$1${imagemBHHTML}`);
+        }
       }
       
       console.log('✅ Imagem do Funk BH inserida com sucesso no contexto do BEAT!');
@@ -1091,8 +1107,8 @@ export default async function handler(req, res) {
     }
 
     // 🎹 INSERIR IMAGEM AUTOMATICAMENTE NO FUNK SP - SEQUÊNCIA DE BEAT COM 1/2 STEP
-    // Verifica se é Funk SP (detecção ampliada)
-    const ehFunkSP = estilo.includes("sp") || 
+    // Verifica se é Funk SP (detecção ampliada) E NÃO é Funk BH para evitar conflito
+    const ehFunkSP = (estilo.includes("sp") || 
                      estilo.includes("paulista") ||
                      perguntaLower.includes("funk sp") || 
                      perguntaLower.includes("funk de sp") ||
@@ -1101,7 +1117,8 @@ export default async function handler(req, res) {
                      respostaLower.includes("funk sp") ||
                      respostaLower.includes("funk zn") ||
                      respostaLower.includes("sp") ||
-                     respostaLower.includes("zn");
+                     respostaLower.includes("zn")) &&
+                     !ehFunkBH; // 🚨 NÃO processar se for Funk BH
 
     // Verifica se menciona especificamente BEAT + 1/2 step
     const mencionaBeat12Step = (respostaLower.includes("beat") && 
@@ -1113,7 +1130,7 @@ export default async function handler(req, res) {
                               (respostaLower.includes("piano roll") && respostaLower.includes("1/2 step")) ||
                               (respostaLower.includes("grid") && respostaLower.includes("1/2 step"));
 
-    console.log('🔍 DEBUG - É Funk SP:', ehFunkSP);
+    console.log('🔍 DEBUG - É Funk SP (não BH):', ehFunkSP);
     console.log('🔍 DEBUG - Menciona Beat + 1/2 step:', mencionaBeat12Step);
 
     if (ehFunkSP && mencionaBeat12Step) {
