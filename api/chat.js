@@ -272,18 +272,28 @@ Diretrizes técnicas:
 - Se o usuário pedir um passo a passo, entregue um guia completo, técnico, com clareza máxima.
 
 📚 INSTRUÇÕES AVANÇADAS — FUNK BH
+- 🥁 O Funk BH é caracterizado por percussões curtas que fazem a marcação do beat, ao invés de synths melódicos como no Automotivo. 
 - 🔢 Use 130 BPM, que é o mais comum no Funk de BH. Ou 128 para um ritmo mais lento.
-- 🥁 O Funk BH é caracterizado por percussões curtas que fazem a marcação do beat, ao invés de synths melódicos como no Automotivo. Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para fazer o beat.
-- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. É comum o uso de **apenas duas notas com intervalo de meio tom**, para variações simples e marcantes.
-- 🎼 Para base melódica, utilize violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: no Splice).
+ 🎼Acapella:
+- 🎧 Uso de **acapellas com vocais costumam ser mais melódicos, com frases repetitivas e marcantes., geralmente com vozes mais bem afinadas e definidas
+- 🎤 Faça uma equalização mais rígida, um tratamento de voz com equalização, compressão, saturação, reverb, delay...
+- 🎚️ Descubra o tom da voz com ajuda de alguma ferramenta de keyfinder.
+🎹 Melodia:
+- 🎹 A melodia costuma seguir **escalas menores harmônicas**, criando tensão. Adicione Aows (vozes sintetizadas) com volume baixo, filter e reverb profundo como camada de fundo.
+- 🎚️ Utilize a mesma escala da voz para criar uma harmonia perfeita.
+- 🎼 Para base melódica, pode-se utilizar violões dedilhados acústicos como base harmônica. Procure samples de acoustic guitar ou guitar melody (ex: no Splice).
 - 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
 - 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
-- 💽 Estética: **kicks com punch, alguns sem limiter**, Kick com presença, bem grave. samples sujos e com ambiência escura também pode ser utilizado dependendo do contexto, marcações com swing.
-- 🎧 Uso de **acapellas antigas fora do tom propositalmente** também é comum. Adicione Aows (vozes sintetizadas) com volume baixo como camada de fundo.
-- 🧠 Mixagem focada em percussão central e ambiências laterais, com compressão paralela. Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
-- 💡 Progressões harmônicas típicas: Lá menor ➝ Ré menor ➝ Sol
-- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas.
+🥁Beat:
 - 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
+- 🎼 Use a ferramenta "Scale Highlights" dentro do piano roll, coloque a mesma escala e nota da acapella, para fazer o beat combinar com a voz
+- 🎹 Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para fazer o beat.
+- 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas,
+🔉 Kick:
+- 💽 Kicks com punch, com presença, bem grave. Com destaque em 20 Hz a 120 Hz.
+🎚️ Mixagem: 
+- 🧠 Use EQ para tirar agudos e graves excessivos e deixar o som mais leve.
+- 💡 Faça uma mixagem limpa sem deixar o som estourar.
 `,
 
   funkBruxaria: `
