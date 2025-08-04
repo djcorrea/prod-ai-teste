@@ -285,7 +285,8 @@ Diretrizes técnicas:
 - 🎻 Instrumentos comuns: **baixo orgânico ou sintetizado**, violinos metálicos, flautas, guitarras, bells, sinos e percussão com ressonância.
 - 🔀 O estilo possui **variação rítmica constante**: os elementos melódicos e percussivos costumam alternar a cada dois compassos.
 🥁Beat:
-- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step, Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
+- 🥁 Sequência padrão do beat no Funk BH: No piano roll, use o grid em 1/2 step com a sequência 6, 4, 4, 1.
+- 🎹 Coloque as notas nos quadradinhos de cada compasso nessa sequencia: 6, 4, 4, 1, como fazer na pratica: no primeiro compasso, conta 5 casas e na 6º você coloca uma nota, no segundo compasso conta 3 casas e na 4º adiciona uma nota, e assim vai.
 - 🎼 Use a ferramenta "Scale Highlights" dentro do piano roll, coloque a mesma escala e nota da acapella, para fazer o beat combinar com a voz
 - 🎹 Use elementos como **chocalho, agogô, tambores, beatbox, palmas e timbres metálicos** para fazer o beat.
 - 🧪 No beat faça uma estrutura simples, mas com camadas bem pensadas,
