@@ -680,8 +680,7 @@ SIGA ESSA MESMA SEQUÊNCIA NAS RESPOSTAS NÃO PULE NADA:
 🥁KICK
 - Use um kick grave e seco, de preferência sem cauda longa.
 - ✂️ Corte o começo do kick (vento/silêncio) para evitar sujeira no som.
-- 🔁 Para a linha do kick, utilize o snap em "1/2 step".
-- 🔉 Adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma "Base para começar"
+- 🔁 Para a linha do kick, utilize o snap em "1/2 step com a sequencia 1x3. Adiciona o primeiro kick no 1º quadrado do primeiro compasso, adicione o proximo 3 casas atras do 2º compasso, continua com esse sequência para criar uma "Base para começar"
 - 🎯 O resultado é um padrão diferente do tradicional, com mais variação e swing.
 
 🪘 PERCUSSÃO / BEAT
