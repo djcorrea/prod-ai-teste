@@ -1081,7 +1081,7 @@ export default async function handler(req, res) {
       {
         nome: "Beat 6, 4, 4, 1 - Funk SP/BH",
         link: "https://i.postimg.cc/nc8n8rtX/Captura-de-tela-2025-08-03-155554.png",
-        palavrasChave: ["6, 4, 4, 1", "beat 6, 4, 4, 1", "sequência 6, 4, 4, 1", "padrão 6, 4, 4, 1"],
+        palavrasChave: ["6, 4, 4, 1", "6,4,4,1", "beat 6, 4, 4, 1", "sequência 6, 4, 4, 1", "padrão 6, 4, 4, 1", "sequência 6,4,4,1", "padrão 6,4,4,1"],
         alt: "Sequência Beat 6, 4, 4, 1 no Piano Roll",
         titulo: "Exemplo visual da sequência 6, 4, 4, 1 no piano roll:"
       },
