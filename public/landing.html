@@ -1159,6 +1159,37 @@
             navLinks.classList.toggle('mobile-active');
             mobileToggle.classList.toggle('active');
         });
+
+        // Funcionalidade de fechamento do menu ao clicar fora
+        function closeMobileMenu() {
+            if (navLinks.classList.contains('mobile-active')) {
+                navLinks.classList.remove('mobile-active');
+                mobileToggle.classList.remove('active');
+            }
+        }
+
+        // Event listener para detectar cliques fora do menu
+        document.addEventListener('click', (event) => {
+            // Verifica se o menu está aberto
+            if (navLinks.classList.contains('mobile-active')) {
+                // Verifica se o clique não foi no botão de toggle nem dentro do menu
+                const isClickInsideMenu = navLinks.contains(event.target);
+                const isClickOnToggle = mobileToggle.contains(event.target);
+                
+                // Se o clique foi fora do menu e não no botão toggle, fecha o menu
+                if (!isClickInsideMenu && !isClickOnToggle) {
+                    closeMobileMenu();
+                }
+            }
+        });
+
+        // Event listener para fechar o menu ao clicar em um link do menu (comportamento adicional útil)
+        navLinks.addEventListener('click', (event) => {
+            // Verifica se o clique foi em um link de navegação
+            if (event.target.classList.contains('nav-link')) {
+                closeMobileMenu();
+            }
+        });
         
         // Add mobile menu styles
         const mobileStyles = document.createElement('style');
