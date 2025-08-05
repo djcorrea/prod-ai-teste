@@ -695,6 +695,24 @@
             transform: translateY(0);
         }
         
+        /* Garantir que elementos importantes apareçam em dispositivos móveis */
+        @media (max-width: 768px) {
+            #about-intro .scroll-reveal {
+                animation: mobile-reveal 1s ease forwards 0.5s;
+            }
+        }
+        
+        @keyframes mobile-reveal {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         /* CTA Final Button - removed, using same .cta-button class */
         
         /* Mobile Menu */
@@ -1033,7 +1051,7 @@
         // Scroll Reveal Animation
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
+            rootMargin: '50px 0px -50px 0px' // Mais sensível para detectar elementos próximos
         };
         
         const observer = new IntersectionObserver((entries) => {
@@ -1044,9 +1062,24 @@
             });
         }, observerOptions);
         
-        document.querySelectorAll('.scroll-reveal').forEach(el => {
-            observer.observe(el);
-        });
+        // Função para verificar se elementos estão visíveis na página inicial
+        function checkInitialVisibleElements() {
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                
+                // Se o elemento está visível na tela inicial, ativa imediatamente
+                if (isVisible) {
+                    el.classList.add('active');
+                }
+                
+                // Observa todos os elementos para futuras interações
+                observer.observe(el);
+            });
+        }
+        
+        // Executa a verificação após o carregamento da página
+        setTimeout(checkInitialVisibleElements, 100);
         
         // Dynamic Navigation Bar
         let lastScroll = 0;
@@ -1390,6 +1423,25 @@
         } else {
             checkLibrariesAndInit();
         }
+        
+        // Garantir que elementos críticos apareçam após carregamento completo
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // Força a ativação do título "O QUE É A AI.SYNTH?" se ainda não estiver ativo
+                const aboutTitle = document.querySelector('#about-intro .scroll-reveal');
+                if (aboutTitle && !aboutTitle.classList.contains('active')) {
+                    aboutTitle.classList.add('active');
+                }
+                
+                // Verifica outros elementos que podem estar visíveis mas não ativados
+                document.querySelectorAll('.scroll-reveal').forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight && rect.bottom > 0 && !el.classList.contains('active')) {
+                        el.classList.add('active');
+                    }
+                });
+            }, 500);
+        });
         
         // Initialize everything when DOM is loaded
         console.log('Site futurista carregado com sucesso!');
