@@ -5,15 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI.Synth – Login</title>
   
-  <!-- Three.js - Biblioteca 3D -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-  <!-- Vanta.js - Efeitos de fundo avançados -->
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
+  <!-- Bibliotecas para efeitos visuais (mesmas da landing) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js" defer></script>
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --neon-cyan: #00ffff;
+      --neon-purple: #ff00ff;
+      --electric-blue: #0099FF;
+      --plasma-pink: #ff0080;
+      --dark-bg: #0a0a0f;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0ff;
+    }
     
     * {
       margin: 0;
@@ -23,9 +31,7 @@
     
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(-45deg, #0a0a1a, #1a1a3a, #0f1535, #1a0a2e, #0a0a1a);
-      background-size: 600% 600%;
-      animation: gradientShift 25s ease-in-out infinite;
+      background: var(--dark-bg);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -35,94 +41,65 @@
       position: relative;
     }
     
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      20% {
-        background-position: 25% 25%;
-      }
-      40% {
-        background-position: 75% 75%;
-      }
-      60% {
-        background-position: 100% 25%;
-      }
-      80% {
-        background-position: 25% 100%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-    
-    /* Container para o efeito Vanta.js */
-    #vanta-bg {
+    /* Animated Background - mesma estrutura da landing */
+    .background-container {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1;
-      pointer-events: none;
+      z-index: -1;
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #16213e 100%);
+      overflow: hidden;
     }
     
-    /* Overlay de degradê animado para misturar com Vanta */
-    #vanta-bg::before {
-      content: '';
+    .vanta-background {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, 
-        rgba(90, 0, 160, 0.08),     /* Roxo */
-        rgba(0, 94, 255, 0.12),     /* Azul dos botões */
-        rgba(90, 0, 160, 0.06),     /* Roxo */
-        rgba(0, 94, 255, 0.10),     /* Azul dos botões */
-        rgba(90, 0, 160, 0.08),     /* Roxo */
-        rgba(0, 94, 255, 0.15),     /* Azul dos botões */
-        rgba(90, 0, 160, 0.05)      /* Roxo */
-      );
-      background-size: 500% 500%;
-      animation: colorFade 30s ease-in-out infinite;
-      opacity: 0.7;
-      mix-blend-mode: soft-light;
-      z-index: 2;
+      z-index: 0;
+      opacity: 0.9;
     }
     
-    @keyframes colorFade {
+    .fundo-neural {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.3;
+      background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
+    }
+    
+    .particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #8a2be2;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #8a2be2;
+      animation: float-up 10s linear infinite;
+    }
+    
+    
+    @keyframes gradientShift {
       0% {
-        background-position: 0% 0%;
-        opacity: 0.5;
+        background-position: 0% 50%;
       }
-      14.3% {
-        background-position: 25% 25%;
-        opacity: 0.8;
-      }
-      28.6% {
-        background-position: 50% 0%;
-        opacity: 0.6;
-      }
-      42.9% {
-        background-position: 75% 50%;
-        opacity: 0.9;
-      }
-      57.2% {
-        background-position: 100% 25%;
-        opacity: 0.7;
-      }
-      71.5% {
-        background-position: 75% 75%;
-        opacity: 0.8;
-      }
-      85.8% {
-        background-position: 25% 100%;
-        opacity: 0.6;
+      50% {
+        background-position: 100% 50%;
       }
       100% {
-        background-position: 0% 0%;
-        opacity: 0.5;
+        background-position: 0% 50%;
       }
     }
     
@@ -144,26 +121,39 @@
     }
     
     .logo {
+      font-family: 'Orbitron', monospace;
       font-size: 3.2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #00F0FF 0%, #5A00A0 50%, #00F0FF 100%);
+      font-weight: 900;
+      background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
       text-align: center;
       margin-bottom: 12px;
       letter-spacing: -0.02em;
-      animation: logoShine 2s ease-in-out infinite alternate;
+      animation: logo-pulse 2s ease-in-out infinite;
     }
     
-    @keyframes logoShine {
+    @keyframes logo-pulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+    }
+    
+    @keyframes float-up {
       0% {
-        filter: brightness(1);
-        text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
       }
       100% {
-        filter: brightness(1.2);
-        text-shadow: 0 0 20px rgba(90, 0, 160, 0.5);
+        transform: translateY(-100vh) translateX(100px);
+        opacity: 0;
       }
     }
     
@@ -453,11 +443,19 @@
 </head>
 
 <body>
-  <!-- Container para efeitos Vanta.js -->
-  <div id="vanta-bg"></div>
+  <!-- Background Elements - mesma estrutura da landing -->
+  <div class="background-container">
+    <!-- Container para o fundo animado Vanta.js -->
+    <div class="vanta-background" id="vanta-bg"></div>
+    
+    <!-- Plano de fundo neural (fallback) -->
+    <div class="fundo-neural"></div>
+    
+    <div class="particles" id="particles"></div>
+  </div>
   
   <div class="container">
-    <h1 class="logo">AI.Synth</h1>
+    <h1 class="logo">AI.SYNTH</h1>
     <p class="subtitle">Acesse sua conta</p>
 
     <!-- Mensagens de status -->
@@ -618,214 +616,81 @@
   <!-- Scripts do Firebase e app -->
   <script type="module" src="auth.js?v=20250128-1710"></script>
   
-  <!-- Inicialização dos efeitos Vanta.js -->
+  <!-- Inicialização dos efeitos Vanta.js (mesma configuração da landing) -->
   <script>
     // Aguarda o carregamento completo da página
     window.addEventListener('DOMContentLoaded', function() {
-      // Efeito principal - NET (rede neural)
-      const vantaNet = VANTA.NET({
-        el: "#vanta-bg",
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        minHeight: 200.00,
-        minWidth: 200.00,
-        scale: 1.00,
-        scaleMobile: 1.00,
-        color: 0x5A00A0,        // Roxo nas linhas da rede
-        backgroundColor: 0x0a0a1a, // Fundo escuro (preto)
-        points: 25.00,           // Número de pontos da rede
-        maxDistance: 25.00,      // Distância máxima das conexões
-        spacing: 16.00,          // Espaçamento entre pontos
-        showDots: true          // Mostrar os pontos
-      });
       
-      // Animação de mudança de cores do Vanta.js - transições suaves
-      const colors = [
-        0x5A00A0,  // Roxo
-        0x005eff,  // Azul dos botões
-        0x5A00A0,  // Roxo
-        0x005eff   // Azul dos botões
-      ];
-      let colorIndex = 0;
-      let isTransitioning = false;
-      
-      function smoothColorTransition() {
-        if (isTransitioning) return;
-        isTransitioning = true;
+      // Criar partículas flutuantes (mesmo sistema da landing)
+      function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50; // Mesmo número da landing
         
-        const nextIndex = (colorIndex + 1) % colors.length;
-        const currentColor = colors[colorIndex];
-        const nextColor = colors[nextIndex];
-        
-        // Sincronizar bordas do container e botões com as cores do Vanta
-        const container = document.querySelector('.container');
-        const buttons = document.querySelectorAll('.btn-plus');
-        
-        if (nextColor === 0x5A00A0) { // Roxo
-          // Container roxo com bordas mais finas e menos opacidade
-          if (container) {
-            container.style.borderColor = 'rgba(90, 0, 160, 0.5)';
-            container.style.boxShadow = `
-              0 8px 32px rgba(0, 0, 0, 0.8),
-              0 0 40px rgba(90, 0, 160, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `;
-          }
-          // Botões roxos
-          buttons.forEach(button => {
-            button.style.background = 'linear-gradient(135deg, #5A00A0 0%, #5A00A0 100%)';
-            button.style.boxShadow = `
-              0 4px 14px rgba(90, 0, 160, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2)
-            `;
-          });
-        } else { // Azul
-          // Container azul com bordas mais finas e menos opacidade
-          if (container) {
-            container.style.borderColor = 'rgba(0, 94, 255, 0.6)';
-            container.style.boxShadow = `
-              0 8px 32px rgba(0, 0, 0, 0.8),
-              0 0 50px rgba(0, 94, 255, 0.25),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `;
-          }
-          // Botões azuis
-          buttons.forEach(button => {
-            button.style.background = 'linear-gradient(135deg, #005eff 0%, #005eff 100%)';
-            button.style.boxShadow = `
-              0 4px 14px rgba(0, 94, 255, 0.4),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2)
-            `;
-          });
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.animationDelay = Math.random() * 10 + 's';
+          particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+          particlesContainer.appendChild(particle);
         }
-        
-        // Transição gradual por 3 segundos
-        const steps = 60; // 60 steps para transição suave
-        let step = 0;
-        
-        const transitionInterval = setInterval(() => {
-          const progress = step / steps;
-          const interpolatedColor = interpolateColors(currentColor, nextColor, progress);
+      }
+      
+      // Initialize Vanta.js Background (same as landing)
+      function initVantaBackground() {
+        try {
+          const vantaElement = document.getElementById("vanta-bg");
+          if (!vantaElement) {
+            return;
+          }
           
-          if (vantaNet && vantaNet.setOptions) {
-            vantaNet.setOptions({
-              color: interpolatedColor
+          if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+            const isLowPerformance = navigator.hardwareConcurrency <= 4;
+            const isDesktop = window.innerWidth > 768;
+            
+            VANTA.NET({
+              el: "#vanta-bg",
+              mouseControls: true,
+              touchControls: true,
+              gyroControls: false,
+              minHeight: 200.00,
+              minWidth: 200.00,
+              scale: 1.00,
+              scaleMobile: 1.00,
+              color: 0x8a2be2,
+              backgroundColor: 0x0a0a1a,
+              points: isLowPerformance ? 3.50 : (isDesktop ? 6.00 : 3.50),
+              maxDistance: isLowPerformance ? 13.00 : (isDesktop ? 20.00 : 13.00),
+              spacing: isLowPerformance ? 30.00 : (isDesktop ? 20.00 : 28.00),
+              showDots: true
             });
+            console.log('Vanta.js Network background initialized');
+          } else {
+            console.log('Vanta.js libraries not available');
           }
-          
-          step++;
-          
-          if (step >= steps) {
-            clearInterval(transitionInterval);
-            colorIndex = nextIndex;
-            isTransitioning = false;
-          }
-        }, 50); // 50ms por step = 3 segundos total
-      }
-      
-      // Função para interpolar cores suavemente
-      function interpolateColors(color1, color2, factor) {
-        const r1 = (color1 >> 16) & 0xff;
-        const g1 = (color1 >> 8) & 0xff;
-        const b1 = color1 & 0xff;
-        
-        const r2 = (color2 >> 16) & 0xff;
-        const g2 = (color2 >> 8) & 0xff;
-        const b2 = color2 & 0xff;
-        
-        const r = Math.round(r1 + (r2 - r1) * factor);
-        const g = Math.round(g1 + (g2 - g1) * factor);
-        const b = Math.round(b1 + (b2 - b1) * factor);
-        
-        return (r << 16) | (g << 8) | b;
-      }
-      
-      // Inicia transições a cada 12 segundos
-      setInterval(smoothColorTransition, 12000);
-      
-      // Adicionar partículas flutuantes extras com Three.js
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true });
-      
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setClearColor(0x000000, 0); // Transparente
-      
-      // Criar container para as partículas extras
-      const particlesContainer = document.createElement('div');
-      particlesContainer.style.position = 'fixed';
-      particlesContainer.style.top = '0';
-      particlesContainer.style.left = '0';
-      particlesContainer.style.width = '100%';
-      particlesContainer.style.height = '100%';
-      particlesContainer.style.zIndex = '2';
-      particlesContainer.style.pointerEvents = 'none';
-      particlesContainer.appendChild(renderer.domElement);
-      document.body.appendChild(particlesContainer);
-      
-      // Criar geometria das partículas
-      const particlesGeometry = new THREE.BufferGeometry();
-      const particlesCount = 100;
-      const posArray = new Float32Array(particlesCount * 3);
-      
-      for(let i = 0; i < particlesCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 10;
-      }
-      
-      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-      
-      // Material das partículas
-      const particlesMaterial = new THREE.PointsMaterial({
-        size: 0.01,
-        color: 0x00F0FF, // Azul elétrico ciano
-        transparent: true,
-        opacity: 0.8
-      });
-      
-      // Criar o sistema de partículas
-      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-      scene.add(particlesMesh);
-      
-      camera.position.z = 2;
-      
-      // Animação das partículas
-      function animateParticles() {
-        requestAnimationFrame(animateParticles);
-        
-        // Rotacionar partículas
-        particlesMesh.rotation.x += 0.001;
-        particlesMesh.rotation.y += 0.002;
-        
-        // Movimento flutuante
-        const positions = particlesMesh.geometry.attributes.position.array;
-        for(let i = 0; i < positions.length; i += 3) {
-          positions[i + 1] += Math.sin(Date.now() * 0.001 + i) * 0.001;
+        } catch (error) {
+          console.log('Vanta.js initialization error:', error);
         }
-        particlesMesh.geometry.attributes.position.needsUpdate = true;
-        
-        renderer.render(scene, camera);
       }
       
-      animateParticles();
-      
-      // Redimensionar ao mudar o tamanho da janela
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        
-        // Redimensionar Vanta também
-        if (vantaNet) {
-          vantaNet.resize();
+      // Initialize Vanta.js when libraries are loaded
+      function checkLibrariesAndInit() {
+        if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+          initVantaBackground();
+        } else {
+          setTimeout(checkLibrariesAndInit, 100);
         }
-      });
+      }
       
-      // Limpar ao sair da página
-      window.addEventListener('beforeunload', () => {
-        if (vantaNet) vantaNet.destroy();
-      });
+      // Start initialization
+      checkLibrariesAndInit();
+      
+      // Criar partículas
+      createParticles();
     });
   </script>
+  
+  <!-- Scripts do sistema de autenticação -->
+  <script type="module" src="auth.js?v=20250128-1710"></script>
 </body>
 </html>

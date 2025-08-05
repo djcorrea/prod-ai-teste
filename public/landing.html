@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI.SYNTH - Produção Musical Inteligente</title>
+    
+    <!-- Bibliotecas para efeitos visuais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js" defer></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
         
@@ -16,7 +21,7 @@
         :root {
             --neon-cyan: #00ffff;
             --neon-purple: #ff00ff;
-            --electric-blue: #0080ff;
+            --electric-blue: #0099FF;
             --plasma-pink: #ff0080;
             --dark-bg: #0a0a0f;
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -39,24 +44,29 @@
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #16213e 100%);
+            overflow: hidden;
         }
         
-        .grid-lines {
+        .vanta-background {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: grid-move 20s linear infinite;
-            transform: perspective(1000px) rotateX(60deg) translateZ(-50px);
+            z-index: 0;
+            opacity: 0.9;
         }
         
-        @keyframes grid-move {
-            0% { transform: perspective(1000px) rotateX(60deg) translateZ(-50px) translateY(0); }
-            100% { transform: perspective(1000px) rotateX(60deg) translateZ(-50px) translateY(50px); }
+        .fundo-neural {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
         }
         
         .particles {
@@ -69,9 +79,9 @@
             position: absolute;
             width: 4px;
             height: 4px;
-            background: var(--neon-cyan);
+            background: #8a2be2;
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-cyan);
+            box-shadow: 0 0 10px #8a2be2;
             animation: float-up 10s linear infinite;
         }
         
@@ -825,7 +835,12 @@
 <body>
     <!-- Background Elements -->
     <div class="background-container">
-        <div class="grid-lines"></div>
+        <!-- Container para o fundo animado Vanta.js -->
+        <div class="vanta-background" id="vanta-bg"></div>
+        
+        <!-- Plano de fundo neural (fallback) -->
+        <div class="fundo-neural"></div>
+        
         <div class="particles" id="particles"></div>
     </div>
     
@@ -874,12 +889,12 @@
             <div class="glass-card scroll-reveal">
                 <div class="card-icon">🤖</div>
                 <h3 class="card-title">Inteligência Artificial</h3>
-                <p class="card-description">Tire dúvidas e receba orientações instantâneas com um assistente inteligente treinado para produção musical.</p>
+                <p class="card-description">Seu mentor online 24 horas, tire dúvidas e receba orientações instantâneas com um assistente inteligente treinado 100% para produção musical.</p>
             </div>
             <div class="glass-card scroll-reveal">
                 <div class="card-icon">💬</div>
                 <h3 class="card-title">Chat Personalizado</h3>
-                <p class="card-description">Respostas inteligentes adaptadas ao seu perfil técnico.</p>
+                <p class="card-description">Respostas inteligentes adaptadas ao seu perfil técnico. A IA vai te conhecer melhor para oferecer soluções mais precisas</p>
             </div>
             <div class="glass-card scroll-reveal">
                 <div class="card-icon">🧠</div>
@@ -1291,6 +1306,59 @@
             }
         `;
         document.head.appendChild(glitchStyles);
+        
+        // Initialize Vanta.js Background
+        function initVantaBackground() {
+            try {
+                const vantaElement = document.getElementById("vanta-bg");
+                if (!vantaElement) {
+                    return;
+                }
+                
+                if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+                    const isLowPerformance = navigator.hardwareConcurrency <= 4;
+                    const isDesktop = window.innerWidth > 768;
+                    
+                    VANTA.NET({
+                        el: "#vanta-bg",
+                        mouseControls: true,
+                        touchControls: true,
+                        gyroControls: false,
+                        minHeight: 200.00,
+                        minWidth: 200.00,
+                        scale: 1.00,
+                        scaleMobile: 1.00,
+                        color: 0x8a2be2,
+                        backgroundColor: 0x0a0a1a,
+                        points: isLowPerformance ? 3.50 : (isDesktop ? 6.00 : 3.50),
+                        maxDistance: isLowPerformance ? 13.00 : (isDesktop ? 20.00 : 13.00),
+                        spacing: isLowPerformance ? 30.00 : (isDesktop ? 20.00 : 28.00),
+                        showDots: true
+                    });
+                    console.log('Vanta.js Network background initialized');
+                } else {
+                    console.log('Vanta.js libraries not available');
+                }
+            } catch (error) {
+                console.log('Vanta.js initialization error:', error);
+            }
+        }
+        
+        // Initialize Vanta.js when libraries are loaded
+        function checkLibrariesAndInit() {
+            if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+                initVantaBackground();
+            } else {
+                setTimeout(checkLibrariesAndInit, 100);
+            }
+        }
+        
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkLibrariesAndInit);
+        } else {
+            checkLibrariesAndInit();
+        }
         
         // Initialize everything when DOM is loaded
         console.log('Site futurista carregado com sucesso!');

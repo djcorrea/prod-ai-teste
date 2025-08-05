@@ -92,7 +92,7 @@ body {
 
 /* ============ ELEMENTOS DO CENÁRIO ============ */
 .robo {
-    top: 2%;
+    top: 3%;
     right: -10%;
     height: auto;
     max-height: 86.1vh;
@@ -101,6 +101,52 @@ body {
     filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.3));
     /* Otimizado: Aumentamos duração para reduzir frequência de repaint */
     animation: fadeInPush 0.6s ease-out forwards, robotBreathingOptimized 4s ease-in-out infinite 0.6s;
+    /* Fade MUITO mais pronunciado - inicia mais cedo e é mais intenso */
+    mask-image: linear-gradient(
+        to bottom, 
+        rgba(0,0,0,1) 0%, 
+        rgba(0,0,0,1) 45%, 
+        rgba(0,0,0,0.9) 55%, 
+        rgba(0,0,0,0.7) 65%, 
+        rgba(0,0,0,0.4) 75%, 
+        rgba(0,0,0,0.2) 85%, 
+        rgba(0,0,0,0.05) 95%, 
+        rgba(0,0,0,0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to bottom, 
+        rgba(0,0,0,1) 0%, 
+        rgba(0,0,0,1) 45%, 
+        rgba(0,0,0,0.9) 55%, 
+        rgba(0,0,0,0.7) 65%, 
+        rgba(0,0,0,0.4) 75%, 
+        rgba(0,0,0,0.2) 85%, 
+        rgba(0,0,0,0.05) 95%, 
+        rgba(0,0,0,0) 100%
+    );
+}
+
+/* Fade suave entre robô e mesa - elimina corte visual seco */
+.robo::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%; /* Aumentado para 60% - fade MUITO mais pronunciado */
+    background: linear-gradient(
+        to bottom, 
+        transparent 0%, 
+        rgba(10, 10, 15, 0.1) 10%,
+        rgba(10, 10, 15, 0.3) 25%,
+        rgba(10, 10, 15, 0.5) 40%,
+        rgba(10, 10, 15, 0.7) 55%,
+        rgba(10, 10, 15, 0.85) 70%,
+        rgba(10, 10, 15, 0.95) 85%,
+        rgba(10, 10, 15, 1) 100%
+    );
+    pointer-events: none; /* Não interfere na interação */
+    z-index: 4; /* Acima do robô para aplicar o fade */
 }
 
 .mesa {
@@ -116,7 +162,7 @@ body {
 }
 
 .notebook {
-    bottom: -45%;
+    bottom: -48%;
     left: -20%;
     height: auto;
     max-height: 120vh;
@@ -129,7 +175,7 @@ body {
 
 .teclado {
     bottom: -48%;
-    left: 23%;
+    left: 22%;
     height: auto;
     max-height: 150vh;
     z-index: 2;
@@ -345,7 +391,7 @@ body {
     filter: 
         drop-shadow(0 0 18px rgba(0, 150, 255, 0.6))
         drop-shadow(0 0 35px rgba(138, 43, 226, 0.4));
-    animation: chatbotMainRobotFloatOptimized 2s ease-in-out infinite;
+    animation: chatbotMainRobotFloatOptimized 1.6s ease-in-out infinite;
     will-change: transform;
 }
 
@@ -373,7 +419,7 @@ body {
     background-size: 300% 300%;
     margin-bottom: 2px;
     text-shadow: 0 0 40px rgba(0, 150, 255, 0.5);
-    animation: chatbotTitleGradientOptimized 1.5s ease-in-out infinite alternate;
+    animation: chatbotTitleGradientOptimized 1.2s ease-in-out infinite alternate;
     letter-spacing: 2px;
     will-change: background-position;
 }
@@ -574,7 +620,7 @@ body {
     display: flex;
     gap: 0px;
     margin-bottom: 25px;
-    animation: chatbotMessageAppearOptimized 0.3s ease-out;
+    animation: chatbotMessageAppearOptimized 0.25s ease-out;
 }
 
 .chatbot-message-user {
@@ -717,7 +763,7 @@ body {
     height: 6px;
     background: rgba(0, 150, 255, 0.7);
     border-radius: 50%;
-    animation: chatbotTypingAnimationOptimized 0.8s ease-in-out infinite;
+    animation: chatbotTypingAnimationOptimized 0.7s ease-in-out infinite;
 }
 
 .chatbot-typing-indicator span:nth-child(2) {
@@ -739,7 +785,7 @@ body {
     z-index: 999;
     transform: rotate(-0deg);
     opacity: 0;
-    animation: chatbotButtonsAppearOptimized 1.2s ease-out 1.5s forwards;
+    animation: chatbotButtonsAppearOptimized 1s ease-out 1.2s forwards;
 }
 
 .chatbot-action-btn {
@@ -763,15 +809,15 @@ body {
 }
 
 .chatbot-action-btn:nth-child(1) {
-    animation: chatbotButtonSlideInOptimized 0.6s ease-out 1.8s forwards;
+    animation: chatbotButtonSlideInOptimized 0.5s ease-out 1.4s forwards;
 }
 
 .chatbot-action-btn:nth-child(2) {
-    animation: chatbotButtonSlideInOptimized 0.6s ease-out 2.1s forwards;
+    animation: chatbotButtonSlideInOptimized 0.5s ease-out 1.6s forwards;
 }
 
 .chatbot-action-btn:nth-child(3) {
-    animation: chatbotButtonSlideInOptimized 0.6s ease-out 2.4s forwards;
+    animation: chatbotButtonSlideInOptimized 0.5s ease-out 1.8s forwards;
 }
 
 .chatbot-action-btn:hover {
@@ -784,7 +830,7 @@ body {
 .chatbot-welcome-state.fade-out {
     opacity: 0;
     transform: translateY(-30px);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 @keyframes chatbotMainRobotFloatOptimized {

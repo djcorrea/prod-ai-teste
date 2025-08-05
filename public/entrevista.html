@@ -185,6 +185,9 @@
             margin-bottom: 25px;
             position: relative;
             z-index: 1;
+            /* Estabiliza o container para evitar expansão */
+            transform: translateZ(0);
+            will-change: auto;
         }
         
         .form-label {
@@ -212,6 +215,9 @@
             font-family: 'Space Grotesk', sans-serif;
             transition: all 0.3s ease;
             outline: none;
+            /* Estabiliza transformações para evitar conflitos */
+            transform: translateZ(0);
+            backface-visibility: hidden;
             box-shadow: 
                 inset 0 2px 8px rgba(0, 0, 0, 0.3),
                 0 0 0 1px rgba(0, 240, 255, 0.4),
@@ -228,7 +234,8 @@
                 0 0 0 1px rgba(0, 240, 255, 0.7),
                 0 0 25px rgba(0, 240, 255, 0.2),
                 0 0 40px rgba(74, 144, 226, 0.2);
-            transform: translateY(-1px);
+            /* Transformação mais sutil e controlada */
+            transform: translateY(-1px) translateZ(0);
         }
         
         .form-select {
@@ -508,16 +515,11 @@
             particlesContainer.appendChild(particle);
         }
         
-        // Form animation on focus
+        // Form particles effect on interaction (removido o scale que causava expansão)
         const inputs = document.querySelectorAll('.form-input, .form-select, .form-textarea');
         inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'scale(1.02)';
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.style.transform = 'scale(1)';
-            });
+            // O efeito visual de foco já está no CSS com translateY(-1px)
+            // Removido o JavaScript que fazia scale no container pai
         });
         
         // Script moderno usando Firebase v11 (mesmo do projeto)
@@ -700,19 +702,22 @@
             lastTouchEnd = now;
         }, { passive: false });
 
-        // Garantir que inputs não causem zoom
+        // Garantir que inputs não causem zoom (versão otimizada)
         document.addEventListener('DOMContentLoaded', function() {
             const inputs = document.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
+                // Removido o scrollIntoView que causava expansão do container
+                // O CSS já cuida do efeito visual com translateY(-1px)
                 input.addEventListener('focus', function() {
-                    // Força scroll suave ao focar no input
-                    setTimeout(() => {
+                    // Apenas garante que o input seja visível sem forçar scroll
+                    if (this.getBoundingClientRect().top < 0 || 
+                        this.getBoundingClientRect().bottom > window.innerHeight) {
                         this.scrollIntoView({ 
                             behavior: 'smooth', 
-                            block: 'center',
+                            block: 'nearest', // Mudado de 'center' para 'nearest'
                             inline: 'nearest'
                         });
-                    }, 100);
+                    }
                 });
             });
         });

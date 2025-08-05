@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escolha seu Plano</title>
+    
+    <!-- Bibliotecas para efeitos visuais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.net.min.js" defer></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -12,37 +17,78 @@
             box-sizing: border-box;
         }
 
-        html {
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%);
-            min-height: 100vh;
-            /* Força o fundo em todos os dispositivos */
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #2a1845 75%, #1f1535 100%);
-            min-height: 100vh;
-            color: #E1E1FF;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Efeito de partículas no fundo */
-        body::before {
-            content: '';
+        /* Background Elements - Mesmo da landing.html */
+        .background-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, rgba(119, 198, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
             z-index: -1;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #16213e 100%);
+            overflow: hidden;
+        }
+
+        .vanta-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.9;
+        }
+
+        .fundo-neural {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000000 100%);
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #8a2be2;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #8a2be2;
+            animation: float-up 10s linear infinite;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            color: #E1E1FF;
+            overflow-x: hidden;
+            position: relative;
         }
 
         .container {
@@ -558,6 +604,17 @@
     </style>
 </head>
 <body>
+    <!-- Background Elements -->
+    <div class="background-container">
+        <!-- Container para o fundo animado Vanta.js -->
+        <div class="vanta-background" id="vanta-bg"></div>
+        
+        <!-- Plano de fundo neural (fallback) -->
+        <div class="fundo-neural"></div>
+        
+        <div class="particles" id="particles"></div>
+    </div>
+
     <div class="container">
         <h1 class="title">Escolha seu plano</h1>
         
@@ -610,7 +667,7 @@
                     </li>
                     <li class="benefit-item">
                         <span class="benefit-icon check">✅</span>
-                        Respostas mais avançadas
+                        Melhores respostas com modelo de IA mais avançado
                     </li>
                     <li class="benefit-item">
                         <span class="benefit-icon check">✅</span>
@@ -622,7 +679,7 @@
                     </li>
                     <li class="benefit-item">
                         <span class="benefit-icon check">✅</span>
-                        Memória de perfil salva
+                        Acesso a análise de problema por imagem
                     </li>
                     <li class="benefit-item">
                         <span class="benefit-icon check">✅</span>
@@ -633,5 +690,75 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Particle Generation - Mesmo da landing.html
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Initialize Vanta.js Background
+        function initVantaBackground() {
+            try {
+                const vantaElement = document.getElementById("vanta-bg");
+                if (!vantaElement) {
+                    return;
+                }
+                
+                if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+                    const isLowPerformance = navigator.hardwareConcurrency <= 4;
+                    const isDesktop = window.innerWidth > 768;
+                    
+                    VANTA.NET({
+                        el: "#vanta-bg",
+                        mouseControls: true,
+                        touchControls: true,
+                        gyroControls: false,
+                        minHeight: 200.00,
+                        minWidth: 200.00,
+                        scale: 1.00,
+                        scaleMobile: 1.00,
+                        color: 0x8a2be2,
+                        backgroundColor: 0x0a0a1a,
+                        points: isLowPerformance ? 3.50 : (isDesktop ? 6.00 : 3.50),
+                        maxDistance: isLowPerformance ? 13.00 : (isDesktop ? 20.00 : 13.00),
+                        spacing: isLowPerformance ? 30.00 : (isDesktop ? 20.00 : 28.00),
+                        showDots: true
+                    });
+                    console.log('Vanta.js Network background initialized');
+                } else {
+                    console.log('Vanta.js libraries not available');
+                }
+            } catch (error) {
+                console.log('Vanta.js initialization error:', error);
+            }
+        }
+        
+        // Initialize Vanta.js when libraries are loaded
+        function checkLibrariesAndInit() {
+            if (typeof VANTA !== 'undefined' && typeof THREE !== 'undefined') {
+                initVantaBackground();
+            } else {
+                setTimeout(checkLibrariesAndInit, 100);
+            }
+        }
+        
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkLibrariesAndInit);
+        } else {
+            checkLibrariesAndInit();
+        }
+        
+        console.log('Background planos.html carregado com sucesso!');
+    </script>
 </body>
 </html>
