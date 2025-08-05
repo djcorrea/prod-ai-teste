@@ -276,6 +276,55 @@
             left: 100%;
         }
         
+        /* Hero About Section - integrated into hero sequence */
+        .hero-about {
+            margin-top: 60px;
+            max-width: 900px;
+            text-align: center;
+        }
+        
+        .hero-about-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+            position: relative;
+            animation: fade-in 1s ease-out 1.5s both;
+        }
+        
+        .hero-about-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .hero-about-text {
+            animation: fade-in 1s ease-out 2s both;
+        }
+        
+        .hero-about-text p {
+            font-size: 1.4rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        .hero-about-text strong {
+            color: var(--neon-cyan);
+        }
+        
         /* Holographic Card */
         .section {
             padding: 100px 50px;
@@ -746,14 +795,18 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-
-            #about-intro {
-                margin-top: -150px !important;
-                padding-top: 0 !important;
-            }
             
             .hero-content {
                 padding: 0 1rem;
+            }
+            
+            .hero-about-title {
+                font-size: clamp(1.5rem, 5vw, 2rem);
+                margin-bottom: 20px;
+            }
+            
+            .hero-about-text p {
+                font-size: 1.2rem;
             }
             
             .section-title {
@@ -803,6 +856,20 @@
                 padding-top: 0 !important;
             }
             
+            .hero-about {
+                margin-top: 40px;
+            }
+            
+            .hero-about-title {
+                font-size: clamp(1.2rem, 4vw, 1.5rem);
+                margin-bottom: 15px;
+            }
+            
+            .hero-about-text p {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+            
             .section-title {
                 font-size: clamp(1.4rem, 5vw, 2rem);
                 margin-bottom: 1.5rem;
@@ -850,7 +917,7 @@
             <div class="logo">AI.SYNTH</div>
             <ul class="nav-links">
                 <li><a href="#home" class="nav-link">HOME</a></li>
-                <li><a href="#about-intro" class="nav-link">SOBRE</a></li>
+                <li><a href="#home" class="nav-link">SOBRE</a></li>
                 <li><a href="#services" class="nav-link">RECURSOS FUTURISTAS</a></li>
                 <li><a href="#performance" class="nav-link">PERFORMANCE</a></li>
                 <li><a href="#instructions" class="nav-link">INSTRUÇÕES</a></li>
@@ -869,16 +936,16 @@
             <h1 class="hero-title">BEM-VINDO AO FUTURO</h1>
             <p class="hero-subtitle">PRODUÇÃO MUSICAL INTELIGENTE</p>
             <a href="login.html" class="cta-button">EXPLORAR AGORA</a>
-        </div>
-    </section>
-    
-    <!-- About Section -->
-    <section class="section" id="about-intro" style="padding-top: 0px; padding-bottom: 30px; margin-top: -120px;">
-        <h2 class="section-title scroll-reveal">O QUE É A AI.SYNTH?</h2>
-        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-            <p style="font-size: 1.4rem; line-height: 1.9; color: var(--text-secondary); letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);">
-                <strong style="color: var(--neon-cyan);">Ai.Synth é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais.</strong> Usando IA, ela te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.
-            </p>
+            
+            <!-- About content integrated into hero sequence -->
+            <div class="hero-about">
+                <h2 class="hero-about-title">O QUE É A AI.SYNTH?</h2>
+                <div class="hero-about-text">
+                    <p>
+                        <strong>Ai.Synth é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais.</strong> Usando IA, ela te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
     
