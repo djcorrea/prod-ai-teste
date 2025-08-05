@@ -205,7 +205,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: title-glow 3s ease-in-out infinite;
+            animation: title-glow 3s ease-in-out infinite, fade-in 1s ease-out 0s both;
             filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.5));
         }
         
@@ -219,7 +219,7 @@
             color: var(--text-secondary);
             margin-bottom: 40px;
             letter-spacing: 3px;
-            animation: fade-in 1s ease-out 0.5s both;
+            animation: fade-in 1s ease-out 1s both;
         }
         
         @keyframes fade-in {
@@ -249,7 +249,7 @@
             overflow: hidden;
             transition: all 0.3s ease;
             transform-style: preserve-3d;
-            animation: fade-in 1s ease-out 1s both;
+            animation: fade-in 1s ease-out 2s both;
         }
         
         .cta-button::before {
@@ -695,22 +695,22 @@
             transform: translateY(0);
         }
         
-        /* Garantir que elementos importantes apareçam em dispositivos móveis */
-        @media (max-width: 768px) {
-            #about-intro .scroll-reveal {
-                animation: mobile-reveal 1s ease forwards 0.5s;
-            }
+        /* Garantir que elementos importantes não apareçam automaticamente */
+        #about-intro .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
         }
         
-        @keyframes mobile-reveal {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #about-intro .about-text {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        
+        #about-intro .about-text.active {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         /* CTA Final Button - removed, using same .cta-button class */
@@ -893,7 +893,7 @@
     <!-- About Section -->
     <section class="section" id="about-intro" style="padding-top: 0px; padding-bottom: 30px; margin-top: -120px;">
         <h2 class="section-title scroll-reveal">O QUE É A AI.SYNTH?</h2>
-        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        <div class="about-text" style="max-width: 900px; margin: 0 auto; text-align: center;">
             <p style="font-size: 1.4rem; line-height: 1.9; color: var(--text-secondary); letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);">
                 <strong style="color: var(--neon-cyan);">Ai.Synth é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais.</strong> Usando IA, ela te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.
             </p>
@@ -1062,9 +1062,34 @@
             });
         }, observerOptions);
         
-        // Função para verificar se elementos estão visíveis na página inicial
+        // Função para criar sequência de animações do hero e about
+        function startHeroSequence() {
+            // Sequência: título -> subtítulo -> botão -> título about -> texto about
+            setTimeout(() => {
+                // Após o botão aparecer (3s), mostra o título "O QUE É A AI.SYNTH?"
+                const aboutTitle = document.querySelector('#about-intro .scroll-reveal');
+                if (aboutTitle) {
+                    aboutTitle.classList.add('active');
+                    
+                    // Depois de 1s, mostra o texto
+                    setTimeout(() => {
+                        const aboutText = document.querySelector('#about-intro .about-text');
+                        if (aboutText) {
+                            aboutText.classList.add('active');
+                        }
+                    }, 1000);
+                }
+            }, 3000); // 3s = tempo para título + subtítulo + botão aparecerem
+        }
+        
+        // Função para verificar se elementos estão visíveis na página inicial (exceto about)
         function checkInitialVisibleElements() {
             document.querySelectorAll('.scroll-reveal').forEach(el => {
+                // Pula o título da seção about, será controlado pela sequência
+                if (el.closest('#about-intro')) {
+                    return;
+                }
+                
                 const rect = el.getBoundingClientRect();
                 const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
                 
@@ -1076,10 +1101,19 @@
                 // Observa todos os elementos para futuras interações
                 observer.observe(el);
             });
+            
+            // Observa o título about, mas não o ativa automaticamente
+            const aboutTitle = document.querySelector('#about-intro .scroll-reveal');
+            if (aboutTitle) {
+                observer.observe(aboutTitle);
+            }
         }
         
         // Executa a verificação após o carregamento da página
-        setTimeout(checkInitialVisibleElements, 100);
+        setTimeout(() => {
+            checkInitialVisibleElements();
+            startHeroSequence();
+        }, 100);
         
         // Dynamic Navigation Bar
         let lastScroll = 0;
@@ -1424,17 +1458,16 @@
             checkLibrariesAndInit();
         }
         
-        // Garantir que elementos críticos apareçam após carregamento completo
+        // Garantir que elementos críticos apareçam após carregamento completo (exceto about)
         window.addEventListener('load', () => {
             setTimeout(() => {
-                // Força a ativação do título "O QUE É A AI.SYNTH?" se ainda não estiver ativo
-                const aboutTitle = document.querySelector('#about-intro .scroll-reveal');
-                if (aboutTitle && !aboutTitle.classList.contains('active')) {
-                    aboutTitle.classList.add('active');
-                }
-                
-                // Verifica outros elementos que podem estar visíveis mas não ativados
+                // Verifica outros elementos que podem estar visíveis mas não ativados (exceto about)
                 document.querySelectorAll('.scroll-reveal').forEach(el => {
+                    // Pula elementos da seção about
+                    if (el.closest('#about-intro')) {
+                        return;
+                    }
+                    
                     const rect = el.getBoundingClientRect();
                     if (rect.top < window.innerHeight && rect.bottom > 0 && !el.classList.contains('active')) {
                         el.classList.add('active');
