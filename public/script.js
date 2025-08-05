@@ -672,10 +672,10 @@ function appendMessage(content, className) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `chatbot-message ${className === 'bot' ? 'chatbot-message-assistant' : 'chatbot-message-user'}`;
   
-  // Criar avatar
-  const avatar = document.createElement('div');
-  avatar.className = 'chatbot-message-avatar';
-  avatar.innerHTML = className === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+  // Avatar removido para aumentar largura da conversa
+  // const avatar = document.createElement('div');
+  // avatar.className = 'chatbot-message-avatar';
+  // avatar.innerHTML = className === 'bot' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
   
   // Criar container de conteúdo
   const messageContent = document.createElement('div');
@@ -704,7 +704,7 @@ function appendMessage(content, className) {
   // Montar estrutura
   messageContent.appendChild(bubble);
   messageContent.appendChild(timestamp);
-  messageDiv.appendChild(avatar);
+  // messageDiv.appendChild(avatar); // Avatar removido
   messageDiv.appendChild(messageContent);
   
   chatboxEl.appendChild(messageDiv);
