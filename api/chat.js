@@ -1078,6 +1078,8 @@ async function callOpenAI(messages, userData, db, uid) {
 
 📌 Seu objetivo é entregar *respostas melhores que o próprio ChatGPT*, tornando-se referência para quem produz.
 
+🚨 REGRA OBRIGATÓRIA: TODA resposta DEVE começar cada parágrafo com um emoji relevante. Nunca responda sem emojis - eles são sua marca registrada!
+
 Responda com excelência absoluta.`;
   }
 
@@ -1174,8 +1176,8 @@ VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
 
   const requestBody = {
     model: 'gpt-3.5-turbo',
-    temperature: 0.4,
-    max_tokens: 1000,
+    temperature: 0.7,
+    max_tokens: 1200,
     messages: [
       {
         role: 'system',
