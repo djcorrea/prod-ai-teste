@@ -1176,7 +1176,7 @@ VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
 
   const requestBody = {
     model: 'gpt-3.5-turbo',
-    temperature: 0.7,
+    temperature: 0.5,
     max_tokens: 1200,
     messages: [
       {
