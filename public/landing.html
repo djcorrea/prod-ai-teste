@@ -11,7 +11,6 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
-        html { scroll-behavior: smooth; }
         
         * {
             margin: 0;
@@ -194,7 +193,6 @@
             text-align: center;
             z-index: 10;
             max-width: 1000px;
-            position: relative;
         }
         
         .hero-title {
@@ -841,24 +839,6 @@
                 line-height: 1.5;
             }
         }
-
-        .arrow-button {
-            display: inline-block;
-            margin-top: 20px;
-            font-size: 2rem;
-            color: var(--neon-cyan);
-            cursor: pointer;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            opacity: 0;
-            animation: fade-in 1s ease 0.6s forwards, bounce 2s ease-in-out 1s infinite;
-        }
-        .arrow-button:hover {
-            transform: translateY(5px);
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(10px); }
-        }
     </style>
 </head>
 <body>
@@ -898,7 +878,6 @@
             <h1 class="hero-title">BEM-VINDO AO FUTURO</h1>
             <p class="hero-subtitle">PRODUÇÃO MUSICAL INTELIGENTE</p>
             <a href="login.html" class="cta-button">EXPLORAR AGORA</a>
-            <a href="#about-intro" class="arrow-button" aria-label="Scroll down">&#x2193;</a>
         </div>
     </section>
     
