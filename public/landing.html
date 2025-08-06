@@ -193,6 +193,19 @@
             justify-content: center;
             position: relative;
             padding: 0 50px;
+            /* Evita mudanças de altura/posição durante scroll */
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            max-width: 1000px;
+            /* Garante posição fixa durante scroll */
+            position: relative;
+            transform: none !important;
         }
         
         /* Scroll Indicator Arrow */
@@ -1406,16 +1419,8 @@
             }
         }
         
-        // Add parallax effect to hero content
-        const heroContent = document.querySelector('.hero-content');
-        window.addEventListener('scroll', () => {
-            requestTick(() => {
-                const scrolled = window.pageYOffset;
-                const rate = scrolled * -0.5;
-                heroContent.style.transform = `translateY(${rate}px)`;
-                ticking = false;
-            });
-        });
+        // Efeito parallax removido para evitar espaço vertical indesejado
+        // O hero content agora mantém posição fixa durante scroll
         
         // Add glitch effect on logo hover
         const logo = document.querySelector('.logo');
