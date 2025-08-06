@@ -860,4 +860,3 @@ console.log('🚀 Carregando auth.js...');
     console.error('❌ Erro crítico ao carregar auth.js:', error);
   }
 })();
-c

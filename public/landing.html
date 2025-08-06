@@ -189,6 +189,44 @@
             padding: 0 50px;
         }
         
+        /* Scroll Indicator Arrow */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            opacity: 0.8;
+            animation: bounce 2s infinite, fade-in 0.5s ease-out 1s both;
+        }
+        
+        .scroll-arrow {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-cyan);
+            border-top: none;
+            border-left: none;
+            transform: rotate(45deg);
+            animation: arrow-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        
+        @keyframes arrow-glow {
+            0%, 100% { 
+                border-color: var(--neon-cyan);
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+            50% { 
+                border-color: var(--neon-purple);
+                box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            }
+        }
+        
         .hero-content {
             text-align: center;
             z-index: 10;
@@ -757,8 +795,8 @@
             }
 
             #about-intro {
-                margin-top: -150px !important;
-                padding-top: 0 !important;
+                margin-top: 0 !important;
+                padding-top: 50px !important;
             }
             
             .hero-content {
@@ -808,8 +846,8 @@
             }
 
             #about-intro {
-                margin-top: -180px !important;
-                padding-top: 0 !important;
+                margin-top: 0 !important;
+                padding-top: 30px !important;
             }
             
             .section-title {
@@ -877,12 +915,17 @@
         <div class="hero-content">
             <h1 class="hero-title">BEM-VINDO AO FUTURO</h1>
             <p class="hero-subtitle">PRODUÇÃO MUSICAL INTELIGENTE</p>
-            <a href="login.html" class="cta-button">EXPLORAR AGORA</a>
+            <a href="#about-intro" class="cta-button" id="explore-btn">EXPLORAR AGORA</a>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
         </div>
     </section>
     
     <!-- About Section -->
-    <section class="section" id="about-intro" style="padding-top: 0px; padding-bottom: 30px; margin-top: -120px;">
+    <section class="section" id="about-intro" style="padding-top: 100px; padding-bottom: 30px; margin-top: 0;">
         <h2 class="section-title scroll-reveal">O QUE É A AI.SYNTH?</h2>
         <div class="about-text" style="max-width: 900px; margin: 0 auto; text-align: center;">
             <p style="font-size: 1.4rem; line-height: 1.9; color: var(--text-secondary); letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);">
@@ -1038,6 +1081,37 @@
                 }
             });
         });
+        
+        // Smooth scroll para o botão "Explorar Agora"
+        const exploreBtn = document.getElementById('explore-btn');
+        if (exploreBtn) {
+            exploreBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const aboutSection = document.getElementById('about-intro');
+                if (aboutSection) {
+                    aboutSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        }
+        
+        // Ocultar/mostrar seta de scroll baseado na posição
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+        if (scrollIndicator) {
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+                
+                // Esconder a seta quando rolar mais que 50% da viewport
+                if (scrollTop > windowHeight * 0.5) {
+                    scrollIndicator.style.opacity = '0';
+                } else {
+                    scrollIndicator.style.opacity = '0.8';
+                }
+            });
+        }
         
         // Scroll Reveal Animation
         const observerOptions = {
