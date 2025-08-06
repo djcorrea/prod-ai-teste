@@ -29,11 +29,16 @@
             --text-secondary: #a0a0ff;
         }
         
+        html {
+            scroll-behavior: smooth;
+        }
+        
         body {
             font-family: 'Rajdhani', sans-serif;
             background: var(--dark-bg);
             color: var(--text-primary);
             overflow-x: hidden;
+            overflow-y: auto;
         }
         
         /* Animated Background */
@@ -43,9 +48,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: -10;
             background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #16213e 100%);
             overflow: hidden;
+            pointer-events: none;
         }
         
         .vanta-background {
@@ -192,8 +198,8 @@
         /* Scroll Indicator Arrow */
         .scroll-indicator {
             position: absolute;
-            bottom: 200px;
-            left: 49.3%;
+            bottom: 180px;
+            left: 48,6%;
             transform: translateX(-50%);
             z-index: 10;
             opacity: 0.8;
@@ -223,7 +229,7 @@
             transform: translate(-50%, -50%);
             width: 40px;
             height: 40px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M7 13l5 5 5-5M7 6l5 5 5-5' stroke='%2300f0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M7 13l5 5 5-5M7 6l5 5 5-5' stroke='%2300ffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-size: contain;
             background-repeat: no-repeat;
             filter: 
@@ -1152,11 +1158,12 @@
             });
         }
         
-        // Smooth scroll para a seta indicativa também
+        // Smooth scroll para a seta indicativa
         const scrollIndicator = document.querySelector('.scroll-indicator');
         if (scrollIndicator) {
             scrollIndicator.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 const aboutSection = document.getElementById('about-intro');
                 if (aboutSection) {
                     aboutSection.scrollIntoView({
@@ -1548,6 +1555,16 @@
         
         // Initialize everything when DOM is loaded
         console.log('Site futurista carregado com sucesso!');
+        
+        // Debug: Teste para verificar se o scroll está funcionando
+        window.addEventListener('wheel', function(e) {
+            console.log('Evento wheel detectado:', e);
+        }, { passive: true });
+        
+        // Debug: Verificar se o scroll está sendo bloqueado
+        document.addEventListener('scroll', function(e) {
+            console.log('Scroll detectado:', window.pageYOffset);
+        }, { passive: true });
     </script>
 </body>
 </html>
