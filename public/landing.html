@@ -1002,7 +1002,7 @@
         <div class="hero-content">
             <h1 class="hero-title">BEM-VINDO AO FUTURO</h1>
             <p class="hero-subtitle">PRODUÇÃO MUSICAL INTELIGENTE</p>
-            <a href="login.html" class="cta-button" id="explore-btn">EXPLORAR AGORA</a>
+            <a href="login.html" class="cta-button">EXPLORAR AGORA</a>
         </div>
         
         <!-- Scroll Indicator -->
@@ -1016,7 +1016,7 @@
         <h2 class="section-title scroll-reveal">O QUE É A AI.SYNTH?</h2>
         <div class="about-text" style="max-width: 900px; margin: 0 auto; text-align: center;">
             <p style="font-size: 1.4rem; line-height: 1.9; color: var(--text-secondary); letter-spacing: 1px; text-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);">
-                <strong style="color: var(--neon-cyan);">Ai.Synth é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais.</strong> Usando IA, ela te ajuda a tirar dúvidas, resolver problemas técnicos, aprender novas técnicas e encontrar soluções rápidas para tudo o que envolve produzir música.
+                <strong style="color: var(--neon-cyan);">Ai.Synth é uma plataforma inteligente que usa inteligência artificial para impulsionar a produtividade de produtores musicais.</strong> Usando IA, ela te ajuda a resolver problemas técnicos, aprender novas técnicas, tirar dúvidas e encontrar soluções rápidas para tudo o que envolve produzir música.
             </p>
         </div>
     </section>
@@ -1169,20 +1169,8 @@
             });
         });
         
-        // Smooth scroll para o botão "Explorar Agora"
-        const exploreBtn = document.getElementById('explore-btn');
-        if (exploreBtn) {
-            exploreBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const aboutSection = document.getElementById('about-intro');
-                if (aboutSection) {
-                    aboutSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        }
+        // Botão "Explorar Agora" agora redireciona para login.html
+        // Event listener removido para permitir navegação normal
         
         // Smooth scroll para a seta indicativa
         const scrollIndicator = document.querySelector('.scroll-indicator');
