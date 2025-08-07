@@ -74,7 +74,9 @@ function validateAndSanitizeInput(req) {
   return {
     message: message.trim().substring(0, 2000),
     conversationHistory: validHistory,
-    idToken: idToken.trim()
+    idToken: idToken.trim(),
+    // 🎤 Detectar se é voice message (GRATUITO)
+    isVoiceMessage: message.startsWith('[VOICE MESSAGE]')
   };
 }
 
@@ -1032,7 +1034,7 @@ async function gerenciarContextoTecnico(db, uid, mensagem) {
 }
 
 // Função para chamar a API da OpenAI
-async function callOpenAI(messages, userData, db, uid) {
+async function callOpenAI(messages, userData, db, uid, isVoiceMessage = false) {
   // 🧠 Gerenciar contexto técnico inteligente
   const currentMessage = messages[messages.length - 1]?.content || '';
   const contextoInfo = await gerenciarContextoTecnico(db, uid, currentMessage);
@@ -1097,6 +1099,27 @@ Responda com excelência absoluta.
 🚨 REGRA OBRIGATÓRIA: TODA resposta DEVE começar cada parágrafo com um emoji relevante. Nunca responda sem emojis - eles são sua marca registrada!
 
 Responda com excelência absoluta.`;
+  }
+
+  // 🎤 PROMPT ESPECIAL PARA VOICE MESSAGES (GRATUITO!)
+  if (isVoiceMessage) {
+    systemPrompt += `\n\n🎤 **VOICE MESSAGE DETECTADO - INSTRUÇÕES ESPECIAIS:**
+
+🎯 O usuário enviou uma MENSAGEM DE VOZ através do reconhecimento de fala.
+- Responda como se você REALMENTE tivesse ouvido o usuário falando
+- Use frases como "Escutei que você...", "Pelo que entendi...", "Ouvi sua preocupação..."
+- Seja mais direto e prático que o normal
+- Use mais emojis de áudio: 🎤 🔊 🎧 🎵
+- Priorize soluções rápidas e aplicáveis
+- Termine sempre perguntando se pode detalhar algum ponto
+
+🧠 **CONTEXTO VOICE:**
+- Voice messages geralmente são mais espontâneos
+- Usuário pode estar no estúdio/produzindo no momento
+- Resposta deve ser mais conversacional e menos formal
+- Foque no problema imediato mencionado
+
+Responda com máxima naturalidade e eficiência!`;
   }
 
   // 🧠 CONTEXTO TÉCNICO INTELIGENTE - Aplicar prompt específico do estilo detectado
@@ -1293,7 +1316,7 @@ export default async function handler(req, res) {
     ];
 
     // Chamar OpenAI com dados completos do usuário para personalização e contexto técnico
-    let reply = await callOpenAI(messages, userData, db, uid);
+    let reply = await callOpenAI(messages, userData, db, uid, validatedData.isVoiceMessage);
 
     // 🎹 SISTEMA DE INSERÇÃO DE IMAGENS COM PALAVRAS-CHAVE EXCLUSIVAS
     // 📋 CONFIGURAÇÃO CENTRALIZADA - FÁCIL MANUTENÇÃO

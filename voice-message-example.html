@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Message - AI.SYNTH</title>
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .voice-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+        
+        .record-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .record-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        }
+        
+        .record-button.recording {
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .status {
+            text-align: center;
+            margin: 10px 0;
+            color: #00ffff;
+        }
+        
+        .audio-preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .analysis-results {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .send-button {
+            background: linear-gradient(45deg, #00ffff, #0099ff);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="voice-container">
+        <h2 style="text-align: center; color: #00ffff;">🎤 Voice Message - AI.SYNTH</h2>
+        
+        <button id="recordButton" class="record-button">
+            <span id="recordIcon">🎤</span>
+        </button>
+        
+        <div id="status" class="status">Clique para gravar</div>
+        
+        <div id="audioPreview" class="audio-preview" style="display: none;">
+            <audio id="audioPlayer" controls style="width: 100%;"></audio>
+            <button id="sendButton" class="send-button">Enviar para AI.SYNTH 🚀</button>
+        </div>
+        
+        <div id="analysisResults" class="analysis-results" style="display: none;">
+            <h3>🎵 Análise do Áudio:</h3>
+            <div id="analysisContent"></div>
+        </div>
+        
+        <div id="aiResponse" style="margin: 20px 0; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; display: none;">
+            <h3>🤖 Resposta do AI.SYNTH:</h3>
+            <div id="responseContent"></div>
+        </div>
+    </div>
+
+    <script>
+        class VoiceMessageHandler {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                this.audioBlob = null;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+            
+            initializeElements() {
+                this.recordButton = document.getElementById('recordButton');
+                this.recordIcon = document.getElementById('recordIcon');
+                this.status = document.getElementById('status');
+                this.audioPreview = document.getElementById('audioPreview');
+                this.audioPlayer = document.getElementById('audioPlayer');
+                this.sendButton = document.getElementById('sendButton');
+                this.analysisResults = document.getElementById('analysisResults');
+                this.analysisContent = document.getElementById('analysisContent');
+                this.aiResponse = document.getElementById('aiResponse');
+                this.responseContent = document.getElementById('responseContent');
+            }
+            
+            setupEventListeners() {
+                this.recordButton.addEventListener('click', () => this.toggleRecording());
+                this.sendButton.addEventListener('click', () => this.sendToAI());
+            }
+            
+            async toggleRecording() {
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+            
+            async startRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        } 
+                    });
+                    
+                    this.mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+                    
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            this.audioChunks.push(event.data);
+                        }
+                    };
+                    
+                    this.mediaRecorder.onstop = () => {
+                        this.audioBlob = new Blob(this.audioChunks, { 
+                            type: 'audio/webm;codecs=opus' 
+                        });
+                        this.showAudioPreview();
+                        this.analyzeAudio();
+                    };
+                    
+                    this.mediaRecorder.start(100);
+                    this.isRecording = true;
+                    
+                    this.recordButton.classList.add('recording');
+                    this.recordIcon.textContent = '⏹️';
+                    this.status.textContent = 'Gravando... Clique para parar';
+                    this.audioPreview.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Erro ao acessar microfone:', error);
+                    this.status.textContent = 'Erro: Permissão de microfone negada';
+                }
+            }
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    
+                    this.isRecording = false;
+                    this.recordButton.classList.remove('recording');
+                    this.recordIcon.textContent = '🎤';
+                    this.status.textContent = 'Processando áudio...';
+                }
+            }
+            
+            showAudioPreview() {
+                const audioURL = URL.createObjectURL(this.audioBlob);
+                this.audioPlayer.src = audioURL;
+                this.audioPreview.style.display = 'block';
+                this.status.textContent = 'Áudio gravado com sucesso!';
+            }
+            
+            async analyzeAudio() {
+                try {
+                    // Análise básica com Web Audio API
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const arrayBuffer = await this.audioBlob.arrayBuffer();
+                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    
+                    // Análise de frequência básica
+                    const channelData = audioBuffer.getChannelData(0);
+                    const analysis = this.performBasicAnalysis(channelData, audioBuffer.sampleRate);
+                    
+                    this.displayAnalysis(analysis);
+                    
+                } catch (error) {
+                    console.error('Erro na análise:', error);
+                    this.analysisContent.innerHTML = '<p style="color: #ff6666;">Erro na análise do áudio</p>';
+                }
+            }
+            
+            performBasicAnalysis(channelData, sampleRate) {
+                // Análise básica de áudio
+                let maxAmplitude = 0;
+                let sumSquared = 0;
+                
+                for (let i = 0; i < channelData.length; i++) {
+                    const sample = Math.abs(channelData[i]);
+                    maxAmplitude = Math.max(maxAmplitude, sample);
+                    sumSquared += sample * sample;
+                }
+                
+                const rms = Math.sqrt(sumSquared / channelData.length);
+                const dynamicRange = maxAmplitude / (rms + 0.001);
+                
+                return {
+                    duration: channelData.length / sampleRate,
+                    maxAmplitude: maxAmplitude,
+                    rms: rms,
+                    dynamicRange: dynamicRange,
+                    estimatedDb: 20 * Math.log10(rms + 0.001),
+                    hasClipping: maxAmplitude > 0.95
+                };
+            }
+            
+            displayAnalysis(analysis) {
+                const duration = analysis.duration.toFixed(1);
+                const dbLevel = analysis.estimatedDb.toFixed(1);
+                const hasClipping = analysis.hasClipping;
+                
+                let analysisHTML = `
+                    <p><strong>⏱️ Duração:</strong> ${duration}s</p>
+                    <p><strong>🔊 Nível:</strong> ~${dbLevel} dB</p>
+                    <p><strong>📊 Range Dinâmico:</strong> ${analysis.dynamicRange.toFixed(2)}</p>
+                `;
+                
+                if (hasClipping) {
+                    analysisHTML += '<p style="color: #ff6666;"><strong>⚠️ Detectado clipping!</strong></p>';
+                }
+                
+                if (analysis.rms < 0.01) {
+                    analysisHTML += '<p style="color: #ffaa00;"><strong>🔇 Áudio muito baixo</strong></p>';
+                } else if (analysis.rms > 0.5) {
+                    analysisHTML += '<p style="color: #ff6666;"><strong>🔊 Áudio muito alto</strong></p>';
+                } else {
+                    analysisHTML += '<p style="color: #00ff66;"><strong>✅ Nível bom</strong></p>';
+                }
+                
+                this.analysisContent.innerHTML = analysisHTML;
+                this.analysisResults.style.display = 'block';
+            }
+            
+            async sendToAI() {
+                if (!this.audioBlob) return;
+                
+                this.sendButton.disabled = true;
+                this.sendButton.textContent = 'Enviando...';
+                
+                try {
+                    // Converter para base64 para envio
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                        const base64Audio = reader.result.split(',')[1];
+                        
+                        // Simular chamada para API (substitua pela sua API real)
+                        const response = await this.callVoiceAPI(base64Audio);
+                        this.displayAIResponse(response);
+                    };
+                    reader.readAsDataURL(this.audioBlob);
+                    
+                } catch (error) {
+                    console.error('Erro ao enviar:', error);
+                    this.responseContent.innerHTML = '<p style="color: #ff6666;">Erro ao processar áudio</p>';
+                    this.aiResponse.style.display = 'block';
+                } finally {
+                    this.sendButton.disabled = false;
+                    this.sendButton.textContent = 'Enviar para AI.SYNTH 🚀';
+                }
+            }
+            
+            async callVoiceAPI(audioBase64) {
+                // MOCK - Substitua pela sua API real
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                return {
+                    transcription: "Escuta esse kick, tá batendo muito fraco quando toca junto com o beat",
+                    aiResponse: `🎤 **Entendi perfeitamente!** Analisando seu áudio:
+
+🔊 **Problema detectado:** Kick perdendo punch quando toca com outros elementos
+
+💡 **Soluções técnicas:**
+- **EQ:** Realce entre 60-80Hz no kick (+3dB)
+- **Sidechain:** Comprima os outros elementos quando kick bater
+- **Transiente:** Use um transient shaper no kick
+- **Mixagem:** Abra espaço de 50-100Hz nos outros instrumentos
+
+🎛️ **Parâmetros FL Studio:**
+1. **Parametric EQ 2** no kick: boost 70Hz, Q=1.2
+2. **Fruity Limiter** nos outros elementos com sidechain
+3. **Threshold -15dB, Release 100ms**
+
+🧪 **Teste agora:** Isole o kick e compare antes/depois!`
+                };
+            }
+            
+            displayAIResponse(response) {
+                this.responseContent.innerHTML = `
+                    <div style="background: rgba(0, 255, 255, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <h4>📝 Transcrição:</h4>
+                        <p><em>"${response.transcription}"</em></p>
+                    </div>
+                    <div style="white-space: pre-line; line-height: 1.6;">
+                        ${response.aiResponse}
+                    </div>
+                `;
+                this.aiResponse.style.display = 'block';
+            }
+        }
+        
+        // Inicializar quando página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            new VoiceMessageHandler();
+        });
+    </script>
+</body>
+</html>
