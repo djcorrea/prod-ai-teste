@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 DEBUG - Voice Recognition</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .mic-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .debug-mic {
+            background: #333;
+            border: 2px solid #666;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .debug-mic:hover {
+            background: #555;
+        }
+        
+        .debug-mic.recording {
+            background: #ff4444;
+            border-color: #ff4444;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #666;
+            border-radius: 10px;
+            background: #222;
+            color: white;
+            margin: 20px 0;
+        }
+        
+        .debug-log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: rgba(0, 200, 255, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status.ready { background: rgba(0, 255, 0, 0.2); }
+        .status.listening { background: rgba(255, 165, 0, 0.2); }
+        .status.error { background: rgba(255, 0, 0, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1 style="text-align: center; color: #00ccff;">🐛 DEBUG - Voice Recognition</h1>
+        
+        <div class="info-box">
+            <h3 style="color: #00ccff; margin-top: 0;">📋 Informações do Sistema:</h3>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>Dispositivo:</strong> <span id="deviceType"></span></p>
+            <p><strong>Speech Recognition:</strong> <span id="speechSupport"></span></p>
+        </div>
+        
+        <div class="status ready" id="status">🟢 READY - Clique no microfone para testar</div>
+        
+        <div class="mic-container">
+            <button class="debug-mic" id="debugMic">🎤 CLIQUE PARA FALAR</button>
+        </div>
+        
+        <input type="text" class="test-input" id="testInput" placeholder="O texto capturado aparecerá aqui...">
+        
+        <div class="debug-log" id="debugLog">
+            <div style="color: #00ff00;">🚀 Sistema iniciado - aguardando clique no microfone...</div>
+        </div>
+        
+        <div class="info-box">
+            <h3 style="color: #ffcc00; margin-top: 0;">🧪 COMO TESTAR:</h3>
+            <ol>
+                <li>Clique no botão do microfone</li>
+                <li>Fale UMA frase clara (ex: "como fazer um beat de funk")</li>
+                <li>Aguarde o sistema processar</li>
+                <li>Veja os logs detalhados abaixo</li>
+            </ol>
+            <p><strong>📱 Mobile:</strong> Pode parar automaticamente<br>
+            <strong>💻 Desktop:</strong> Clique novamente para parar</p>
+        </div>
+    </div>
+
+    <script>
+        // Variables
+        let recognition = null;
+        let isListening = false;
+        let finalText = '';
+        let logCount = 0;
+        
+        // Elements
+        const mic = document.getElementById('debugMic');
+        const input = document.getElementById('testInput');
+        const log = document.getElementById('debugLog');
+        const status = document.getElementById('status');
+        
+        // Device detection
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Update info
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('deviceType').textContent = isMobile ? '📱 Mobile' : '💻 Desktop';
+        
+        // Initialize
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+            recognition.continuous = !isMobile; // Mobile: false, Desktop: true
+            
+            document.getElementById('speechSupport').innerHTML = '✅ Suportado';
+            addLog('✅ Speech Recognition inicializado');
+            addLog(`🔧 Configuração: continuous=${recognition.continuous}, mobile=${isMobile}`);
+        } else {
+            document.getElementById('speechSupport').innerHTML = '❌ Não suportado';
+            addLog('❌ Speech Recognition NÃO suportado neste navegador');
+            mic.disabled = true;
+            return;
+        }
+        
+        // Events
+        mic.addEventListener('click', toggleRecognition);
+        
+        recognition.onstart = () => {
+            isListening = true;
+            addLog('🎤 INÍCIO da captura de voz');
+            updateStatus('listening', '🔴 GRAVANDO - Fale agora!');
+            mic.classList.add('recording');
+            mic.textContent = '🔴 GRAVANDO...';
+        };
+        
+        recognition.onresult = (event) => {
+            addLog(`📝 RESULTADO recebido - Total: ${event.results.length}`);
+            
+            let allInterim = '';
+            let allFinal = '';
+            
+            for (let i = 0; i < event.results.length; i++) {
+                const result = event.results[i];
+                const transcript = result[0].transcript;
+                const confidence = result[0].confidence || 0;
+                const isFinal = result.isFinal;
+                
+                addLog(`   [${i}] "${transcript}" | Final: ${isFinal} | Conf: ${confidence.toFixed(2)}`);
+                
+                if (isFinal) {
+                    allFinal += transcript + ' ';
+                } else {
+                    allInterim += transcript;
+                }
+            }
+            
+            if (allFinal.trim()) {
+                finalText = allFinal.trim();
+                addLog(`✅ TEXTO FINAL: "${finalText}"`);
+            }
+            
+            // Update input immediately
+            const displayText = (finalText + ' ' + allInterim).trim();
+            input.value = displayText;
+            addLog(`🔄 Input atualizado: "${displayText}"`);
+        };
+        
+        recognition.onend = () => {
+            addLog('🏁 FIM da captura');
+            addLog(`📊 Texto final capturado: "${finalText}"`);
+            
+            if (isMobile && isListening && finalText.trim().length === 0) {
+                addLog('📱 MOBILE: Sem texto, tentando reiniciar...');
+                setTimeout(() => {
+                    if (isListening) {
+                        recognition.start();
+                        return;
+                    }
+                }, 200);
+                return;
+            }
+            
+            isListening = false;
+            updateStatus('ready', '🟢 FINALIZADO');
+            mic.classList.remove('recording');
+            mic.textContent = '🎤 CLIQUE PARA FALAR';
+            
+            if (finalText.trim()) {
+                input.value = finalText.trim();
+                addLog(`✅ SUCESSO! Texto: "${finalText.trim()}"`);
+            } else {
+                addLog('⚠️ NENHUM texto foi capturado');
+            }
+        };
+        
+        recognition.onerror = (event) => {
+            addLog(`❌ ERRO: ${event.error}`);
+            updateStatus('error', `❌ ERRO: ${event.error}`);
+            isListening = false;
+            mic.classList.remove('recording');
+            mic.textContent = '🎤 CLIQUE PARA FALAR';
+        };
+        
+        function toggleRecognition() {
+            if (isListening) {
+                addLog('⏹️ Parando gravação...');
+                recognition.stop();
+            } else {
+                addLog('🚀 Iniciando gravação...');
+                finalText = '';
+                input.value = '';
+                try {
+                    recognition.start();
+                } catch (e) {
+                    addLog(`❌ Erro ao iniciar: ${e.message}`);
+                }
+            }
+        }
+        
+        function addLog(message) {
+            logCount++;
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `<div style="color: #00ff88;">[${time}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function updateStatus(type, message) {
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+    </script>
+</body>
+</html>

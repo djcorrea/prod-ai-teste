@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 TESTE SIMPLES - Voice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .big-button {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 30px 60px;
+            font-size: 2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .big-button:hover {
+            background: #ff6666;
+            transform: scale(1.05);
+        }
+        
+        .big-button.recording {
+            background: #00ff00;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .big-input {
+            width: 90%;
+            padding: 20px;
+            font-size: 1.5rem;
+            border: 3px solid #666;
+            border-radius: 15px;
+            background: #222;
+            color: white;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 TESTE DIRETO - Speech Recognition</h1>
+        
+        <div class="status" id="status">
+            Clique no botão e fale: "Olá mundo"
+        </div>
+        
+        <button class="big-button" id="voiceBtn">
+            🎤 CLIQUE E FALE
+        </button>
+        
+        <input type="text" class="big-input" id="resultInput" placeholder="Texto aparecerá aqui..." readonly>
+        
+        <div class="log" id="log"></div>
+        
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <h3>🚨 SE NÃO FUNCIONAR:</h3>
+            <p>1. Verifique se permite microfone no navegador</p>
+            <p>2. Fale CLARAMENTE: "Olá mundo como você está"</p>
+            <p>3. Aguarde alguns segundos</p>
+            <p>4. Veja os logs abaixo</p>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('voiceBtn');
+        const input = document.getElementById('resultInput');
+        const status = document.getElementById('status');
+        const log = document.getElementById('log');
+        
+        let recognition = null;
+        let isListening = false;
+        
+        // Log function
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `<div style="color: #0ff;">[${time}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Check support
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            
+            // Simple config
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = false; // APENAS RESULTADO FINAL
+            recognition.maxAlternatives = 1;
+            recognition.continuous = false; // PARA AUTOMATICAMENTE
+            
+            addLog('✅ Speech Recognition disponível');
+            addLog('🔧 Configuração: interimResults=false, continuous=false');
+        } else {
+            addLog('❌ Speech Recognition NÃO suportado');
+            btn.disabled = true;
+            status.textContent = '❌ Navegador não suporta Speech Recognition';
+        }
+        
+        btn.addEventListener('click', () => {
+            if (!isListening) {
+                startRecognition();
+            } else {
+                stopRecognition();
+            }
+        });
+        
+        function startRecognition() {
+            addLog('🚀 INICIANDO reconhecimento...');
+            input.value = '';
+            
+            recognition.onstart = () => {
+                isListening = true;
+                btn.classList.add('recording');
+                btn.textContent = '🔴 FALANDO...';
+                status.textContent = '🔴 GRAVANDO - Fale agora!';
+                addLog('🎤 Gravação INICIADA');
+            };
+            
+            recognition.onresult = (event) => {
+                addLog(`📝 RESULTADO! Total: ${event.results.length}`);
+                
+                for (let i = 0; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const transcript = result[0].transcript;
+                    const confidence = result[0].confidence || 0;
+                    
+                    addLog(`   [${i}] "${transcript}" (conf: ${confidence.toFixed(2)})`);
+                    
+                    if (result.isFinal) {
+                        addLog(`✅ TEXTO FINAL: "${transcript}"`);
+                        
+                        // FORÇA o texto no input
+                        input.value = transcript;
+                        addLog(`🔥 FORÇADO no input: "${input.value}"`);
+                    }
+                }
+            };
+            
+            recognition.onend = () => {
+                addLog('🏁 Gravação FINALIZADA');
+                isListening = false;
+                btn.classList.remove('recording');
+                btn.textContent = '🎤 CLIQUE E FALE';
+                
+                if (input.value.trim()) {
+                    status.textContent = `✅ SUCESSO: "${input.value}"`;
+                    addLog(`✅ RESULTADO FINAL: "${input.value}"`);
+                } else {
+                    status.textContent = '⚠️ Nenhum texto capturado';
+                    addLog('⚠️ FALHA: Nenhum texto capturado');
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                addLog(`❌ ERRO: ${event.error}`);
+                status.textContent = `❌ ERRO: ${event.error}`;
+                isListening = false;
+                btn.classList.remove('recording');
+                btn.textContent = '🎤 CLIQUE E FALE';
+            };
+            
+            try {
+                recognition.start();
+            } catch (e) {
+                addLog(`❌ Erro ao iniciar: ${e.message}`);
+            }
+        }
+        
+        function stopRecognition() {
+            if (recognition && isListening) {
+                addLog('⏹️ PARANDO gravação...');
+                recognition.stop();
+            }
+        }
+        
+        addLog('🚀 Sistema carregado - pronto para testar!');
+    </script>
+</body>
+</html>

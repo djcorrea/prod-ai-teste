@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 TESTE BÁSICO - Voice Message</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            border: 2px solid #00ffff;
+        }
+        
+        #testInput {
+            width: 80%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #333;
+            background: #222;
+            color: white;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        
+        button {
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #voiceBtn {
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            color: white;
+            font-weight: bold;
+        }
+        
+        #voiceBtn:hover {
+            transform: scale(1.05);
+        }
+        
+        #voiceBtn.recording {
+            background: linear-gradient(45deg, #00ff00, #44ff44);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .log {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: left;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.listening { background: rgba(255, 68, 68, 0.2); color: #ff4444; }
+        .status.done { background: rgba(0, 255, 0, 0.2); color: #00ff00; }
+        .status.error { background: rgba(255, 0, 0, 0.2); color: #ff0000; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="color: #00ffff;">🔧 TESTE BÁSICO - Voice Message</h1>
+        
+        <div class="input-container">
+            <h3 style="color: #00ffff; margin-top: 0;">📝 Input de Teste</h3>
+            <input type="text" id="testInput" placeholder="O texto transcrito aparecerá aqui..." />
+            <br>
+            <button id="voiceBtn">🎤 Iniciar Gravação</button>
+            <button onclick="clearInput()" style="background: #666; color: white;">🗑️ Limpar</button>
+        </div>
+        
+        <div id="status" class="status">Clique em "Iniciar Gravação" para testar</div>
+        
+        <div class="log" id="log">
+            <div style="color: #00ff66;">Log inicializado...</div>
+        </div>
+        
+        <div style="background: rgba(255, 255, 0, 0.1); padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <strong style="color: #ffff00;">🔍 INSTRUÇÕES:</strong><br>
+            1. Clique em "Iniciar Gravação"<br>
+            2. Permita acesso ao microfone<br>
+            3. Fale uma frase clara<br>
+            4. Aguarde a transcrição aparecer no input
+        </div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isListening = false;
+        let finalTranscript = '';
+        
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        const input = document.getElementById('testInput');
+        const voiceBtn = document.getElementById('voiceBtn');
+        
+        function addLog(message, color = '#00ff66') {
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(message, className = '') {
+            status.textContent = message;
+            status.className = `status ${className}`;
+            addLog(`Status: ${message}`);
+        }
+        
+        function clearInput() {
+            input.value = '';
+            finalTranscript = '';
+            addLog('Input limpo');
+        }
+        
+        // Inicializar Web Speech API
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.lang = 'pt-BR';
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+                
+                addLog('✅ Web Speech API inicializada');
+                return true;
+            } else {
+                addLog('❌ Web Speech API não suportada', '#ff4444');
+                return false;
+            }
+        }
+        
+        function startListening() {
+            if (!recognition) {
+                if (!initSpeechRecognition()) {
+                    updateStatus('Navegador não suporta reconhecimento de voz', 'error');
+                    return;
+                }
+            }
+            
+            finalTranscript = '';
+            input.value = '';
+            
+            recognition.onstart = () => {
+                isListening = true;
+                voiceBtn.textContent = '🔴 Ouvindo...';
+                voiceBtn.classList.add('recording');
+                updateStatus('🔴 Ouvindo... Fale agora!', 'listening');
+                addLog('🎤 Reconhecimento iniciado');
+            };
+            
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                
+                addLog(`📝 Resultado recebido - ${event.results.length} result(s)`);
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    const confidence = event.results[i][0].confidence;
+                    
+                    addLog(`   [${i}] "${transcript}" (confidence: ${confidence?.toFixed(2) || 'N/A'})`);
+                    
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                        addLog(`✅ Texto final: "${finalTranscript}"`, '#00ffff');
+                    } else {
+                        interimTranscript += transcript;
+                        addLog(`⏳ Texto provisório: "${interimTranscript}"`, '#ffff00');
+                    }
+                }
+                
+                // Atualizar input com texto completo
+                const fullText = finalTranscript + interimTranscript;
+                input.value = fullText;
+                addLog(`📝 Input atualizado: "${fullText}"`);
+            };
+            
+            recognition.onend = () => {
+                isListening = false;
+                voiceBtn.textContent = '🎤 Iniciar Gravação';
+                voiceBtn.classList.remove('recording');
+                
+                const finalText = finalTranscript.trim();
+                input.value = finalText;
+                
+                if (finalText) {
+                    updateStatus(`✅ Gravação concluída: "${finalText}"`, 'done');
+                    addLog(`🎯 Resultado final no input: "${finalText}"`, '#00ff00');
+                } else {
+                    updateStatus('❌ Nenhum texto detectado', 'error');
+                    addLog('⚠️ Nenhum texto final detectado', '#ffaa00');
+                }
+            };
+            
+            recognition.onerror = (event) => {
+                isListening = false;
+                voiceBtn.textContent = '🎤 Iniciar Gravação';
+                voiceBtn.classList.remove('recording');
+                
+                updateStatus(`❌ Erro: ${event.error}`, 'error');
+                addLog(`❌ Erro no reconhecimento: ${event.error}`, '#ff4444');
+                
+                // Salvar texto parcial se houver
+                if (finalTranscript.trim()) {
+                    input.value = finalTranscript.trim();
+                    addLog(`💾 Texto parcial salvo: "${finalTranscript.trim()}"`, '#ffaa00');
+                }
+            };
+            
+            addLog('🚀 Iniciando reconhecimento...');
+            recognition.start();
+        }
+        
+        function stopListening() {
+            if (recognition && isListening) {
+                addLog('⏹️ Parando reconhecimento...');
+                recognition.stop();
+            }
+        }
+        
+        // Event listeners
+        voiceBtn.addEventListener('click', () => {
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        });
+        
+        // Inicialização
+        addLog('🚀 Página carregada');
+        addLog(`🌐 Navegador: ${navigator.userAgent}`);
+        addLog(`🎤 Web Speech API: ${'webkitSpeechRecognition' in window || 'SpeechRecognition' in window ? 'Disponível' : 'Não disponível'}`);
+        
+        // Teste inicial
+        if (!initSpeechRecognition()) {
+            updateStatus('Navegador não suporta reconhecimento de voz', 'error');
+        } else {
+            updateStatus('Pronto para testar!', 'done');
+        }
+    </script>
+</body>
+</html>
