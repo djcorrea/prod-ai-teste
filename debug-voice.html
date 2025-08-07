@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 DEBUG - Voice Message</title>
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Simulação do seu input original */
+        .chatbot-input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-mic-icon {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .chatbot-main-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-send-button {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+        
+        #debug-log {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .status.info { background: rgba(0, 255, 255, 0.1); border: 1px solid #00ffff; }
+        .status.success { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; }
+        .status.error { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1 style="color: #00ffff; text-align: center;">🔧 DEBUG - Voice Message</h1>
+        
+        <div class="status info">
+            <strong>🔍 MODE DEBUG ATIVO</strong><br>
+            Todos os logs aparecem no console e na área abaixo
+        </div>
+
+        <!-- Simulação EXATA do seu input -->
+        <div class="chatbot-input-field">
+            <svg class="chatbot-mic-icon" width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
+                <path d="M192 0C139 0 96 43 96 96v160c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464h-48c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24h-48v-33.6c85.8-11.7 152-85.3 152-174.4v-40c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z"/>
+            </svg>
+            <input type="text" 
+                   class="chatbot-main-input" 
+                   id="chatbotMainInput" 
+                   placeholder="Clique no microfone para testar..."
+                   maxlength="500">
+            <button class="chatbot-send-button" id="chatbotSendButton">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="white" stroke="none"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="status info">
+            <strong>📋 INSTRUÇÕES:</strong><br>
+            1. Abra o Console do navegador (F12)<br>
+            2. Clique no microfone 🎤<br>
+            3. Fale uma frase<br>
+            4. Veja os logs abaixo e no console
+        </div>
+
+        <h3 style="color: #00ffff;">🔍 Debug Log:</h3>
+        <div id="debug-log">Aguardando testes...</div>
+
+        <button onclick="clearLog()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 10px 0;">
+            🗑️ Limpar Log
+        </button>
+        
+        <button onclick="testInputAccess()" style="background: #00ffff; color: black; border: none; padding: 10px 20px; border-radius: 5px; margin: 10px;">
+            🧪 Testar Acesso ao Input
+        </button>
+    </div>
+
+    <!-- Sistema de voice com debug -->
+    <script src="voice-integration-prodai.js"></script>
+    
+    <script>
+        // Override console.log para mostrar na tela também
+        const originalLog = console.log;
+        const debugLog = document.getElementById('debug-log');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, arguments);
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' ');
+            
+            debugLog.innerHTML += `<div style="color: #00ff66;">[${timestamp}] ${message}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        };
+        
+        // Override console.error para mostrar erros
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, arguments);
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            ).join(' ');
+            
+            debugLog.innerHTML += `<div style="color: #ff4444;">[${timestamp}] ERROR: ${message}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        };
+        
+        function clearLog() {
+            debugLog.innerHTML = 'Log limpo...';
+        }
+        
+        function testInputAccess() {
+            const input = document.getElementById('chatbotMainInput');
+            console.log('Teste de acesso ao input:', input);
+            if (input) {
+                input.value = 'TESTE - Input funcionando!';
+                console.log('Input value definido com sucesso');
+            } else {
+                console.error('Input não encontrado!');
+            }
+        }
+        
+        // Teste inicial
+        console.log('🚀 Debug page loaded');
+        console.log('Input element:', document.getElementById('chatbotMainInput'));
+        console.log('Mic icon element:', document.querySelector('.chatbot-mic-icon'));
+        
+        // Simular envio para teste
+        document.getElementById('chatbotSendButton').addEventListener('click', () => {
+            const input = document.getElementById('chatbotMainInput');
+            console.log('Send button clicked. Input value:', input.value);
+            if (input.value.trim()) {
+                console.log('✅ Message would be sent:', input.value);
+                input.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

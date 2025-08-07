@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 VOICE INLINE - Sem Janela Modal</title>
+    <style>
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        /* Simulação do seu input original */
+        .chatbot-input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-mic-icon {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.1);
+        }
+        
+        .chatbot-mic-icon:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px #00ffff);
+            background: rgba(0, 255, 255, 0.2);
+        }
+        
+        .chatbot-main-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-main-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .chatbot-send-button {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-send-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .demo-box {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #00ffff;
+        }
+        
+        .success {
+            background: rgba(0, 255, 102, 0.2);
+            border: 1px solid rgba(0, 255, 102, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .recording {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 style="color: #00ffff; margin-bottom: 20px;">🎤 VOICE INLINE - Experiência Fluida!</h1>
+        
+        <div class="success">
+            <h3 style="color: #00ff66; margin: 0 0 10px;">✅ NOVA EXPERIÊNCIA - SEM JANELA!</h3>
+            <p>Agora o voice message funciona diretamente no chat, sem modal!</p>
+        </div>
+
+        <!-- Simulação do seu input real -->
+        <div class="chatbot-input-field">
+            <svg class="chatbot-mic-icon" width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
+                <path d="M192 0C139 0 96 43 96 96v160c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464h-48c-13.3 0-24 10.7-24 24s10.7 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24h-48v-33.6c85.8-11.7 152-85.3 152-174.4v-40c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z"/>
+            </svg>
+            <input type="text" class="chatbot-main-input" id="testInput" placeholder="Clique no microfone ou digite aqui..." maxlength="500">
+            <button class="chatbot-send-button" id="testSend">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="white" stroke="none"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="demo-box">
+            <h3 style="color: #00ffff; margin-top: 0;">🚀 Nova Experiência:</h3>
+            
+            <div class="step">
+                <strong>1️⃣ Clique no microfone 🎤</strong><br>
+                • Ícone fica vermelho 🔴<br>
+                • Placeholder muda para "Ouvindo..."<br>
+                • Input ganha borda vermelha
+            </div>
+            
+            <div class="step">
+                <strong>2️⃣ Fale sua pergunta</strong><br>
+                • Texto aparece <strong>diretamente no input</strong><br>
+                • Atualização em tempo real<br>
+                • Sem janela modal!
+            </div>
+            
+            <div class="step">
+                <strong>3️⃣ Parar de falar</strong><br>
+                • Sistema finaliza automaticamente<br>
+                • Ícone volta ao normal<br>
+                • Texto fica no input
+            </div>
+            
+            <div class="step">
+                <strong>4️⃣ Envio automático</strong><br>
+                • Após 1.5s, envia automaticamente<br>
+                • Ou clique em enviar manualmente<br>
+                • Vai direto para o ChatGPT!
+            </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 0, 0.1); border: 1px solid rgba(255, 255, 0, 0.5); border-radius: 10px; padding: 20px; margin: 30px 0;">
+            <h3 style="color: #ffff00; margin-top: 0;">⚡ TESTE AGORA!</h3>
+            <p>
+                1. Clique no microfone 🎤 acima<br>
+                2. Veja o ícone ficar vermelho 🔴<br>
+                3. Fale: <em>"Como deixar o kick mais forte?"</em><br>
+                4. Veja o texto aparecer no input em tempo real! ✨
+            </p>
+        </div>
+
+        <div style="background: rgba(0, 255, 255, 0.1); border-radius: 10px; padding: 20px;">
+            <h3 style="color: #00ffff;">🎯 VANTAGENS:</h3>
+            <ul style="text-align: left;">
+                <li><strong>✅ Sem janela modal</strong> - experiência fluida</li>
+                <li><strong>✅ Feedback visual</strong> - ícone vermelho pulsando</li>
+                <li><strong>✅ Tempo real</strong> - texto aparece enquanto fala</li>
+                <li><strong>✅ Auto-envio</strong> - envia automaticamente</li>
+                <li><strong>✅ Integração perfeita</strong> - usa seu chat atual</li>
+            </ul>
+        </div>
+        
+        <div style="background: rgba(0, 255, 102, 0.1); border-radius: 10px; padding: 20px; margin-top: 20px;">
+            <h3 style="color: #00ff66;">💰 AINDA GRÁTIS!</h3>
+            <p>Web Speech API - $0.00 de custo adicional!</p>
+        </div>
+    </div>
+
+    <!-- Incluir o sistema atualizado -->
+    <script src="voice-integration-prodai.js"></script>
+    
+    <script>
+        // Simular funcionalidade de envio
+        document.getElementById('testSend').addEventListener('click', () => {
+            const input = document.getElementById('testInput');
+            if (input.value.trim()) {
+                alert(`✅ Voice message enviado:\n\n"${input.value}"\n\n(No chat real, isso vai para o AI.SYNTH!)`);
+                input.value = '';
+            }
+        });
+        
+        document.getElementById('testInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('testSend').click();
+            }
+        });
+    </script>
+</body>
+</html>
