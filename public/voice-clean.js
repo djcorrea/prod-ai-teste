@@ -12,21 +12,24 @@ window.addEventListener('load', () => {
 function setupVoice() {
     console.log('🔍 Procurando elementos...');
     
-    // Encontrar microfone
-    const micIcon = document.querySelector('.chatbot-mic-icon');
-    if (!micIcon) {
-        console.log('❌ Microfone não encontrado, tentando novamente...');
+    // Encontrar TODOS os microfones (inicial e ativo)
+    const allMicIcons = document.querySelectorAll('.chatbot-mic-icon');
+    
+    if (allMicIcons.length === 0) {
+        console.log('❌ Nenhum microfone encontrado, tentando novamente...');
         setTimeout(setupVoice, 2000);
         return;
     }
     
-    console.log('✅ Microfone encontrado:', micIcon);
+    console.log(`✅ ${allMicIcons.length} microfone(s) encontrado(s):`, allMicIcons);
     
     // Verificar suporte ao Speech Recognition
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         console.log('❌ Speech Recognition não suportado');
-        micIcon.style.opacity = '0.5';
-        micIcon.title = 'Speech Recognition não suportado neste navegador';
+        allMicIcons.forEach(mic => {
+            mic.style.opacity = '0.5';
+            mic.title = 'Speech Recognition não suportado neste navegador';
+        });
         return;
     }
     
@@ -49,14 +52,23 @@ function setupVoice() {
     
     let isRecording = false;
     let finalTranscript = '';
+    let currentMicIcon = null;
+    let currentInput = null;
     
-    // Tornar microfone clicável
-    micIcon.style.cursor = 'pointer';
-    micIcon.addEventListener('click', handleMicClick);
+    // Configurar TODOS os microfones
+    allMicIcons.forEach(micIcon => {
+        micIcon.style.cursor = 'pointer';
+        micIcon.title = 'Clique para gravar mensagem de voz';
+        micIcon.addEventListener('click', () => handleMicClick(micIcon));
+        console.log('✅ Microfone configurado:', micIcon);
+    });
     
-    function handleMicClick() {
+    function handleMicClick(clickedMicIcon) {
         console.log('🎤 Microfone clicado!');
         console.log('📊 Estado atual:', isRecording ? '🔴 GRAVANDO' : '⚫ PARADO');
+        console.log('🎯 Microfone clicado:', clickedMicIcon);
+        
+        currentMicIcon = clickedMicIcon;
         
         if (isRecording) {
             console.log('⏹️ USUÁRIO QUER PARAR - finalizando gravação...');
@@ -69,53 +81,70 @@ function setupVoice() {
     }
     
     function startRecording() {
-        // Encontrar input do chat
-        let chatInput = document.getElementById('chatbotMainInput');
+        // Encontrar input ATUAL dinamicamente
+        let chatInput = null;
         
-        if (!chatInput) {
-            chatInput = document.getElementById('chatbotActiveInput');
-            console.log('📍 Tentando chatbotActiveInput...');
+        // ESTRATÉGIA 1: Procurar input visível e não disabled
+        const allInputs = [
+            document.getElementById('chatbotActiveInput'),
+            document.getElementById('chatbotMainInput'),
+            document.querySelector('.chatbot-active-input'),
+            document.querySelector('.chatbot-main-input'),
+            ...document.querySelectorAll('input[type="text"]')
+        ];
+        
+        for (let input of allInputs) {
+            if (input && !input.disabled) {
+                // Verificar se o input está visível
+                const style = window.getComputedStyle(input);
+                const parent = input.closest('.chatbot-active-state, .chatbot-welcome-state');
+                
+                if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+                    if (!parent || window.getComputedStyle(parent).display !== 'none') {
+                        chatInput = input;
+                        console.log(`✅ Input ATIVO encontrado: ${input.id || input.className}`);
+                        break;
+                    }
+                }
+            }
         }
         
         if (!chatInput) {
-            chatInput = document.querySelector('.chatbot-main-input');
-            console.log('📍 Tentando classe chatbot-main-input...');
-        }
-        
-        if (!chatInput) {
-            chatInput = document.querySelector('input[placeholder*="mensagem"]');
-            console.log('📍 Tentando input com placeholder mensagem...');
-        }
-        
-        if (!chatInput) {
-            console.log('❌ Input do chat não encontrado!');
-            console.log('🔍 Inputs disponíveis:', document.querySelectorAll('input'));
+            console.log('❌ NENHUM input ativo encontrado!');
+            console.log('🔍 Inputs disponíveis:', {
+                activeInput: document.getElementById('chatbotActiveInput'),
+                mainInput: document.getElementById('chatbotMainInput'),
+                allInputs: document.querySelectorAll('input')
+            });
             alert('❌ Campo de texto do chat não encontrado!');
             return;
         }
         
-        console.log('✅ Input encontrado:', {
+        currentInput = chatInput;
+        console.log('✅ Usando input:', {
             id: chatInput.id,
             className: chatInput.className,
-            placeholder: chatInput.placeholder
+            placeholder: chatInput.placeholder,
+            visible: window.getComputedStyle(chatInput).display !== 'none'
         });
         
         // Resetar variáveis
         finalTranscript = '';
         chatInput.value = '';
         
-        // Feedback visual CONTÍNUO
-        micIcon.style.fill = '#ff4444';
-        micIcon.style.transform = 'scale(1.1)';
-        micIcon.style.filter = 'drop-shadow(0 0 10px #ff4444)';
+        // Feedback visual CONTÍNUO para o microfone atual
+        if (currentMicIcon) {
+            currentMicIcon.style.fill = '#ff4444';
+            currentMicIcon.style.transform = 'scale(1.1)';
+            currentMicIcon.style.filter = 'drop-shadow(0 0 10px #ff4444)';
+            currentMicIcon.style.animation = 'pulse 1.5s infinite';
+        }
+        
         chatInput.placeholder = '🔴 GRAVANDO CONTÍNUO... Clique novamente para parar';
         chatInput.style.borderColor = '#ff4444';
         chatInput.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
         
         // Adicionar animação pulsante para indicar gravação ativa
-        micIcon.style.animation = 'pulse 1.5s infinite';
-        
-        // Adicionar CSS de animação se não existir
         if (!document.querySelector('#voice-animation-style')) {
             const style = document.createElement('style');
             style.id = 'voice-animation-style';
@@ -162,11 +191,12 @@ function setupVoice() {
                 console.log('✅ Texto final atualizado:', finalTranscript);
             }
             
-            // Mostrar no input (final + interim)
-            const displayText = (finalTranscript + interimTranscript).trim();
-            chatInput.value = displayText;
-            
-            console.log('🔄 Input atualizado com:', displayText);
+            // Mostrar no input ATUAL (final + interim)
+            if (currentInput) {
+                const displayText = (finalTranscript + interimTranscript).trim();
+                currentInput.value = displayText;
+                console.log('🔄 Input ATUAL atualizado com:', displayText);
+            }
         };
         
         recognition.onend = function() {
@@ -200,29 +230,36 @@ function setupVoice() {
             console.log('🏁 Finalizando gravação por solicitação do usuário');
             isRecording = false;
             
-            // Restaurar visual COMPLETAMENTE
-            micIcon.style.fill = 'currentColor';
-            micIcon.style.transform = 'scale(1)';
-            micIcon.style.filter = 'none';
-            micIcon.style.animation = 'none';
-            chatInput.placeholder = 'Digite sua mensagem...';
-            chatInput.style.borderColor = '';
-            chatInput.style.boxShadow = '';
+            // Restaurar visual COMPLETAMENTE do microfone atual
+            if (currentMicIcon) {
+                currentMicIcon.style.fill = 'currentColor';
+                currentMicIcon.style.transform = 'scale(1)';
+                currentMicIcon.style.filter = 'none';
+                currentMicIcon.style.animation = 'none';
+            }
+            
+            if (currentInput) {
+                currentInput.placeholder = 'Digite sua mensagem...';
+                currentInput.style.borderColor = '';
+                currentInput.style.boxShadow = '';
+            }
             
             console.log('🎨 Visual restaurado - gravação finalizada');
             
-            // Garantir que o texto final está no input
+            // Garantir que o texto final está no input ATUAL
             const cleanText = finalTranscript.trim();
-            if (cleanText) {
-                chatInput.value = cleanText;
-                console.log('✅ SUCESSO! Texto final no input:', chatInput.value);
+            if (cleanText && currentInput) {
+                currentInput.value = cleanText;
+                console.log('✅ SUCESSO! Texto final no input ATUAL:', currentInput.value);
                 
                 // Disparar eventos
-                chatInput.dispatchEvent(new Event('input', { bubbles: true }));
-                chatInput.dispatchEvent(new Event('change', { bubbles: true }));
+                currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+                currentInput.dispatchEvent(new Event('change', { bubbles: true }));
             } else {
                 console.log('⚠️ Nenhum texto foi capturado');
-                chatInput.placeholder = 'Nenhum texto capturado - tente novamente';
+                if (currentInput) {
+                    currentInput.placeholder = 'Nenhum texto capturado - tente novamente';
+                }
             }
         };
         
@@ -231,32 +268,37 @@ function setupVoice() {
             
             isRecording = false;
             
-            // Restaurar visual COMPLETAMENTE
-            micIcon.style.fill = 'currentColor';
-            micIcon.style.transform = 'scale(1)';
-            micIcon.style.filter = 'none';
-            micIcon.style.animation = 'none';
-            chatInput.style.borderColor = '';
-            chatInput.style.boxShadow = '';
+            // Restaurar visual COMPLETAMENTE do microfone atual
+            if (currentMicIcon) {
+                currentMicIcon.style.fill = 'currentColor';
+                currentMicIcon.style.transform = 'scale(1)';
+                currentMicIcon.style.filter = 'none';
+                currentMicIcon.style.animation = 'none';
+            }
+            
+            if (currentInput) {
+                currentInput.style.borderColor = '';
+                currentInput.style.boxShadow = '';
+            }
             
             // Tratar erros específicos
             switch(event.error) {
                 case 'not-allowed':
-                    chatInput.placeholder = '❌ Permissão negada - habilite o microfone';
+                    if (currentInput) currentInput.placeholder = '❌ Permissão negada - habilite o microfone';
                     alert('❌ Permissão do microfone negada!\n\nClique no ícone de microfone na barra de endereços e permita o acesso.');
                     break;
                 case 'network':
-                    chatInput.placeholder = '❌ Erro de rede - verifique sua conexão';
+                    if (currentInput) currentInput.placeholder = '❌ Erro de rede - verifique sua conexão';
                     break;
                 case 'no-speech':
-                    chatInput.placeholder = '❌ Nenhuma fala detectada - tente novamente';
+                    if (currentInput) currentInput.placeholder = '❌ Nenhuma fala detectada - tente novamente';
                     break;
                 case 'aborted':
-                    chatInput.placeholder = 'Gravação interrompida pelo usuário';
+                    if (currentInput) currentInput.placeholder = 'Gravação interrompida pelo usuário';
                     console.log('ℹ️ Gravação foi interrompida pelo usuário - normal');
                     break;
                 default:
-                    chatInput.placeholder = `❌ Erro: ${event.error}`;
+                    if (currentInput) currentInput.placeholder = `❌ Erro: ${event.error}`;
                     break;
             }
         };
