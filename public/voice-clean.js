@@ -7,7 +7,50 @@ console.log('🎤 VOICE CLEAN VERSION loaded');
 window.addEventListener('load', () => {
     console.log('🚀 Window loaded - starting voice integration');
     setTimeout(setupVoice, 1500); // Aguarda 1.5s para garantir
+    
+    // ADICIONAR OBSERVADOR DE MUDANÇAS NO DOM
+    setupDOMObserver();
 });
+
+// FUNÇÃO PARA OBSERVAR MUDANÇAS NO DOM E RECONFIGURAR MICROFONES
+function setupDOMObserver() {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            // Verificar se foram adicionados novos nós
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach((node) => {
+                    // Se é um elemento e contém microfones
+                    if (node.nodeType === 1) { // ELEMENT_NODE
+                        const newMics = node.querySelectorAll ? node.querySelectorAll('.chatbot-mic-icon') : [];
+                        
+                        if (newMics.length > 0) {
+                            console.log('🔄 NOVOS microfones detectados no DOM:', newMics.length);
+                            setTimeout(() => {
+                                setupVoice(); // Reconfigurar sistema
+                            }, 500);
+                        }
+                        
+                        // Também verificar se o próprio nó é um microfone
+                        if (node.classList && node.classList.contains('chatbot-mic-icon')) {
+                            console.log('🔄 Novo microfone individual detectado');
+                            setTimeout(() => {
+                                setupVoice(); // Reconfigurar sistema
+                            }, 500);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    // Observar mudanças em todo o documento
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    console.log('👀 DOM Observer ativado - vai reconfigurar microfones automaticamente');
+}
 
 function setupVoice() {
     console.log('🔍 Procurando elementos...');
@@ -33,46 +76,58 @@ function setupVoice() {
         return;
     }
     
-    // Criar Speech Recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    // Criar Speech Recognition (uma única instância global)
+    if (!window.globalVoiceRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        window.globalVoiceRecognition = new SpeechRecognition();
+        
+        // Configuração ULTRA SIMPLES
+        window.globalVoiceRecognition.lang = 'pt-BR';
+        window.globalVoiceRecognition.interimResults = true;
+        window.globalVoiceRecognition.continuous = true; // MODO CONTÍNUO - NÃO PARA SOZINHO
+        window.globalVoiceRecognition.maxAlternatives = 1;
+        
+        console.log('✅ Speech Recognition GLOBAL configurado para GRAVAÇÃO CONTÍNUA');
+    }
     
-    // Configuração ULTRA SIMPLES
-    recognition.lang = 'pt-BR';
-    recognition.interimResults = true;
-    recognition.continuous = true; // MODO CONTÍNUO - NÃO PARA SOZINHO
-    recognition.maxAlternatives = 1;
+    const recognition = window.globalVoiceRecognition;
     
-    console.log('✅ Speech Recognition configurado para GRAVAÇÃO CONTÍNUA');
-    console.log('🔧 Configurações:', {
-        lang: recognition.lang,
-        continuous: recognition.continuous,
-        interimResults: recognition.interimResults
-    });
+    // Variáveis globais de estado
+    if (!window.voiceState) {
+        window.voiceState = {
+            isRecording: false,
+            finalTranscript: '',
+            currentMicIcon: null,
+            currentInput: null
+        };
+    }
     
-    let isRecording = false;
-    let finalTranscript = '';
-    let currentMicIcon = null;
-    let currentInput = null;
-    
-    // Configurar TODOS os microfones
+    // Configurar TODOS os microfones (incluindo novos)
     allMicIcons.forEach(micIcon => {
+        // Verificar se já foi configurado para evitar duplicações
+        if (micIcon.dataset.voiceConfigured === 'true') {
+            console.log('⏭️ Microfone já configurado, pulando:', micIcon);
+            return;
+        }
+        
         micIcon.style.cursor = 'pointer';
         micIcon.title = 'Clique para gravar mensagem de voz';
         micIcon.addEventListener('click', () => handleMicClick(micIcon));
-        console.log('✅ Microfone configurado:', micIcon);
+        micIcon.dataset.voiceConfigured = 'true'; // Marcar como configurado
+        
+        console.log('✅ Novo microfone configurado:', micIcon);
     });
     
     function handleMicClick(clickedMicIcon) {
         console.log('🎤 Microfone clicado!');
-        console.log('📊 Estado atual:', isRecording ? '🔴 GRAVANDO' : '⚫ PARADO');
+        console.log('📊 Estado atual:', window.voiceState.isRecording ? '🔴 GRAVANDO' : '⚫ PARADO');
         console.log('🎯 Microfone clicado:', clickedMicIcon);
         
-        currentMicIcon = clickedMicIcon;
+        window.voiceState.currentMicIcon = clickedMicIcon;
         
-        if (isRecording) {
+        if (window.voiceState.isRecording) {
             console.log('⏹️ USUÁRIO QUER PARAR - finalizando gravação...');
-            isRecording = false; // Marcar que usuário quer parar
+            window.voiceState.isRecording = false; // Marcar que usuário quer parar
             recognition.stop(); // Parar recognition
         } else {
             console.log('🚀 USUÁRIO QUER GRAVAR - iniciando gravação...');
@@ -120,7 +175,7 @@ function setupVoice() {
             return;
         }
         
-        currentInput = chatInput;
+        window.voiceState.currentInput = chatInput;
         console.log('✅ Usando input:', {
             id: chatInput.id,
             className: chatInput.className,
@@ -129,15 +184,15 @@ function setupVoice() {
         });
         
         // Resetar variáveis
-        finalTranscript = '';
+        window.voiceState.finalTranscript = '';
         chatInput.value = '';
         
         // Feedback visual CONTÍNUO para o microfone atual
-        if (currentMicIcon) {
-            currentMicIcon.style.fill = '#ff4444';
-            currentMicIcon.style.transform = 'scale(1.1)';
-            currentMicIcon.style.filter = 'drop-shadow(0 0 10px #ff4444)';
-            currentMicIcon.style.animation = 'pulse 1.5s infinite';
+        if (window.voiceState.currentMicIcon) {
+            window.voiceState.currentMicIcon.style.fill = '#ff4444';
+            window.voiceState.currentMicIcon.style.transform = 'scale(1.1)';
+            window.voiceState.currentMicIcon.style.filter = 'drop-shadow(0 0 10px #ff4444)';
+            window.voiceState.currentMicIcon.style.animation = 'pulse 1.5s infinite';
         }
         
         chatInput.placeholder = '🔴 GRAVANDO CONTÍNUO... Clique novamente para parar';
@@ -160,7 +215,7 @@ function setupVoice() {
         
         // Configurar eventos do recognition
         recognition.onstart = function() {
-            isRecording = true;
+            window.voiceState.isRecording = true;
             console.log('🎤 ✅ GRAVAÇÃO INICIADA!');
         };
         
@@ -187,30 +242,30 @@ function setupVoice() {
             
             // Atualizar transcript final
             if (newFinalTranscript) {
-                finalTranscript += newFinalTranscript + ' ';
-                console.log('✅ Texto final atualizado:', finalTranscript);
+                window.voiceState.finalTranscript += newFinalTranscript + ' ';
+                console.log('✅ Texto final atualizado:', window.voiceState.finalTranscript);
             }
             
             // Mostrar no input ATUAL (final + interim)
-            if (currentInput) {
-                const displayText = (finalTranscript + interimTranscript).trim();
-                currentInput.value = displayText;
+            if (window.voiceState.currentInput) {
+                const displayText = (window.voiceState.finalTranscript + interimTranscript).trim();
+                window.voiceState.currentInput.value = displayText;
                 console.log('🔄 Input ATUAL atualizado com:', displayText);
             }
         };
         
         recognition.onend = function() {
             console.log('🏁 Recognition tentou finalizar');
-            console.log('📊 Texto final capturado:', finalTranscript);
-            console.log('🎤 Usuário ainda quer gravar?', isRecording);
+            console.log('📊 Texto final capturado:', window.voiceState.finalTranscript);
+            console.log('🎤 Usuário ainda quer gravar?', window.voiceState.isRecording);
             
             // SE O USUÁRIO AINDA QUER GRAVAR (não clicou para parar)
-            if (isRecording) {
+            if (window.voiceState.isRecording) {
                 console.log('🔄 REINICIANDO automaticamente - usuário não parou manualmente');
                 
                 // Tentar reiniciar em 100ms
                 setTimeout(() => {
-                    if (isRecording) {
+                    if (window.voiceState.isRecording) {
                         try {
                             console.log('🚀 Reiniciando recognition...');
                             recognition.start();
@@ -223,42 +278,42 @@ function setupVoice() {
                 }, 100);
                 
                 // Se conseguir reiniciar, não executar o resto da função
-                if (isRecording) return;
+                if (window.voiceState.isRecording) return;
             }
             
             // FINALIZAÇÃO NORMAL (quando usuário clicou para parar)
             console.log('🏁 Finalizando gravação por solicitação do usuário');
-            isRecording = false;
+            window.voiceState.isRecording = false;
             
             // Restaurar visual COMPLETAMENTE do microfone atual
-            if (currentMicIcon) {
-                currentMicIcon.style.fill = 'currentColor';
-                currentMicIcon.style.transform = 'scale(1)';
-                currentMicIcon.style.filter = 'none';
-                currentMicIcon.style.animation = 'none';
+            if (window.voiceState.currentMicIcon) {
+                window.voiceState.currentMicIcon.style.fill = 'currentColor';
+                window.voiceState.currentMicIcon.style.transform = 'scale(1)';
+                window.voiceState.currentMicIcon.style.filter = 'none';
+                window.voiceState.currentMicIcon.style.animation = 'none';
             }
             
-            if (currentInput) {
-                currentInput.placeholder = 'Digite sua mensagem...';
-                currentInput.style.borderColor = '';
-                currentInput.style.boxShadow = '';
+            if (window.voiceState.currentInput) {
+                window.voiceState.currentInput.placeholder = 'Digite sua mensagem...';
+                window.voiceState.currentInput.style.borderColor = '';
+                window.voiceState.currentInput.style.boxShadow = '';
             }
             
             console.log('🎨 Visual restaurado - gravação finalizada');
             
             // Garantir que o texto final está no input ATUAL
-            const cleanText = finalTranscript.trim();
-            if (cleanText && currentInput) {
-                currentInput.value = cleanText;
-                console.log('✅ SUCESSO! Texto final no input ATUAL:', currentInput.value);
+            const cleanText = window.voiceState.finalTranscript.trim();
+            if (cleanText && window.voiceState.currentInput) {
+                window.voiceState.currentInput.value = cleanText;
+                console.log('✅ SUCESSO! Texto final no input ATUAL:', window.voiceState.currentInput.value);
                 
                 // Disparar eventos
-                currentInput.dispatchEvent(new Event('input', { bubbles: true }));
-                currentInput.dispatchEvent(new Event('change', { bubbles: true }));
+                window.voiceState.currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+                window.voiceState.currentInput.dispatchEvent(new Event('change', { bubbles: true }));
             } else {
                 console.log('⚠️ Nenhum texto foi capturado');
-                if (currentInput) {
-                    currentInput.placeholder = 'Nenhum texto capturado - tente novamente';
+                if (window.voiceState.currentInput) {
+                    window.voiceState.currentInput.placeholder = 'Nenhum texto capturado - tente novamente';
                 }
             }
         };
@@ -266,35 +321,35 @@ function setupVoice() {
         recognition.onerror = function(event) {
             console.log('❌ ERRO na gravação:', event.error);
             
-            isRecording = false;
+            window.voiceState.isRecording = false;
             
             // Restaurar visual COMPLETAMENTE do microfone atual
-            if (currentMicIcon) {
-                currentMicIcon.style.fill = 'currentColor';
-                currentMicIcon.style.transform = 'scale(1)';
-                currentMicIcon.style.filter = 'none';
-                currentMicIcon.style.animation = 'none';
+            if (window.voiceState.currentMicIcon) {
+                window.voiceState.currentMicIcon.style.fill = 'currentColor';
+                window.voiceState.currentMicIcon.style.transform = 'scale(1)';
+                window.voiceState.currentMicIcon.style.filter = 'none';
+                window.voiceState.currentMicIcon.style.animation = 'none';
             }
             
-            if (currentInput) {
-                currentInput.style.borderColor = '';
-                currentInput.style.boxShadow = '';
+            if (window.voiceState.currentInput) {
+                window.voiceState.currentInput.style.borderColor = '';
+                window.voiceState.currentInput.style.boxShadow = '';
             }
             
             // Tratar erros específicos
             switch(event.error) {
                 case 'not-allowed':
-                    if (currentInput) currentInput.placeholder = '❌ Permissão negada - habilite o microfone';
+                    if (window.voiceState.currentInput) window.voiceState.currentInput.placeholder = '❌ Permissão negada - habilite o microfone';
                     alert('❌ Permissão do microfone negada!\n\nClique no ícone de microfone na barra de endereços e permita o acesso.');
                     break;
                 case 'network':
-                    if (currentInput) currentInput.placeholder = '❌ Erro de rede - verifique sua conexão';
+                    if (window.voiceState.currentInput) window.voiceState.currentInput.placeholder = '❌ Erro de rede - verifique sua conexão';
                     break;
                 case 'no-speech':
-                    if (currentInput) currentInput.placeholder = '❌ Nenhuma fala detectada - tente novamente';
+                    if (window.voiceState.currentInput) window.voiceState.currentInput.placeholder = '❌ Nenhuma fala detectada - tente novamente';
                     break;
                 case 'aborted':
-                    if (currentInput) currentInput.placeholder = 'Gravação interrompida pelo usuário';
+                    if (window.voiceState.currentInput) window.voiceState.currentInput.placeholder = 'Gravação interrompida pelo usuário';
                     console.log('ℹ️ Gravação foi interrompida pelo usuário - normal');
                     break;
                 default:
