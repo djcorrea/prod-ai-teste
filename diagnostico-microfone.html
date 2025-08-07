@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 DIAGNÓSTICO - Microfone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+        
+        .step.success {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+        }
+        
+        .step.error {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff0000;
+        }
+        
+        .big-button {
+            background: linear-gradient(45deg, #ff4444, #ff6b6b);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px;
+        }
+        
+        .big-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .big-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .result {
+            font-size: 1.2rem;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: #00ffff; margin-bottom: 30px;">🔧 DIAGNÓSTICO COMPLETO</h1>
+        <p style="font-size: 1.1rem; opacity: 0.9;">Vamos descobrir exatamente por que não está gravando!</p>
+        
+        <!-- STEP 1: Verificar suporte -->
+        <div class="step" id="step1">
+            <h3>📋 PASSO 1: Verificar Suporte</h3>
+            <p id="support-info">Verificando...</p>
+        </div>
+        
+        <!-- STEP 2: Testar permissão -->
+        <div class="step" id="step2">
+            <h3>🔐 PASSO 2: Testar Permissão do Microfone</h3>
+            <button class="big-button" id="permission-btn">🎤 TESTAR PERMISSÃO</button>
+            <p id="permission-result">Clique no botão acima</p>
+        </div>
+        
+        <!-- STEP 3: Testar gravação -->
+        <div class="step" id="step3">
+            <h3>🎙️ PASSO 3: Testar Gravação</h3>
+            <button class="big-button" id="record-btn" disabled>🔴 TESTAR GRAVAÇÃO</button>
+            <div class="result" id="record-result" style="background: rgba(100, 100, 100, 0.2);">
+                Aguardando permissão...
+            </div>
+        </div>
+        
+        <!-- Logs -->
+        <div class="step">
+            <h3>📝 LOGS DETALHADOS</h3>
+            <div class="log" id="log"></div>
+        </div>
+        
+        <!-- Soluções -->
+        <div class="step">
+            <h3>🔧 POSSÍVEIS SOLUÇÕES</h3>
+            <div style="text-align: left;">
+                <p><strong>❌ Se não funcionar:</strong></p>
+                <ul>
+                    <li>🔒 <strong>Permissão:</strong> Clique no ícone de cadeado/microfone na barra de endereços</li>
+                    <li>🌐 <strong>HTTPS:</strong> Alguns navegadores só permitem em sites HTTPS</li>
+                    <li>📱 <strong>Mobile:</strong> Teste em modo Desktop do navegador</li>
+                    <li>🔊 <strong>Microfone:</strong> Verifique se o microfone físico está funcionando</li>
+                    <li>🚫 <strong>Bloqueador:</strong> Desative extensões que bloqueiam permissões</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const supportInfo = document.getElementById('support-info');
+        const permissionBtn = document.getElementById('permission-btn');
+        const permissionResult = document.getElementById('permission-result');
+        const recordBtn = document.getElementById('record-btn');
+        const recordResult = document.getElementById('record-result');
+        
+        let recognition = null;
+        let isRecording = false;
+        
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML += `<div style="color: #00ff88;">[${time}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // PASSO 1: Verificar suporte
+        addLog('🔍 Verificando suporte ao Speech Recognition...');
+        
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            supportInfo.innerHTML = '✅ <strong>Speech Recognition SUPORTADO</strong>';
+            step1.classList.add('success');
+            addLog('✅ Speech Recognition encontrado!');
+            
+            // Criar recognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = true;
+            recognition.continuous = false;
+            
+            // Habilitar passo 2
+            permissionBtn.disabled = false;
+            step2.classList.add('active');
+            
+        } else {
+            supportInfo.innerHTML = '❌ <strong>Speech Recognition NÃO SUPORTADO</strong><br>Este navegador não suporta reconhecimento de voz.';
+            step1.classList.add('error');
+            addLog('❌ Speech Recognition não encontrado!');
+        }
+        
+        // PASSO 2: Testar permissão
+        permissionBtn.addEventListener('click', async () => {
+            addLog('🔐 Testando permissão do microfone...');
+            step2.classList.add('active');
+            permissionResult.textContent = 'Testando...';
+            
+            try {
+                // Tentar obter permissão de microfone
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                addLog('✅ Permissão do microfone CONCEDIDA!');
+                permissionResult.innerHTML = '✅ <strong>PERMISSÃO CONCEDIDA</strong>';
+                step2.classList.remove('active');
+                step2.classList.add('success');
+                
+                // Parar o stream
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Habilitar passo 3
+                recordBtn.disabled = false;
+                step3.classList.add('active');
+                recordResult.style.background = 'rgba(0, 100, 255, 0.2)';
+                recordResult.textContent = 'Pronto para testar gravação!';
+                
+            } catch (error) {
+                addLog(`❌ Erro de permissão: ${error.name} - ${error.message}`);
+                permissionResult.innerHTML = `❌ <strong>PERMISSÃO NEGADA</strong><br>${error.message}`;
+                step2.classList.remove('active');
+                step2.classList.add('error');
+            }
+        });
+        
+        // PASSO 3: Testar gravação
+        recordBtn.addEventListener('click', () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+        
+        function startRecording() {
+            addLog('🎙️ Iniciando teste de gravação...');
+            
+            recordBtn.textContent = '⏹️ PARAR GRAVAÇÃO';
+            recordBtn.style.background = 'linear-gradient(45deg, #ff4444, #ff0000)';
+            recordResult.style.background = 'rgba(255, 0, 0, 0.2)';
+            recordResult.textContent = '🔴 GRAVANDO... Fale: "Olá mundo teste"';
+            
+            recognition.onstart = () => {
+                isRecording = true;
+                addLog('🎤 Gravação INICIADA com sucesso!');
+            };
+            
+            recognition.onresult = (event) => {
+                addLog(`📝 Resultado recebido: ${event.results.length} resultados`);
+                
+                let text = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    const isFinal = event.results[i].isFinal;
+                    text += transcript;
+                    addLog(`   [${i}] "${transcript}" (final: ${isFinal})`);
+                }
+                
+                recordResult.innerHTML = `📝 <strong>CAPTURADO:</strong><br>"${text}"`;
+            };
+            
+            recognition.onend = () => {
+                addLog('🏁 Gravação finalizada');
+                isRecording = false;
+                recordBtn.textContent = '🎤 TESTAR NOVAMENTE';
+                recordBtn.style.background = 'linear-gradient(45deg, #ff4444, #ff6b6b)';
+                step3.classList.remove('active');
+                step3.classList.add('success');
+            };
+            
+            recognition.onerror = (event) => {
+                addLog(`❌ ERRO na gravação: ${event.error}`);
+                recordResult.innerHTML = `❌ <strong>ERRO:</strong><br>${event.error}`;
+                recordResult.style.background = 'rgba(255, 0, 0, 0.3)';
+                isRecording = false;
+                recordBtn.textContent = '🎤 TENTAR NOVAMENTE';
+                recordBtn.style.background = 'linear-gradient(45deg, #ff4444, #ff6b6b)';
+                step3.classList.remove('active');
+                step3.classList.add('error');
+            };
+            
+            recognition.start();
+        }
+        
+        function stopRecording() {
+            if (recognition && isRecording) {
+                addLog('⏹️ Parando gravação...');
+                recognition.stop();
+            }
+        }
+        
+        addLog('🚀 Diagnóstico carregado - execute os passos acima!');
+    </script>
+</body>
+</html>

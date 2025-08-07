@@ -37,10 +37,10 @@ function setupVoice() {
     // Configuração ULTRA SIMPLES
     recognition.lang = 'pt-BR';
     recognition.interimResults = true;
-    recognition.continuous = false; // Para automaticamente após silêncio
+    recognition.continuous = true; // MODO CONTÍNUO - NÃO PARA SOZINHO
     recognition.maxAlternatives = 1;
     
-    console.log('✅ Speech Recognition configurado');
+    console.log('✅ Speech Recognition configurado para GRAVAÇÃO CONTÍNUA');
     console.log('🔧 Configurações:', {
         lang: recognition.lang,
         continuous: recognition.continuous,
@@ -55,13 +55,15 @@ function setupVoice() {
     micIcon.addEventListener('click', handleMicClick);
     
     function handleMicClick() {
-        console.log('🎤 Microfone clicado! Estado atual:', isRecording ? 'GRAVANDO' : 'PARADO');
+        console.log('🎤 Microfone clicado!');
+        console.log('📊 Estado atual:', isRecording ? '🔴 GRAVANDO' : '⚫ PARADO');
         
         if (isRecording) {
-            console.log('⏹️ Parando gravação...');
-            recognition.stop();
+            console.log('⏹️ USUÁRIO QUER PARAR - finalizando gravação...');
+            isRecording = false; // Marcar que usuário quer parar
+            recognition.stop(); // Parar recognition
         } else {
-            console.log('🚀 Iniciando gravação...');
+            console.log('🚀 USUÁRIO QUER GRAVAR - iniciando gravação...');
             startRecording();
         }
     }
@@ -102,11 +104,30 @@ function setupVoice() {
         finalTranscript = '';
         chatInput.value = '';
         
-        // Feedback visual
+        // Feedback visual CONTÍNUO
         micIcon.style.fill = '#ff4444';
         micIcon.style.transform = 'scale(1.1)';
-        chatInput.placeholder = '🔴 Gravando... Fale agora!';
+        micIcon.style.filter = 'drop-shadow(0 0 10px #ff4444)';
+        chatInput.placeholder = '🔴 GRAVANDO CONTÍNUO... Clique novamente para parar';
         chatInput.style.borderColor = '#ff4444';
+        chatInput.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
+        
+        // Adicionar animação pulsante para indicar gravação ativa
+        micIcon.style.animation = 'pulse 1.5s infinite';
+        
+        // Adicionar CSS de animação se não existir
+        if (!document.querySelector('#voice-animation-style')) {
+            const style = document.createElement('style');
+            style.id = 'voice-animation-style';
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: scale(1.1); }
+                    50% { transform: scale(1.2); filter: drop-shadow(0 0 15px #ff4444); }
+                    100% { transform: scale(1.1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         // Configurar eventos do recognition
         recognition.onstart = function() {
@@ -149,22 +170,52 @@ function setupVoice() {
         };
         
         recognition.onend = function() {
-            console.log('🏁 Gravação finalizada');
+            console.log('🏁 Recognition tentou finalizar');
             console.log('📊 Texto final capturado:', finalTranscript);
+            console.log('🎤 Usuário ainda quer gravar?', isRecording);
             
+            // SE O USUÁRIO AINDA QUER GRAVAR (não clicou para parar)
+            if (isRecording) {
+                console.log('🔄 REINICIANDO automaticamente - usuário não parou manualmente');
+                
+                // Tentar reiniciar em 100ms
+                setTimeout(() => {
+                    if (isRecording) {
+                        try {
+                            console.log('🚀 Reiniciando recognition...');
+                            recognition.start();
+                            return; // NÃO continuar com finalização
+                        } catch (e) {
+                            console.log('❌ Erro ao reiniciar:', e.message);
+                            // Se não conseguir reiniciar, finalizar normalmente
+                        }
+                    }
+                }, 100);
+                
+                // Se conseguir reiniciar, não executar o resto da função
+                if (isRecording) return;
+            }
+            
+            // FINALIZAÇÃO NORMAL (quando usuário clicou para parar)
+            console.log('🏁 Finalizando gravação por solicitação do usuário');
             isRecording = false;
             
-            // Restaurar visual
+            // Restaurar visual COMPLETAMENTE
             micIcon.style.fill = 'currentColor';
             micIcon.style.transform = 'scale(1)';
+            micIcon.style.filter = 'none';
+            micIcon.style.animation = 'none';
             chatInput.placeholder = 'Digite sua mensagem...';
             chatInput.style.borderColor = '';
+            chatInput.style.boxShadow = '';
+            
+            console.log('🎨 Visual restaurado - gravação finalizada');
             
             // Garantir que o texto final está no input
             const cleanText = finalTranscript.trim();
             if (cleanText) {
                 chatInput.value = cleanText;
-                console.log('✅ SUCESSO! Texto no input:', chatInput.value);
+                console.log('✅ SUCESSO! Texto final no input:', chatInput.value);
                 
                 // Disparar eventos
                 chatInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -180,10 +231,13 @@ function setupVoice() {
             
             isRecording = false;
             
-            // Restaurar visual
+            // Restaurar visual COMPLETAMENTE
             micIcon.style.fill = 'currentColor';
             micIcon.style.transform = 'scale(1)';
+            micIcon.style.filter = 'none';
+            micIcon.style.animation = 'none';
             chatInput.style.borderColor = '';
+            chatInput.style.boxShadow = '';
             
             // Tratar erros específicos
             switch(event.error) {
@@ -196,6 +250,10 @@ function setupVoice() {
                     break;
                 case 'no-speech':
                     chatInput.placeholder = '❌ Nenhuma fala detectada - tente novamente';
+                    break;
+                case 'aborted':
+                    chatInput.placeholder = 'Gravação interrompida pelo usuário';
+                    console.log('ℹ️ Gravação foi interrompida pelo usuário - normal');
                     break;
                 default:
                     chatInput.placeholder = `❌ Erro: ${event.error}`;

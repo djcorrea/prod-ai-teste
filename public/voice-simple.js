@@ -37,13 +37,16 @@ function setupSimpleVoice() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
         
-        // CONFIGURAÇÃO CORRIGIDA - O PROBLEMA ESTAVA AQUI
+        // CONFIGURAÇÃO CORRIGIDA - PARA NÃO PARAR SOZINHO
         recognition.lang = 'pt-BR';
         recognition.interimResults = true; // Para ver texto em tempo real
-        recognition.continuous = true; // NÃO PARAR SOZINHO
+        recognition.continuous = true; // Modo contínuo
         recognition.maxAlternatives = 1;
         
-        console.log('✅ Speech Recognition configurado corretamente');
+        // CONFIGURAÇÕES ADICIONAIS PARA NÃO PARAR
+        recognition.serviceURI = ''; // Remove limitações de serviço
+        
+        console.log('✅ Speech Recognition configurado para NÃO PARAR SOZINHO');
         console.log('🔧 Config: continuous=true, interimResults=true');
     } else {
         console.log('❌ Speech Recognition not supported');
