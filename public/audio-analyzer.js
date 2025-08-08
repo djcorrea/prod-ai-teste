@@ -373,6 +373,9 @@ class AudioAnalyzer {
     prompt += `Se detectou frequências problemáticas, me diga exatamente onde cortar/realçar e com qual Q. `;
     prompt += `Se o volume está inadequado, me diga os valores exatos de compressão e limitação para corrigir.`;
 
+  // ⚠️ Regra obrigatória para reforçar uso dos dados do JSON na resposta da IA
+  prompt += `\n\n⚠️ REGRA OBRIGATÓRIA: Use obrigatoriamente todos os valores de Peak, RMS, Dinâmica e Frequências Dominantes fornecidos no JSON para criar recomendações técnicas reais e específicas de EQ, compressão, limitação, saturação e outros processamentos. Sempre inclua valores exatos nas recomendações.`;
+
     return prompt;
   }
 }

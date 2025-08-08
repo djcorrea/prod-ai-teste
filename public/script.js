@@ -1237,9 +1237,55 @@ async function processMessage(message) {
         'bot'
       );
     } else if (data.reply) {
-      console.log('✅ Exibindo resposta da IA');
-      appendMessage(`<strong>Assistente:</strong> ${data.reply}`, 'bot');
-      conversationHistory.push({ role: 'assistant', content: data.reply });
+      console.log('✅ Resposta recebida da IA, iniciando validação de conteúdo');
+
+      // 🔎 Validação: se a mensagem do usuário aparenta ser uma análise de áudio, validar presença de números-chave
+      const isAudioAnalysis = /\[ANÁLISE DE ÁUDIO\]/i.test(message) || /ANÁLISE TÉCNICA DE ÁUDIO/i.test(message) || /📊 DADOS TÉCNICOS:/i.test(message);
+
+      let finalReply = data.reply;
+
+      if (isAudioAnalysis) {
+        try {
+          const values = extrairValoresAnaliseDoPrompt(message);
+          const ok = validarPresencaValoresNaResposta(values, finalReply);
+          if (!ok && !data._validatedResend) {
+            console.warn('⚠️ Resposta não contém todos os valores técnicos. Reenviando com reforço...');
+            showTypingIndicator();
+
+            const reforco = `\n\n⚠️ REGRA OBRIGATÓRIA: Inclua explicitamente no texto todos estes valores do meu JSON: Peak ${values.peak}dB, RMS ${values.rms}dB, Dinâmica ${values.dinamica}dB e as frequências dominantes ${values.freqs.join(', ')} Hz. Explique cada ajuste com base nesses números.`;
+
+            const response2 = await fetch(API_CONFIG.chatEndpoint, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+              },
+              body: JSON.stringify({ 
+                message: message + reforco,
+                conversationHistory, 
+                idToken,
+                _validatedResend: true
+              })
+            });
+            hideTypingIndicator();
+            if (response2.ok) {
+              const rawText2 = await response2.text();
+              try {
+                const data2 = JSON.parse(rawText2);
+                if (data2.reply) {
+                  finalReply = data2.reply;
+                }
+              } catch {}
+            }
+          }
+        } catch (e) {
+          console.log('Validação da análise: não foi possível extrair valores', e?.message);
+        }
+      }
+
+      console.log('✅ Exibindo resposta final da IA');
+      appendMessage(`<strong>Assistente:</strong> ${finalReply}`, 'bot');
+      conversationHistory.push({ role: 'assistant', content: finalReply });
       
       // Mostrar mensagens restantes se for usuário gratuito
       if (data.mensagensRestantes !== null && data.mensagensRestantes !== undefined) {
@@ -1272,6 +1318,73 @@ async function processMessage(message) {
       mainSendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
     }
   }
+}
+
+// ========== Validação da resposta com base no prompt de análise ==========
+function extrairValoresAnaliseDoPrompt(userPrompt) {
+  // Procura por linhas tipo: • Peak: -1.2dB, • RMS: -12.3dB, • Dinâmica: 8.5dB
+  const peakMatch = userPrompt.match(/Peak:\s*([-+]?\d+(?:[\.,]\d+)?)\s*dB/i);
+  const rmsMatch = userPrompt.match(/RMS:\s*([-+]?\d+(?:[\.,]\d+)?)\s*dB/i);
+  const dynMatch = userPrompt.match(/Dinâmica:\s*([-+]?\d+(?:[\.,]\d+)?)\s*dB/i);
+  // Frequências: linhas "• 120Hz (3x detectada)"
+  const freqRegex = /\n\s*•\s*(\d{2,5})\s*Hz/gi;
+  const freqs = [];
+  let m;
+  while ((m = freqRegex.exec(userPrompt)) !== null) {
+    const f = parseInt(m[1], 10);
+    if (!isNaN(f)) freqs.push(f);
+    if (freqs.length >= 5) break;
+  }
+  return {
+    peak: peakMatch ? normalizarNumero(peakMatch[1]) : null,
+    rms: rmsMatch ? normalizarNumero(rmsMatch[1]) : null,
+    dinamica: dynMatch ? normalizarNumero(dynMatch[1]) : null,
+    freqs
+  };
+}
+
+function normalizarNumero(str) {
+  return parseFloat(String(str).replace(',', '.'));
+}
+
+function validarPresencaValoresNaResposta(values, replyText) {
+  if (!values) return true;
+  const txt = (replyText || '').toLowerCase();
+
+  const checks = [];
+  if (typeof values.peak === 'number') {
+    checks.push(incluiNumeroComSufixo(txt, values.peak, 'db'));
+  }
+  if (typeof values.rms === 'number') {
+    checks.push(incluiNumeroComSufixo(txt, values.rms, 'db'));
+  }
+  if (typeof values.dinamica === 'number') {
+    checks.push(incluiNumeroComSufixo(txt, values.dinamica, 'db'));
+  }
+  // Checar pelo menos 1-2 frequências
+  let freqOk = true;
+  if (values.freqs && values.freqs.length) {
+    const sampleFreqs = values.freqs.slice(0, Math.min(2, values.freqs.length));
+    freqOk = sampleFreqs.every(f => incluiNumeroComSufixo(txt, f, 'hz'));
+  }
+  return checks.every(Boolean) && freqOk;
+}
+
+function incluiNumeroComSufixo(texto, numero, sufixo) {
+  if (typeof numero !== 'number' || !isFinite(numero)) return true;
+  // Tolerância de variação: aceitar arredondamentos 0.0 e 0.1
+  const candidatos = new Set();
+  const base = Math.round(numero * 10) / 10;
+  const variantes = [base, Math.round(numero), Math.floor(numero), Math.ceil(numero)];
+  variantes.forEach(v => {
+    candidatos.add(`${String(v).replace('.', ',')}${sufixo}`.toLowerCase());
+    candidatos.add(`${v}${sufixo}`.toLowerCase());
+    candidatos.add(`${String(v).replace('.', ',')} ${sufixo}`.toLowerCase());
+    candidatos.add(`${v} ${sufixo}`.toLowerCase());
+  });
+  // Também aceitar com sinal +/-
+  const withSign = Array.from(candidatos).flatMap(c => [c, c.replace(/^/, '+'), c.replace(/^/, '-')]);
+  return withSign.some(pattern => texto.includes(pattern));
 }
 
 /* ============ INICIALIZAÇÃO DO SISTEMA ============ */
