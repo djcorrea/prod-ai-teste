@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PROD.AI – Prova do Analisador de Áudio</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 20px; color: #222; }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    .desc { color: #444; margin-bottom: 16px; }
+    button { background: #0ea5e9; color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+    button:hover { background: #0284c7; }
+    .panel { margin-top: 16px; padding: 14px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa; }
+    .log { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; background: #0b1020; color: #d1e7ff; padding: 12px; border-radius: 8px; max-height: 55vh; overflow: auto; }
+    .ok { color: #16a34a; font-weight: 600; }
+    .fail { color: #dc2626; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .small { color: #666; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Prova do Analisador de Áudio (Web Audio API)</h1>
+  <p class="desc">Este teste gera sinais sintéticos, roda o mesmo código de análise usado no site e verifica se os resultados batem com valores esperados da teoria do áudio (dBFS, RMS, pico, dinâmica e frequência dominante). 100% local, sem rede.</p>
+
+  <div class="grid">
+    <button id="run">Rodar testes</button>
+    <button id="download" title="Baixa um JSON com resultados e métricas">Baixar relatório JSON</button>
+  </div>
+
+  <div class="panel">
+    <div id="summary">Pronto para testar.</div>
+  </div>
+
+  <div class="panel">
+    <div class="small">Detalhes</div>
+    <div id="log" class="log"></div>
+  </div>
+
+  <script src="audio-analyzer.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    const summaryEl = document.getElementById('summary');
+    const results = [];
+
+    function log(msg) {
+      logEl.textContent += msg + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function within(val, target, tol) {
+      return Math.abs(val - target) <= tol;
+    }
+
+    function fmtDb(x) {
+      return (Number.isFinite(x) ? x.toFixed(2) : '-∞') + ' dB';
+    }
+
+    async function createSineBuffer({ sampleRate = 44100, seconds = 1, freq = 1000, amplitude = 0.5, channels = 1 }) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const len = Math.floor(sampleRate * seconds);
+      const buffer = ctx.createBuffer(channels, len, sampleRate);
+      for (let c = 0; c < channels; c++) {
+        const data = buffer.getChannelData(c);
+        for (let i = 0; i < len; i++) {
+          const t = i / sampleRate;
+          data[i] = amplitude * Math.sin(2 * Math.PI * freq * t);
+        }
+      }
+      try { ctx.close(); } catch {}
+      return buffer;
+    }
+
+    async function runTest(name, fn) {
+      try {
+        const out = await fn();
+        results.push({ name, ok: true, out });
+        log(`✔ ${name}: OK`);
+        return true;
+      } catch (e) {
+        results.push({ name, ok: false, error: e.message });
+        log(`✖ ${name}: FAIL -> ${e.message}`);
+        return false;
+      }
+    }
+
+    async function run() {
+      logEl.textContent = '';
+      results.length = 0;
+      summaryEl.textContent = 'Executando...';
+
+      // Teste 1: Seno 1kHz, amplitude 0.5
+      await runTest('Sine 1kHz @ A=0.5 (pico≈-6.02dB, rms≈-9.03dB, DR≈3.01dB, freq≈1kHz)', async () => {
+        const buf = await createSineBuffer({ amplitude: 0.5, freq: 1000, seconds: 1.0 });
+        const analysis = window.audioAnalyzer.performFullAnalysis(buf);
+        const peak = analysis.technicalData.peak; // dB
+        const rms = analysis.technicalData.rms;   // dB
+        const dr = analysis.technicalData.dynamicRange; // dB
+        const top = analysis.technicalData.dominantFrequencies?.[0]?.frequency || 0;
+
+        log(`   peak=${fmtDb(peak)} | exp≈-6.02dB`);
+        log(`   rms =${fmtDb(rms)} | exp≈-9.03dB`);
+        log(`   DR  =${dr.toFixed(2)} dB | exp≈3.01dB`);
+        log(`   f0  =${Math.round(top)} Hz | exp≈1000Hz (±50Hz)`);
+
+        if (!within(peak, -6.02, 0.6)) throw new Error('Peak fora do esperado');
+        if (!within(rms, -9.03, 0.6)) throw new Error('RMS fora do esperado');
+        if (!within(dr, 3.01, 0.6)) throw new Error('Dinâmica fora do esperado');
+        if (!(top >= 950 && top <= 1050)) throw new Error('Freq dominante fora do esperado');
+
+        return { peak, rms, dr, top };
+      });
+
+      // Teste 2: Seno amplitude 1.0 (pico≈0dB)
+      await runTest('Sine 1kHz @ A=1.0 (pico≈0dB)', async () => {
+        const buf = await createSineBuffer({ amplitude: 1.0, freq: 1000, seconds: 1.0 });
+        const analysis = window.audioAnalyzer.performFullAnalysis(buf);
+        const peak = analysis.technicalData.peak;
+        log(`   peak=${fmtDb(peak)} | exp≈0.00dB`);
+        if (!(peak <= 0.5 && peak >= -0.5)) throw new Error('Peak ≈ 0dB esperado');
+        return { peak };
+      });
+
+      // Teste 3: Volume muito baixo (RMS < -30dB deve marcar low_volume)
+      await runTest('Low volume flag (RMS < -30dB)', async () => {
+        const buf = await createSineBuffer({ amplitude: 0.03, freq: 500, seconds: 1.0 });
+        const analysis = window.audioAnalyzer.performFullAnalysis(buf);
+        const rms = analysis.technicalData.rms; // ≈ -33.5 dB
+        const hasLow = analysis.problems.some(p => p.type === 'low_volume');
+        log(`   rms=${fmtDb(rms)} | esperado < -30dB | flag=${hasLow}`);
+        if (!(rms < -30)) throw new Error('RMS não está baixo como esperado');
+        if (!hasLow) throw new Error('Flag low_volume não detectada');
+        return { rms, hasLow };
+      });
+
+      // Resumo
+      const passed = results.filter(r => r.ok).length;
+      const total = results.length;
+      summaryEl.innerHTML = `${passed}/${total} testes <span class="${passed===total?'ok':'fail'}">${passed===total?'PASS':'FAIL'}</span>`;
+    }
+
+    document.getElementById('run').addEventListener('click', run);
+    document.getElementById('download').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify({ when: new Date().toISOString(), results }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'prova-analisador-audio.json';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  </script>
+</body>
+</html>
