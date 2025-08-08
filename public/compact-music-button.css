@@ -1,0 +1,31 @@
+/* Hover effect para o botão de análise compacto */
+.music-analysis-section button:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    background: linear-gradient(135deg, rgba(0, 150, 255, 0.3), rgba(100, 200, 255, 0.25)) !important;
+    box-shadow: 0 6px 20px rgba(0, 150, 255, 0.3) !important;
+    border-color: rgba(0, 150, 255, 0.6) !important;
+}
+
+.music-analysis-section button:active {
+    transform: translateY(0) scale(1.02) !important;
+    transition: all 0.1s ease !important;
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+    .music-analysis-section {
+        bottom: 15px !important;
+        right: 15px !important;
+    }
+    
+    .music-analysis-section button {
+        padding: 10px 16px !important;
+        font-size: 0.8rem !important;
+        min-width: 120px !important;
+    }
+    
+    .music-analysis-section svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}

@@ -1107,22 +1107,40 @@ function startTypingEffect(bubbleElement, content, messageDiv) {
 }
 
 function showTypingIndicator() {
-  const typingIndicator = document.getElementById('chatbotTypingIndicator');
   const chatboxEl = document.getElementById('chatbotConversationArea');
   
-  if (typingIndicator) {
-    typingIndicator.style.display = 'flex';
-    typingIndicator.classList.add('active');
-    if (chatboxEl) chatboxEl.scrollTop = chatboxEl.scrollHeight;
+  if (chatboxEl) {
+    // Remover indicador existente se houver
+    const existingIndicator = chatboxEl.querySelector('.chatbot-conversation-typing');
+    if (existingIndicator) {
+      existingIndicator.remove();
+    }
+    
+    // Criar novo indicador como mensagem
+    const typingMessage = document.createElement('div');
+    typingMessage.className = 'chatbot-conversation-typing active';
+    typingMessage.innerHTML = `
+      <span class="typing-text">AI.SYNTH está digitando</span>
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+    
+    chatboxEl.appendChild(typingMessage);
+    chatboxEl.scrollTop = chatboxEl.scrollHeight;
   }
 }
 
 function hideTypingIndicator() {
-  const typingIndicator = document.getElementById('chatbotTypingIndicator');
+  const chatboxEl = document.getElementById('chatbotConversationArea');
   
-  if (typingIndicator) {
-    typingIndicator.style.display = 'none';
-    typingIndicator.classList.remove('active');
+  if (chatboxEl) {
+    const typingMessage = chatboxEl.querySelector('.chatbot-conversation-typing');
+    if (typingMessage) {
+      typingMessage.remove();
+    }
   }
 }
 

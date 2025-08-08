@@ -195,9 +195,7 @@ function setupVoice() {
             window.voiceState.currentMicIcon.style.animation = 'pulse 1.5s infinite';
         }
         
-        chatInput.placeholder = '🔴 GRAVANDO CONTÍNUO... Clique novamente para parar';
-        chatInput.style.borderColor = '#ff4444';
-        chatInput.style.boxShadow = '0 0 10px rgba(255, 68, 68, 0.3)';
+        chatInput.placeholder = '🔴 Captando áudio... Clique novamente para parar';
         
         // Adicionar animação pulsante para indicar gravação ativa
         if (!document.querySelector('#voice-animation-style')) {
@@ -295,8 +293,6 @@ function setupVoice() {
             
             if (window.voiceState.currentInput) {
                 window.voiceState.currentInput.placeholder = 'Digite sua mensagem...';
-                window.voiceState.currentInput.style.borderColor = '';
-                window.voiceState.currentInput.style.boxShadow = '';
             }
             
             console.log('🎨 Visual restaurado - gravação finalizada');
@@ -329,11 +325,6 @@ function setupVoice() {
                 window.voiceState.currentMicIcon.style.transform = 'scale(1)';
                 window.voiceState.currentMicIcon.style.filter = 'none';
                 window.voiceState.currentMicIcon.style.animation = 'none';
-            }
-            
-            if (window.voiceState.currentInput) {
-                window.voiceState.currentInput.style.borderColor = '';
-                window.voiceState.currentInput.style.boxShadow = '';
             }
             
             // Tratar erros específicos

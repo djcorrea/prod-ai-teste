@@ -1,0 +1,295 @@
+/* ============ 🎵 AUDIO ANALYZER STYLES ============ */
+
+/* Botão de análise de áudio no input */
+.chatbot-audio-analyze-btn {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #00d4ff, #0096cc);
+    border: none;
+    border-radius: 50%;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin: 0 8px;
+    flex-shrink: 0;
+}
+
+.chatbot-audio-analyze-btn:hover {
+    background: linear-gradient(135deg, #00a8cc, #007799);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.chatbot-audio-analyze-btn:active {
+    transform: scale(0.95);
+}
+
+/* Modal de análise de áudio */
+.audio-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.audio-modal-content {
+    background: linear-gradient(135deg, #1a1a1a, #252525);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.audio-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px 16px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.audio-modal-header h3 {
+    color: #00d4ff;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.audio-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.audio-modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Upload area no modal */
+.audio-upload-area {
+    padding: 30px 24px;
+}
+
+.upload-content {
+    border: 2px dashed #333;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(37, 37, 37, 0.3);
+}
+
+.upload-content:hover,
+.upload-content.dragover {
+    border-color: #00d4ff;
+    background: rgba(0, 212, 255, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.upload-content h4 {
+    color: #00d4ff;
+    margin: 16px 0 8px 0;
+    font-size: 1.2rem;
+}
+
+.upload-content p {
+    color: #aaa;
+    margin: 8px 0;
+}
+
+.supported-formats {
+    font-size: 12px;
+    color: #666;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #00d4ff, #0096cc);
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 16px;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    background: linear-gradient(135deg, #00a8cc, #007799);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+}
+
+/* Loading no modal */
+.audio-loading {
+    padding: 40px 24px;
+    text-align: center;
+    color: #fff;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #333;
+    border-top: 4px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 16px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #0096cc);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Resultados no modal */
+.audio-results {
+    padding: 24px;
+}
+
+.results-header h4 {
+    color: #00d4ff;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.technical-data {
+    background: rgba(37, 37, 37, 0.5);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.data-row:last-child {
+    border-bottom: none;
+}
+
+.data-row .label {
+    color: #aaa;
+    font-weight: 500;
+}
+
+.data-row .value {
+    color: #00d4ff;
+    font-weight: bold;
+}
+
+/* Ações do modal */
+.analysis-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #00d4ff, #0096cc);
+    color: #000;
+}
+
+.action-btn.secondary {
+    background: rgba(51, 51, 51, 0.8);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn.primary:hover {
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsivo para modal */
+@media (max-width: 600px) {
+    .audio-modal-content {
+        width: 95%;
+        margin: 20px;
+        max-height: 90vh;
+    }
+    
+    .audio-upload-area {
+        padding: 20px 16px;
+    }
+    
+    .upload-content {
+        padding: 30px 15px;
+    }
+    
+    .analysis-actions {
+        flex-direction: column;
+    }
+    
+    .chatbot-audio-analyze-btn {
+        width: 28px;
+        height: 28px;
+        margin: 0 4px;
+    }
+}

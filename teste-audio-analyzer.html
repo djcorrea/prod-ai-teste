@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Teste do Audio Analyzer - PROD.AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #252525;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-btn {
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 10px 10px 0;
+        }
+        .test-btn:hover {
+            background: #00a8cc;
+        }
+        .log {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .success { color: #51cf66; }
+        .error { color: #ff6b6b; }
+        .info { color: #00d4ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Teste do Audio Analyzer - PROD.AI</h1>
+        <p>Sistema de análise de áudio em tempo real usando Web Audio API</p>
+        
+        <!-- Teste de Carregamento -->
+        <div class="test-section">
+            <h3>🚀 Teste de Carregamento</h3>
+            <button class="test-btn" onclick="testLoadAnalyzer()">Testar Carregamento</button>
+            <button class="test-btn" onclick="checkDependencies()">Verificar Dependências</button>
+            <div id="loadTest" class="log"></div>
+        </div>
+        
+        <!-- Teste de Upload -->
+        <div class="test-section">
+            <h3>📁 Teste de Upload</h3>
+            <input type="file" id="testFileInput" accept="audio/*">
+            <button class="test-btn" onclick="testFileAnalysis()">Testar Análise</button>
+            <div id="uploadTest" class="log"></div>
+        </div>
+        
+        <!-- Teste de Funcionalidades -->
+        <div class="test-section">
+            <h3>⚙️ Teste de Funcionalidades</h3>
+            <button class="test-btn" onclick="testAudioContext()">Testar Audio Context</button>
+            <button class="test-btn" onclick="testFFT()">Testar FFT</button>
+            <button class="test-btn" onclick="testPromptGeneration()">Testar Geração de Prompts</button>
+            <div id="functionTest" class="log"></div>
+        </div>
+        
+        <!-- Demonstração -->
+        <div class="test-section">
+            <h3>🎵 Demonstração Completa</h3>
+            <button class="test-btn" onclick="runCompleteDemo()">Executar Demo Completa</button>
+            <div id="demoTest" class="log"></div>
+        </div>
+        
+        <!-- Status do Sistema -->
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <div id="systemStatus" class="log">Carregando status...</div>
+        </div>
+    </div>
+
+    <!-- Scripts do Audio Analyzer -->
+    <script src="audio-analyzer.js"></script>
+    
+    <script>
+        // 🧪 SISTEMA DE TESTES PARA AUDIO ANALYZER
+        
+        let testResults = {
+            analyzer: false,
+            audioContext: false,
+            fft: false,
+            integration: false
+        };
+        
+        // 📊 Atualizar status do sistema
+        function updateSystemStatus() {
+            const status = document.getElementById('systemStatus');
+            if (!status) return;
+            
+            const checks = [
+                { name: 'Web Audio API', status: !!(window.AudioContext || window.webkitAudioContext), critical: true },
+                { name: 'Audio Analyzer', status: !!window.audioAnalyzer, critical: true },
+                { name: 'File API', status: !!(window.File && window.FileReader), critical: true },
+                { name: 'Navigator', status: !!navigator, critical: false },
+                { name: 'Clipboard API', status: !!(navigator.clipboard), critical: false },
+                { name: 'Local Storage', status: typeof(Storage) !== "undefined", critical: false }
+            ];
+            
+            let statusHTML = '';
+            checks.forEach(check => {
+                const icon = check.status ? '✅' : '❌';
+                const className = check.status ? 'success' : 'error';
+                const critical = check.critical ? ' (CRÍTICO)' : '';
+                statusHTML += `<span class="${className}">${icon} ${check.name}${critical}</span>\n`;
+            });
+            
+            status.innerHTML = statusHTML;
+        }
+        
+        // 🧪 Função de log para testes
+        function logTest(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        // 🚀 Testar carregamento do analyzer
+        async function testLoadAnalyzer() {
+            const log = (msg, type) => logTest('loadTest', msg, type);
+            
+            log('Iniciando teste de carregamento...', 'info');
+            
+            try {
+                if (window.audioAnalyzer) {
+                    log('✅ Audio Analyzer já carregado', 'success');
+                    testResults.analyzer = true;
+                } else {
+                    log('❌ Audio Analyzer não encontrado', 'error');
+                    testResults.analyzer = false;
+                    return;
+                }
+                
+                // Testar inicialização
+                const initialized = await window.audioAnalyzer.initializeAnalyzer();
+                if (initialized) {
+                    log('✅ Audio Analyzer inicializado com sucesso', 'success');
+                } else {
+                    log('❌ Falha na inicialização', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Erro no teste: ${error.message}`, 'error');
+            }
+        }
+        
+        // 🔍 Verificar dependências
+        function checkDependencies() {
+            const log = (msg, type) => logTest('loadTest', msg, type);
+            
+            log('Verificando dependências...', 'info');
+            
+            const deps = {
+                'AudioContext': !!(window.AudioContext || window.webkitAudioContext),
+                'File API': !!(window.File && window.FileReader && window.FileList && window.Blob),
+                'URL API': !!window.URL,
+                'Promise': typeof Promise !== 'undefined',
+                'Async/Await': (function() {
+                    try {
+                        eval('async function test() {}');
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                })()
+            };
+            
+            Object.entries(deps).forEach(([name, available]) => {
+                const status = available ? '✅' : '❌';
+                const type = available ? 'success' : 'error';
+                log(`${status} ${name}`, type);
+            });
+        }
+        
+        // 📁 Testar análise de arquivo
+        async function testFileAnalysis() {
+            const log = (msg, type) => logTest('uploadTest', msg, type);
+            const fileInput = document.getElementById('testFileInput');
+            
+            if (!fileInput.files.length) {
+                log('❌ Por favor, selecione um arquivo de áudio', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            log(`Analisando arquivo: ${file.name} (${(file.size/1024/1024).toFixed(2)}MB)`, 'info');
+            
+            try {
+                if (!window.audioAnalyzer) {
+                    log('❌ Audio Analyzer não carregado', 'error');
+                    return;
+                }
+                
+                log('Iniciando análise...', 'info');
+                const analysis = await window.audioAnalyzer.analyzeAudioFile(file);
+                
+                log('✅ Análise concluída!', 'success');
+                log(`📊 Peak: ${analysis.technicalData.peak.toFixed(1)}dB`, 'info');
+                log(`📊 RMS: ${analysis.technicalData.rms.toFixed(1)}dB`, 'info');
+                log(`📊 Duração: ${analysis.duration.toFixed(1)}s`, 'info');
+                log(`📊 Problemas: ${analysis.problems.length}`, 'info');
+                log(`📊 Sugestões: ${analysis.suggestions.length}`, 'info');
+                
+                // Testar geração de prompt
+                const prompt = window.audioAnalyzer.generateAIPrompt(analysis);
+                log(`📝 Prompt gerado: ${prompt.length} caracteres`, 'success');
+                
+            } catch (error) {
+                log(`❌ Erro na análise: ${error.message}`, 'error');
+            }
+        }
+        
+        // 🎵 Testar Audio Context
+        async function testAudioContext() {
+            const log = (msg, type) => logTest('functionTest', msg, type);
+            
+            try {
+                log('Testando Audio Context...', 'info');
+                
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) {
+                    log('❌ Audio Context não suportado', 'error');
+                    return;
+                }
+                
+                const ctx = new AudioContextClass();
+                log(`✅ Audio Context criado - Sample Rate: ${ctx.sampleRate}Hz`, 'success');
+                
+                const analyzer = ctx.createAnalyser();
+                analyzer.fftSize = 2048;
+                log(`✅ Analyzer Node criado - FFT Size: ${analyzer.fftSize}`, 'success');
+                
+                ctx.close();
+                log('✅ Audio Context fechado corretamente', 'success');
+                
+                testResults.audioContext = true;
+                
+            } catch (error) {
+                log(`❌ Erro no Audio Context: ${error.message}`, 'error');
+                testResults.audioContext = false;
+            }
+        }
+        
+        // 📊 Testar FFT
+        function testFFT() {
+            const log = (msg, type) => logTest('functionTest', msg, type);
+            
+            try {
+                log('Testando implementação FFT...', 'info');
+                
+                if (!window.audioAnalyzer) {
+                    log('❌ Audio Analyzer não carregado', 'error');
+                    return;
+                }
+                
+                // Gerar sinal de teste
+                const testSignal = new Array(1024);
+                for (let i = 0; i < testSignal.length; i++) {
+                    testSignal[i] = Math.sin(2 * Math.PI * 440 * i / 44100); // 440Hz
+                }
+                
+                log('✅ Sinal de teste gerado (440Hz)', 'info');
+                
+                // Testar FFT
+                const spectrum = window.audioAnalyzer.simpleFFT(testSignal);
+                log(`✅ FFT executada - ${spectrum.length} bins`, 'success');
+                
+                // Encontrar pico
+                let maxBin = 0;
+                let maxValue = 0;
+                for (let i = 1; i < spectrum.length / 2; i++) {
+                    if (spectrum[i] > maxValue) {
+                        maxValue = spectrum[i];
+                        maxBin = i;
+                    }
+                }
+                
+                const detectedFreq = (maxBin * 44100) / 1024;
+                log(`🎯 Frequência detectada: ${detectedFreq.toFixed(1)}Hz`, 'success');
+                
+                testResults.fft = true;
+                
+            } catch (error) {
+                log(`❌ Erro no teste FFT: ${error.message}`, 'error');
+                testResults.fft = false;
+            }
+        }
+        
+        // 📝 Testar geração de prompts
+        function testPromptGeneration() {
+            const log = (msg, type) => logTest('functionTest', msg, type);
+            
+            try {
+                log('Testando geração de prompts...', 'info');
+                
+                if (!window.audioAnalyzer) {
+                    log('❌ Audio Analyzer não carregado', 'error');
+                    return;
+                }
+                
+                // Criar análise de exemplo
+                const mockAnalysis = {
+                    duration: 180.5,
+                    sampleRate: 44100,
+                    channels: 2,
+                    technicalData: {
+                        peak: -2.1,
+                        rms: -14.5,
+                        dynamicRange: 12.4,
+                        dominantFrequencies: [
+                            { frequency: 65, occurrences: 15 },
+                            { frequency: 440, occurrences: 8 },
+                            { frequency: 8000, occurrences: 5 }
+                        ]
+                    },
+                    problems: [
+                        {
+                            type: 'test_problem',
+                            message: 'Problema de teste',
+                            solution: 'Solução de teste',
+                            severity: 'medium'
+                        }
+                    ],
+                    suggestions: [
+                        {
+                            type: 'test_suggestion',
+                            message: 'Sugestão de teste',
+                            action: 'Ação de teste'
+                        }
+                    ]
+                };
+                
+                log('✅ Análise mock criada', 'info');
+                
+                const prompt = window.audioAnalyzer.generateAIPrompt(mockAnalysis);
+                
+                log(`✅ Prompt gerado com sucesso!`, 'success');
+                log(`📝 Tamanho: ${prompt.length} caracteres`, 'info');
+                log(`📊 Contém dados técnicos: ${prompt.includes('DADOS TÉCNICOS') ? '✅' : '❌'}`, 'info');
+                log(`🚨 Contém problemas: ${prompt.includes('PROBLEMAS DETECTADOS') ? '✅' : '❌'}`, 'info');
+                log(`💡 Contém sugestões: ${prompt.includes('SUGESTÕES AUTOMÁTICAS') ? '✅' : '❌'}`, 'info');
+                
+                log('📄 Preview do prompt:', 'info');
+                log(prompt.substring(0, 200) + '...', 'info');
+                
+            } catch (error) {
+                log(`❌ Erro na geração de prompt: ${error.message}`, 'error');
+            }
+        }
+        
+        // 🎭 Demo completa
+        async function runCompleteDemo() {
+            const log = (msg, type) => logTest('demoTest', msg, type);
+            
+            log('🎬 Iniciando demonstração completa...', 'info');
+            log('', 'info');
+            
+            try {
+                // Passo 1: Verificar sistema
+                log('1️⃣ Verificando sistema...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                if (!window.audioAnalyzer) {
+                    log('❌ Sistema não carregado corretamente', 'error');
+                    return;
+                }
+                log('✅ Sistema operacional', 'success');
+                
+                // Passo 2: Inicializar
+                log('2️⃣ Inicializando Audio Analyzer...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const initialized = await window.audioAnalyzer.initializeAnalyzer();
+                if (!initialized) {
+                    log('❌ Falha na inicialização', 'error');
+                    return;
+                }
+                log('✅ Audio Analyzer inicializado', 'success');
+                
+                // Passo 3: Simular análise
+                log('3️⃣ Simulando análise de áudio...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Criar dados simulados mais realistas
+                const simulatedAnalysis = {
+                    duration: 210.7,
+                    sampleRate: 44100,
+                    channels: 2,
+                    technicalData: {
+                        peak: -1.2,
+                        rms: -12.8,
+                        dynamicRange: 11.6,
+                        dominantFrequencies: [
+                            { frequency: 60, occurrences: 22 },    // Sub bass
+                            { frequency: 440, occurrences: 18 },   // A4 note
+                            { frequency: 1000, occurrences: 12 },  // Mid frequency
+                            { frequency: 5000, occurrences: 8 },   // Presence
+                            { frequency: 10000, occurrences: 5 }   // Air
+                        ]
+                    },
+                    problems: [
+                        {
+                            type: 'slight_clipping',
+                            message: 'Possível clipping detectado em picos',
+                            solution: 'Reduzir gain em 2-3dB ou usar limitador suave',
+                            severity: 'low'
+                        }
+                    ],
+                    suggestions: [
+                        {
+                            type: 'mastering',
+                            message: 'Nível adequado para streaming',
+                            action: 'Volume ideal para Spotify/YouTube (-14 LUFS)'
+                        },
+                        {
+                            type: 'frequency_balance',
+                            message: 'Boa distribuição de frequências',
+                            action: 'Considere leve boost em 10kHz para mais brilho'
+                        }
+                    ]
+                };
+                
+                log('✅ Análise simulada concluída!', 'success');
+                log('', 'info');
+                
+                // Passo 4: Mostrar resultados
+                log('4️⃣ Resultados da análise:', 'info');
+                log(`🎵 Duração: ${simulatedAnalysis.duration}s`, 'info');
+                log(`📊 Peak: ${simulatedAnalysis.technicalData.peak}dB`, 'info');
+                log(`📊 RMS: ${simulatedAnalysis.technicalData.rms}dB (ideal para streaming!)`, 'success');
+                log(`📊 Dinâmica: ${simulatedAnalysis.technicalData.dynamicRange}dB`, 'info');
+                log(`🎯 Frequências dominantes: ${simulatedAnalysis.technicalData.dominantFrequencies.length}`, 'info');
+                log(`🚨 Problemas detectados: ${simulatedAnalysis.problems.length}`, 'info');
+                log(`💡 Sugestões: ${simulatedAnalysis.suggestions.length}`, 'success');
+                log('', 'info');
+                
+                // Passo 5: Gerar prompt para IA
+                log('5️⃣ Gerando prompt para IA...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                const aiPrompt = window.audioAnalyzer.generateAIPrompt(simulatedAnalysis);
+                log('✅ Prompt gerado para envio ao chat!', 'success');
+                log(`📝 Tamanho: ${aiPrompt.length} caracteres`, 'info');
+                log('', 'info');
+                
+                // Passo 6: Finalizar
+                log('6️⃣ Demo concluída com sucesso! 🎉', 'success');
+                log('', 'info');
+                log('💻 O sistema está pronto para usar!', 'success');
+                log('🎵 Faça upload de um arquivo de áudio para testar na prática.', 'info');
+                
+                testResults.integration = true;
+                
+            } catch (error) {
+                log(`❌ Erro na demonstração: ${error.message}`, 'error');
+                testResults.integration = false;
+            }
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSystemStatus();
+            
+            // Verificar periodicamente o status
+            setInterval(updateSystemStatus, 2000);
+        });
+        
+        console.log('🧪 Sistema de Testes do Audio Analyzer carregado!');
+    </script>
+</body>
+</html>

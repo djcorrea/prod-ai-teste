@@ -1,0 +1,598 @@
+<!-- 🎵 AUDIO UPLOAD COMPONENT - Interface para análise de áudio -->
+<div id="audio-analyzer-component" class="audio-analyzer-container">
+  <!-- 📁 Área de Upload -->
+  <div class="upload-area" id="uploadArea">
+    <div class="upload-content">
+      <div class="upload-icon">🎵</div>
+      <h3>Analisar Áudio</h3>
+      <p>Arraste seu arquivo aqui ou clique para selecionar</p>
+      <p class="supported-formats">Suporta: MP3, WAV, M4A, OGG</p>
+      <input type="file" id="audioFileInput" accept="audio/*" hidden>
+      <button class="upload-btn" onclick="document.getElementById('audioFileInput').click()">
+        Escolher Arquivo
+      </button>
+    </div>
+  </div>
+
+  <!-- 📊 Área de Resultados -->
+  <div id="analysisResults" class="analysis-results" style="display: none;">
+    <div class="analysis-header">
+      <h4>🔬 Análise Completa</h4>
+      <button class="close-analysis" onclick="closeAnalysis()">✕</button>
+    </div>
+    
+    <!-- Dados Técnicos -->
+    <div class="technical-data">
+      <div class="data-row">
+        <span class="label">📈 Peak:</span>
+        <span class="value" id="peakValue">-</span>
+      </div>
+      <div class="data-row">
+        <span class="label">🔊 RMS:</span>
+        <span class="value" id="rmsValue">-</span>
+      </div>
+      <div class="data-row">
+        <span class="label">📊 Dinâmica:</span>
+        <span class="value" id="dynamicValue">-</span>
+      </div>
+      <div class="data-row">
+        <span class="label">⏱️ Duração:</span>
+        <span class="value" id="durationValue">-</span>
+      </div>
+    </div>
+
+    <!-- Frequências Dominantes -->
+    <div class="frequency-analysis" id="frequencyAnalysis">
+      <h5>🎯 Frequências Dominantes</h5>
+      <div class="frequency-list" id="frequencyList">
+        <!-- Preenchido dinamicamente -->
+      </div>
+    </div>
+
+    <!-- Problemas Detectados -->
+    <div class="problems-section" id="problemsSection" style="display: none;">
+      <h5>🚨 Problemas Detectados</h5>
+      <div class="problems-list" id="problemsList">
+        <!-- Preenchido dinamicamente -->
+      </div>
+    </div>
+
+    <!-- Sugestões -->
+    <div class="suggestions-section" id="suggestionsSection" style="display: none;">
+      <h5>💡 Sugestões Automáticas</h5>
+      <div class="suggestions-list" id="suggestionsList">
+        <!-- Preenchido dinamicamente -->
+      </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="analysis-actions">
+      <button class="action-btn primary" onclick="sendAnalysisToChat()">
+        🤖 Pedir Ajuda à IA
+      </button>
+      <button class="action-btn secondary" onclick="downloadAnalysis()">
+        📄 Baixar Relatório
+      </button>
+    </div>
+  </div>
+
+  <!-- 🔄 Loading -->
+  <div id="analysisLoading" class="analysis-loading" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p>Analisando áudio...</p>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.audio-analyzer-container {
+  max-width: 600px;
+  margin: 20px auto;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.upload-area {
+  padding: 40px 20px;
+  border: 2px dashed #333;
+  margin: 20px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #252525;
+}
+
+.upload-area:hover {
+  border-color: #00d4ff;
+  background: #2a2a2a;
+}
+
+.upload-area.dragover {
+  border-color: #00d4ff;
+  background: #2a3a4a;
+  transform: scale(1.02);
+}
+
+.upload-content {
+  color: #fff;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.upload-content h3 {
+  margin: 16px 0 8px 0;
+  color: #00d4ff;
+}
+
+.upload-content p {
+  margin: 8px 0;
+  color: #aaa;
+}
+
+.supported-formats {
+  font-size: 12px;
+  color: #666;
+}
+
+.upload-btn {
+  background: #00d4ff;
+  color: #000;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 16px;
+  transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+  background: #00a8cc;
+  transform: translateY(-2px);
+}
+
+.analysis-results {
+  padding: 20px;
+  background: #1e1e1e;
+}
+
+.analysis-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.analysis-header h4 {
+  color: #00d4ff;
+  margin: 0;
+}
+
+.close-analysis {
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.technical-data {
+  background: #252525;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+}
+
+.data-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: #aaa;
+  font-weight: 500;
+}
+
+.value {
+  color: #00d4ff;
+  font-weight: bold;
+}
+
+.frequency-analysis, .problems-section, .suggestions-section {
+  margin-bottom: 16px;
+}
+
+.frequency-analysis h5, .problems-section h5, .suggestions-section h5 {
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.frequency-list, .problems-list, .suggestions-list {
+  background: #252525;
+  padding: 12px;
+  border-radius: 6px;
+}
+
+.frequency-item, .problem-item, .suggestion-item {
+  padding: 8px 0;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+}
+
+.frequency-item:last-child, .problem-item:last-child, .suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.problem-item {
+  color: #ff6b6b;
+}
+
+.suggestion-item {
+  color: #51cf66;
+}
+
+.analysis-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: #00d4ff;
+  color: #000;
+}
+
+.action-btn.secondary {
+  background: #333;
+  color: #fff;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+}
+
+.analysis-loading {
+  padding: 40px;
+  text-align: center;
+  color: #fff;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #333;
+  border-top: 4px solid #00d4ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #00d4ff;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+  .audio-analyzer-container {
+    margin: 10px;
+  }
+  
+  .upload-area {
+    margin: 10px;
+    padding: 30px 15px;
+  }
+  
+  .analysis-actions {
+    flex-direction: column;
+  }
+}
+</style>
+
+<script>
+// 🎵 AUDIO ANALYZER INTERFACE CONTROLLER
+let currentAnalysis = null;
+
+// Inicializar eventos quando DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+  initializeAudioAnalyzer();
+});
+
+function initializeAudioAnalyzer() {
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('audioFileInput');
+  
+  // Drag and Drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+  
+  uploadArea.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelection(files[0]);
+    }
+  });
+  
+  // File input
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+      handleFileSelection(e.target.files[0]);
+    }
+  });
+  
+  // Click na área de upload
+  uploadArea.addEventListener('click', () => {
+    fileInput.click();
+  });
+}
+
+// 📁 Processar arquivo selecionado
+async function handleFileSelection(file) {
+  // Validar tipo de arquivo
+  if (!file.type.startsWith('audio/')) {
+    alert('Por favor, selecione um arquivo de áudio válido.');
+    return;
+  }
+  
+  // Validar tamanho (max 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Arquivo muito grande. Tamanho máximo: 10MB');
+    return;
+  }
+  
+  console.log('🎵 Arquivo selecionado:', file.name);
+  
+  // Mostrar loading
+  showLoading();
+  
+  try {
+    // Analisar arquivo
+    const analysis = await window.audioAnalyzer.analyzeAudioFile(file);
+    currentAnalysis = analysis;
+    
+    // Mostrar resultados
+    displayAnalysisResults(analysis);
+    
+  } catch (error) {
+    console.error('❌ Erro na análise:', error);
+    alert('Erro ao analisar arquivo. Verifique se é um áudio válido.');
+    hideLoading();
+  }
+}
+
+// 🔄 Mostrar loading
+function showLoading() {
+  document.getElementById('uploadArea').style.display = 'none';
+  document.getElementById('analysisResults').style.display = 'none';
+  document.getElementById('analysisLoading').style.display = 'block';
+  
+  // Simular progresso
+  let progress = 0;
+  const progressFill = document.getElementById('progressFill');
+  const interval = setInterval(() => {
+    progress += Math.random() * 15;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+    }
+    progressFill.style.width = progress + '%';
+  }, 200);
+}
+
+// ❌ Esconder loading
+function hideLoading() {
+  document.getElementById('analysisLoading').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+}
+
+// 📊 Exibir resultados da análise
+function displayAnalysisResults(analysis) {
+  hideLoading();
+  
+  const resultsDiv = document.getElementById('analysisResults');
+  resultsDiv.style.display = 'block';
+  
+  // Dados técnicos
+  document.getElementById('peakValue').textContent = `${analysis.technicalData.peak.toFixed(1)} dB`;
+  document.getElementById('rmsValue').textContent = `${analysis.technicalData.rms.toFixed(1)} dB`;
+  document.getElementById('dynamicValue').textContent = `${analysis.technicalData.dynamicRange.toFixed(1)} dB`;
+  document.getElementById('durationValue').textContent = `${analysis.duration.toFixed(1)}s`;
+  
+  // Frequências dominantes
+  const frequencyList = document.getElementById('frequencyList');
+  frequencyList.innerHTML = '';
+  
+  if (analysis.technicalData.dominantFrequencies.length > 0) {
+    analysis.technicalData.dominantFrequencies.slice(0, 5).forEach(freq => {
+      const item = document.createElement('div');
+      item.className = 'frequency-item';
+      item.innerHTML = `<strong>${Math.round(freq.frequency)} Hz</strong> - ${freq.occurrences} ocorrências`;
+      frequencyList.appendChild(item);
+    });
+  } else {
+    frequencyList.innerHTML = '<div class="frequency-item">Nenhuma frequência dominante detectada</div>';
+  }
+  
+  // Problemas
+  const problemsSection = document.getElementById('problemsSection');
+  const problemsList = document.getElementById('problemsList');
+  
+  if (analysis.problems.length > 0) {
+    problemsSection.style.display = 'block';
+    problemsList.innerHTML = '';
+    
+    analysis.problems.forEach(problem => {
+      const item = document.createElement('div');
+      item.className = 'problem-item';
+      item.innerHTML = `<strong>${problem.message}</strong><br><small>${problem.solution}</small>`;
+      problemsList.appendChild(item);
+    });
+  } else {
+    problemsSection.style.display = 'none';
+  }
+  
+  // Sugestões
+  const suggestionsSection = document.getElementById('suggestionsSection');
+  const suggestionsList = document.getElementById('suggestionsList');
+  
+  if (analysis.suggestions.length > 0) {
+    suggestionsSection.style.display = 'block';
+    suggestionsList.innerHTML = '';
+    
+    analysis.suggestions.forEach(suggestion => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.innerHTML = `<strong>${suggestion.message}</strong><br><small>${suggestion.action}</small>`;
+      suggestionsList.appendChild(item);
+    });
+  } else {
+    suggestionsSection.style.display = 'none';
+  }
+}
+
+// ❌ Fechar análise
+function closeAnalysis() {
+  document.getElementById('analysisResults').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+  currentAnalysis = null;
+}
+
+// 🤖 Enviar análise para chat
+async function sendAnalysisToChat() {
+  if (!currentAnalysis) {
+    alert('Nenhuma análise disponível');
+    return;
+  }
+  
+  const prompt = window.audioAnalyzer.generateAIPrompt(currentAnalysis);
+  const message = `[ANÁLISE DE ÁUDIO] 🎵 Analisei meu áudio e preciso de ajuda para melhorar:\n\n${prompt}`;
+  
+  // Integrar com o sistema de chat existente
+  if (typeof sendMessage === 'function') {
+    await sendMessage(message);
+  } else if (typeof window.sendMessage === 'function') {
+    await window.sendMessage(message);
+  } else {
+    // Fallback: copiar para clipboard
+    navigator.clipboard.writeText(message).then(() => {
+      alert('Análise copiada para clipboard! Cole no chat.');
+    });
+  }
+  
+  closeAnalysis();
+}
+
+// 📄 Baixar relatório
+function downloadAnalysis() {
+  if (!currentAnalysis) {
+    alert('Nenhuma análise disponível');
+    return;
+  }
+  
+  const report = generateAnalysisReport(currentAnalysis);
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `audio_analysis_${Date.now()}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 📋 Gerar relatório texto
+function generateAnalysisReport(analysis) {
+  let report = `🎵 RELATÓRIO DE ANÁLISE DE ÁUDIO\n`;
+  report += `=====================================\n\n`;
+  report += `📊 DADOS TÉCNICOS:\n`;
+  report += `Peak Level: ${analysis.technicalData.peak.toFixed(1)} dB\n`;
+  report += `RMS Level: ${analysis.technicalData.rms.toFixed(1)} dB\n`;
+  report += `Dynamic Range: ${analysis.technicalData.dynamicRange.toFixed(1)} dB\n`;
+  report += `Duration: ${analysis.duration.toFixed(1)} seconds\n`;
+  report += `Sample Rate: ${analysis.sampleRate} Hz\n`;
+  report += `Channels: ${analysis.channels}\n\n`;
+  
+  if (analysis.technicalData.dominantFrequencies.length > 0) {
+    report += `🎯 FREQUÊNCIAS DOMINANTES:\n`;
+    analysis.technicalData.dominantFrequencies.forEach(freq => {
+      report += `• ${Math.round(freq.frequency)} Hz (${freq.occurrences} ocorrências)\n`;
+    });
+    report += `\n`;
+  }
+  
+  if (analysis.problems.length > 0) {
+    report += `🚨 PROBLEMAS DETECTADOS:\n`;
+    analysis.problems.forEach(problem => {
+      report += `• ${problem.message}\n  Solução: ${problem.solution}\n`;
+    });
+    report += `\n`;
+  }
+  
+  if (analysis.suggestions.length > 0) {
+    report += `💡 SUGESTÕES:\n`;
+    analysis.suggestions.forEach(suggestion => {
+      report += `• ${suggestion.message}\n  Ação: ${suggestion.action}\n`;
+    });
+    report += `\n`;
+  }
+  
+  report += `Relatório gerado em: ${new Date().toLocaleString()}\n`;
+  return report;
+}
+
+console.log('🎵 Audio Analyzer Interface carregada com sucesso!');
+</script>
