@@ -130,29 +130,7 @@ function setupAudioModal() {
         }
     });
     
-    // Click robusto no botão de upload (compatível com iOS/Safari)
-    const uploadBtn = document.getElementById('uploadAudioBtn');
-    if (uploadBtn) {
-        uploadBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('modalAudioFileInput');
-            if (fileInput) {
-                // iOS/Safari workaround: reset input value to allow re-selection of same file
-                fileInput.value = '';
-                setTimeout(() => fileInput.click(), 0);
-            }
-        }, { passive: false });
-        // Também garantir via touchstart para máxima compatibilidade
-        uploadBtn.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('modalAudioFileInput');
-            if (fileInput) {
-                fileInput.value = '';
-                setTimeout(() => fileInput.click(), 0);
-            }
-        }, { passive: false });
-    }
-    // Remover qualquer evento de click na área de upload para evitar conflito
+    // Não adicionar nenhum listener JS ao botão/label de upload!
     uploadArea.onclick = null;
     
     console.log('✅ Modal de áudio configurado com sucesso');
