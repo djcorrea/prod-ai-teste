@@ -49,6 +49,39 @@
     width: 90%;
     max-width: 600px;
     max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .audio-modal {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 5vh;
+    }
+    
+    .audio-modal-content {
+        width: 95%;
+        max-height: 90vh;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .audio-modal {
+        padding: 5px;
+        padding-top: 2vh;
+    }
+    
+    .audio-modal-content {
+        width: 98%;
+        max-height: 95vh;
+        border-radius: 8px;
+    }
+}
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(0, 212, 255, 0.2);
@@ -136,12 +169,52 @@
     font-weight: bold;
     margin-top: 16px;
     transition: all 0.3s ease;
+    min-height: 44px;
+    min-width: 120px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 212, 255, 0.3);
+    user-select: none;
+    font-size: 16px; /* Evita zoom no iOS */
 }
 
 .upload-btn:hover {
     background: linear-gradient(135deg, #00a8cc, #007799);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+}
+
+.upload-btn:active {
+    transform: translateY(0px);
+    background: linear-gradient(135deg, #007799, #005566);
+}
+
+/* Mobile-specific touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .upload-btn:hover {
+        transform: none;
+        box-shadow: none;
+        background: linear-gradient(135deg, #00d4ff, #0096cc);
+    }
+    
+    .upload-btn:active {
+        background: linear-gradient(135deg, #007799, #005566);
+        transform: scale(0.98);
+    }
+    
+    .upload-content {
+        cursor: default;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-btn {
+        padding: 14px 20px;
+        width: 80%;
+        max-width: 200px;
+        font-size: 15px;
+    }
 }
 
 /* Loading no modal */

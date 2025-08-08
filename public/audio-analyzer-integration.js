@@ -8,6 +8,90 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAudioAnalyzerIntegration();
 });
 
+// 📱 Trigger para upload de arquivo mobile-friendly
+function triggerMobileFileUpload() {
+    console.log('📱 Trigger mobile file upload');
+    
+    // Debug info
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+    const isAndroid = /Android/.test(userAgent);
+    
+    console.log('📱 Device info:', { isIOS, isAndroid, userAgent });
+    
+    const fileInput = document.getElementById('modalAudioFileInput');
+    if (!fileInput) {
+        console.error('❌ File input not found!');
+        return;
+    }
+    
+    console.log('📱 File input found:', fileInput);
+    console.log('📱 File input accept:', fileInput.accept);
+    
+    if (isIOS) {
+        // Estratégia específica para iOS
+        console.log('📱 Using iOS-specific file upload strategy');
+        
+        // Tornar visível temporariamente
+        fileInput.style.cssText = `
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            opacity: 0.01 !important;
+            z-index: 999999 !important;
+            width: 100px !important;
+            height: 100px !important;
+            pointer-events: auto !important;
+        `;
+        
+        // Foco no input antes do click
+        fileInput.focus();
+        
+        setTimeout(() => {
+            try {
+                fileInput.click();
+                console.log('📱 iOS file input clicked');
+            } catch (error) {
+                console.error('❌ Error clicking file input:', error);
+            }
+            
+            // Reesconder após delay maior
+            setTimeout(() => {
+                fileInput.style.cssText = `
+                    position: absolute !important;
+                    left: -9999px !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                `;
+            }, 300);
+        }, 50);
+    } else {
+        // Estratégia padrão para outros dispositivos
+        console.log('📱 Using standard file upload strategy');
+        
+        fileInput.style.position = 'fixed';
+        fileInput.style.top = '0';
+        fileInput.style.left = '0';
+        fileInput.style.opacity = '0.01';
+        fileInput.style.pointerEvents = 'auto';
+        fileInput.style.zIndex = '9999';
+        
+        fileInput.click();
+        
+        setTimeout(() => {
+            fileInput.style.position = 'absolute';
+            fileInput.style.left = '-9999px';
+            fileInput.style.opacity = '0';
+            fileInput.style.pointerEvents = 'none';
+            fileInput.style.zIndex = 'auto';
+        }, 100);
+    }
+}
+
+// Tornar função global
+window.triggerMobileFileUpload = triggerMobileFileUpload;
+
 function initializeAudioAnalyzerIntegration() {
     console.log('🎵 Inicializando integração do Audio Analyzer...');
     
@@ -94,38 +178,61 @@ function setupAudioModal() {
         }
     });
     
-    // Drag and Drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.querySelector('.upload-content').classList.add('dragover');
-    });
+    // Detectar se é dispositivo móvel
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    uploadArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        uploadArea.querySelector('.upload-content').classList.remove('dragover');
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.querySelector('.upload-content').classList.remove('dragover');
+    if (!isMobile) {
+        // Drag and Drop (apenas para desktop)
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.querySelector('.upload-content').classList.add('dragover');
+        });
         
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleModalFileSelection(files[0]);
-        }
-    });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.querySelector('.upload-content').classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.querySelector('.upload-content').classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleModalFileSelection(files[0]);
+            }
+        });
+    }
     
-    // File input
+    // File input change event
     fileInput.addEventListener('change', (e) => {
+        console.log('📁 File input change triggered');
         if (e.target.files.length > 0) {
+            console.log('📁 File selected:', e.target.files[0].name);
             handleModalFileSelection(e.target.files[0]);
         }
     });
     
-    // Click na área de upload
+    // Click na área de upload (mobile-friendly)
     uploadArea.addEventListener('click', (e) => {
-        if (e.target.closest('.upload-content')) {
-            fileInput.click();
+        e.preventDefault();
+        if (e.target.closest('.upload-content') || e.target.closest('.upload-btn')) {
+            console.log('📱 Upload area clicked');
+            triggerMobileFileUpload();
+        }
+    });
+    
+    // Touch events para mobile
+    uploadArea.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        console.log('📱 Touch start on upload area');
+    });
+    
+    uploadArea.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        console.log('📱 Touch end on upload area');
+        if (e.target.closest('.upload-content') || e.target.closest('.upload-btn')) {
+            triggerMobileFileUpload();
         }
     });
     
