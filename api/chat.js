@@ -68,7 +68,8 @@ function validateAndSanitizeInput(req) {
           msg.content.trim().length > 0 &&
           ['user', 'assistant', 'system'].includes(msg.role);
       })
-      .slice(-10);
+  // Reduzir limite de mensagens recentes para 5 (requisito)
+  .slice(-5);
   }
   
   return {
@@ -1252,6 +1253,85 @@ VOCÊ DEVE RESPONDER EXATAMENTE NESTA SEQUÊNCIA - SEM EXCEÇÕES:
   }
 }
 
+// 🔎 Utilitários para priorização e deduplicação de histórico
+function normalizeWhitespace(text = '') {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function extractKeywordsFromMessage(text = '') {
+  // Normaliza acentos e minúsculas
+  const base = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  const stopwords = new Set([
+    'a','o','e','de','da','do','dos','das','um','uma','uns','umas','no','na','nos','nas','em','para','pra','por','com','sem','que','como','qual','quais','quando','onde','porque','porquê','ser','estar','ter','fazer','sobre','entre','mais','menos','muito','pouco','ja','já','tambem','também','agora','isso','isso','esse','essa','esses','essas','sou','estou','vai','vou','pode','poder','se','ou','and','the'
+  ]);
+
+  const tokens = base.split(/[^a-z0-9]+/).filter(Boolean);
+  const keywords = [];
+  const seen = new Set();
+  for (const t of tokens) {
+    if (t.length >= 4 && !stopwords.has(t) && !seen.has(t)) {
+      seen.add(t);
+      keywords.push(t);
+    }
+  }
+  // Fallback: se nada sobrar, use até 3 palavras mais longas
+  if (keywords.length === 0) {
+    const byLength = [...new Set(tokens)].sort((a,b)=>b.length-a.length);
+    return byLength.slice(0, 3);
+  }
+  return keywords.slice(0, 12); // limite de segurança
+}
+
+function prioritizeAndDedupHistory(history = [], currentMessage = '', limit = 5) {
+  try {
+    const keywords = extractKeywordsFromMessage(currentMessage);
+    const includesKeyword = (content = '') => {
+      const c = content.toLowerCase();
+      return keywords.some(k => c.includes(k));
+    };
+
+    // 1) Priorizar mensagens que contenham keywords
+    const prioritizedIdx = [];
+    for (let i = 0; i < history.length; i++) {
+      const msg = history[i];
+      if (msg && typeof msg.content === 'string' && includesKeyword(msg.content)) {
+        prioritizedIdx.push(i);
+      }
+    }
+
+    // 2) Completar com as últimas mensagens mais recentes até atingir o limite
+    const includeSet = new Set(prioritizedIdx);
+    for (let i = history.length - 1; i >= 0 && includeSet.size < Math.min(limit, history.length); i--) {
+      includeSet.add(i);
+    }
+
+    // Ordenar por ordem cronológica e mapear
+    const orderedIdx = Array.from(includeSet).sort((a,b)=>a-b);
+    const selected = orderedIdx.map(i => history[i]);
+
+    // 3) Remover mensagens duplicadas (mesmo role e mesmo conteúdo normalizado)
+    const seen = new Set();
+    const deduped = [];
+    for (const msg of selected) {
+      const key = `${msg.role}|${normalizeWhitespace(msg.content).toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(msg);
+      }
+    }
+
+    // 4) Se ainda exceder o limite, manter apenas as 5 mais recentes
+    return deduped.length > limit ? deduped.slice(-limit) : deduped;
+  } catch (e) {
+    console.warn('⚠️ Falha ao priorizar/deduplicar histórico, usando últimas mensagens:', e?.message);
+    return history.slice(-limit);
+  }
+}
+
 export default async function handler(req, res) {
   console.log('🔄 Nova requisição recebida:', {
     method: req.method,
@@ -1288,7 +1368,7 @@ export default async function handler(req, res) {
       throw error;
     }
 
-    const { message, conversationHistory, idToken } = validatedData;
+  const { message, conversationHistory, idToken } = validatedData;
 
     let decoded;
     try {
@@ -1310,8 +1390,17 @@ export default async function handler(req, res) {
       throw error;
     }
 
+    // Filtrar 'system' do histórico para garantir que o system prompt venha apenas no início
+    const historySemSystem = Array.isArray(conversationHistory)
+      ? conversationHistory.filter(m => m && m.role !== 'system')
+      : [];
+
+  // Priorizar por palavras‑chave da mensagem atual, deduplicar e limitar para 4
+  // para que, somando a mensagem atual, o total fique em no máximo 5
+  const historyProcessado = prioritizeAndDedupHistory(historySemSystem, message, 4);
+
     const messages = [
-      ...conversationHistory,
+      ...historyProcessado,
       { role: 'user', content: message },
     ];
 
@@ -1409,23 +1498,61 @@ export default async function handler(req, res) {
     console.log('🔍 DEBUG - Pergunta:', perguntaLower.substring(0, 100));
     console.log('🔍 DEBUG - Resposta:', respostaLower.substring(0, 100));
 
+    // 🔍 Persistência de imagens já exibidas por usuário (para evitar repetição entre respostas)
+    async function getShownImages(db, uid) {
+      try {
+        const ref = db.collection('usuarios').doc(uid).collection('contexto').doc('media');
+        const snap = await ref.get();
+        const data = snap.exists ? snap.data() : {};
+        return Array.isArray(data.shownImages) ? data.shownImages : [];
+      } catch (e) {
+        console.warn('⚠️ Não foi possível obter imagens já exibidas:', e?.message);
+        return [];
+      }
+    }
+
+    async function addShownImages(db, uid, names = []) {
+      if (!names.length) return;
+      try {
+        const ref = db.collection('usuarios').doc(uid).collection('contexto').doc('media');
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(ref);
+          const current = snap.exists && Array.isArray(snap.data().shownImages) ? snap.data().shownImages : [];
+          const merged = Array.from(new Set([...current, ...names]));
+          tx.set(ref, { shownImages: merged, updatedAt: Timestamp.now() }, { merge: true });
+        });
+      } catch (e) {
+        console.warn('⚠️ Falha ao salvar imagens exibidas:', e?.message);
+      }
+    }
+
     // 🔍 FUNÇÃO INTELIGENTE DE INSERÇÃO DE IMAGENS
     // ✅ Sistema automático, robusto e com logs detalhados
-    function inserirImagensPorPalavrasChave(respostaTexto) {
+    function inserirImagensPorPalavrasChave(respostaTexto, { alreadyShown = new Set(), maxInsertions = 1 } = {}) {
       let respostaAtualizada = respostaTexto;
       let imagensInseridas = [];
       let totalProcessadas = 0;
 
       console.log(`🎬 Iniciando verificação de ${imagensInstrucao.length} imagens configuradas...`);
 
-      imagensInstrucao.forEach((item, index) => {
+      for (let index = 0; index < imagensInstrucao.length; index++) {
+        if (imagensInseridas.length >= maxInsertions) {
+          break; // Limitar o número de imagens por resposta
+        }
+        const item = imagensInstrucao[index];
         totalProcessadas++;
         console.log(`📋 [${index + 1}/${imagensInstrucao.length}] Processando: ${item.nome}`);
 
         // 🛡️ VERIFICAÇÃO ANTI-DUPLICAÇÃO
         if (respostaAtualizada.includes(item.link)) {
           console.log(`🛡️ [${item.nome}] Imagem já presente - pulando inserção`);
-          return;
+          continue;
+        }
+
+        // 🛡️ NÃO REPETIR ENTRE RESPOSTAS DO MESMO USUÁRIO
+        if (alreadyShown.has(item.nome) || alreadyShown.has(item.link)) {
+          console.log(`🛡️ [${item.nome}] Já exibida anteriormente para este usuário - ignorando`);
+          continue;
         }
 
         // 🔍 BUSCA POR PALAVRAS-CHAVE EXCLUSIVAS
@@ -1461,10 +1588,14 @@ export default async function handler(req, res) {
               }
             }
           }
+          // Se inseriu, não tente inserir mais imagens se alcançou limite
+          if (imagensInseridas.length >= maxInsertions) {
+            break;
+          }
         } else {
           console.log(`ℹ️ [${item.nome}] Nenhuma palavra-chave encontrada: ${item.palavrasChave.join(', ')}`);
         }
-      });
+      }
 
       // 📊 RELATÓRIO FINAL
       console.log(`📊 RELATÓRIO DE INSERÇÃO:`);
@@ -1476,12 +1607,16 @@ export default async function handler(req, res) {
       } else {
         console.log(`ℹ️ Nenhuma palavra-chave exclusiva encontrada nesta resposta`);
       }
-
-      return respostaAtualizada;
+      return { respostaAtualizada, imagensInseridas };
     }
 
-    // Aplicar o sistema de inserção de imagens
-    reply = inserirImagensPorPalavrasChave(reply);
+    // Aplicar o sistema de inserção de imagens com controle de repetição entre respostas
+    const jaExibidas = new Set(await getShownImages(db, uid));
+    const { respostaAtualizada, imagensInseridas } = inserirImagensPorPalavrasChave(reply, { alreadyShown: jaExibidas, maxInsertions: 1 });
+    reply = respostaAtualizada;
+    if (imagensInseridas.length) {
+      await addShownImages(db, uid, imagensInseridas);
+    }
 
     if (userData.plano === 'gratis') {
       console.log('✅ Mensagens restantes para', email, ':', userData.mensagensRestantes);
