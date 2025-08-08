@@ -361,7 +361,7 @@ function displayModalResults(analysis) {
 }
 
 // 🤖 Enviar análise para chat
-async function sendModalAnalysisToChat() {
+window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
     console.log('🎯 BOTÃO CLICADO: Pedir Ajuda à IA');
     
     if (!currentModalAnalysis) {
@@ -382,38 +382,32 @@ async function sendModalAnalysisToChat() {
         // Tentar diferentes formas de integrar com o chat
         let messageSent = false;
         
-        // Método 1: Usar o sistema ProdAI Chatbot
-        if (window.prodAIChatbot && typeof window.prodAIChatbot.sendMessage === 'function') {
+        // Método 1: Usar diretamente o ProdAI Chatbot quando disponível
+        if (window.prodAIChatbot) {
             console.log('🎯 Tentando enviar via ProdAI Chatbot...');
-            
-            // Inserir mensagem no input ativo
-            const activeInput = document.getElementById('chatbotActiveInput');
-            if (activeInput) {
-                console.log('✅ Input encontrado:', activeInput);
-                
-                activeInput.value = message;
-                activeInput.focus();
-                
-                // Disparar evento de input para simular digitação
-                const inputEvent = new Event('input', { bubbles: true });
-                activeInput.dispatchEvent(inputEvent);
-                
-                // Aguardar um pouco e enviar mensagem
-                setTimeout(async () => {
-                    try {
+            try {
+                // Se o chat ainda não está ativo, ativar com a mensagem
+                if (!window.prodAIChatbot.isActive && typeof window.prodAIChatbot.activateChat === 'function') {
+                    console.log('🚀 Chat inativo. Ativando com a primeira mensagem...');
+                    await window.prodAIChatbot.activateChat(message);
+                    showTemporaryFeedback('🎵 Análise enviada para o chat!');
+                    closeAudioModal();
+                    messageSent = true;
+                } else if (typeof window.prodAIChatbot.sendMessage === 'function') {
+                    // Chat já ativo: preencher input ativo e enviar
+                    const activeInput = document.getElementById('chatbotActiveInput');
+                    if (activeInput) {
+                        activeInput.value = message;
+                        activeInput.focus();
+                        activeInput.dispatchEvent(new Event('input', { bubbles: true }));
                         await window.prodAIChatbot.sendMessage();
-                        console.log('✅ Mensagem enviada via ProdAI Chatbot');
                         showTemporaryFeedback('🎵 Análise enviada para o chat!');
                         closeAudioModal();
-                    } catch (error) {
-                        console.error('❌ Erro no envio:', error);
-                        showTemporaryFeedback('❌ Erro ao enviar. Tente novamente.');
+                        messageSent = true;
                     }
-                }, 500);
-                
-                messageSent = true;
-            } else {
-                console.log('❌ Input não encontrado');
+                }
+            } catch (err) {
+                console.warn('⚠️ Falha ao usar ProdAIChatbot direto, tentando fallback...', err);
             }
         }
         // Método 2: Inserir diretamente no input e simular envio
