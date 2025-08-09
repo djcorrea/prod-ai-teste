@@ -8,7 +8,7 @@ const input = document.getElementById('chatbotMainInput');
 const sendBtn = document.getElementById('chatbotSendButton');
 // Indicador de digitação do novo layout
 const typingIndicator = document.getElementById('chatbotTypingIndicator');
-j
+
 let isFirstMessage = true;
 let conversationHistory = [];
 let chatStarted = false;
