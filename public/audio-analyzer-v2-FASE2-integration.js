@@ -266,22 +266,11 @@ class AudioAnalyzerV2Integration {
         console.log(`📊 Tamanho: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
         console.log(`🎵 Tipo: ${file.type}`);
         
-        // Atualizar interface
-        const uploadContent = document.querySelector('.upload-content');
-        uploadContent.innerHTML = `
-            <div class="file-selected">
-                <div class="file-icon">🎵</div>
-                <div class="file-info">
-                    <p class="file-name">${file.name}</p>
-                    <p class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-            </div>
-        `;
-        
-        // Habilitar botão de análise
+        // Mostrar botão de análise
         const analyzeButton = document.getElementById('analyzeButton');
+        analyzeButton.style.display = 'block';
         analyzeButton.disabled = false;
-        analyzeButton.textContent = '🎵 Analisar Áudio FASE 2';
+        analyzeButton.textContent = `🎵 Analisar ${file.name}`;
         
         // Salvar arquivo para análise
         this.selectedFile = file;
@@ -295,31 +284,35 @@ class AudioAnalyzerV2Integration {
         this.isAnalyzing = true;
         
         try {
-            console.log('🎵 Iniciando análise FASE 2...');
+            // Esconder seção de upload
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('analyzeButton').style.display = 'none';
             
-            // Mostrar seção de análise
-            const analysisSection = document.getElementById('analysisSection');
-            const analysisStatus = document.getElementById('analysisStatus');
-            const resultsContainer = document.getElementById('resultsContainer');
+            // Mostrar seção de processamento
+            const processingSection = document.getElementById('processingSection');
+            processingSection.style.display = 'block';
             
-            analysisSection.style.display = 'block';
-            analysisStatus.style.display = 'block';
-            resultsContainer.style.display = 'none';
+            // Simular etapas de processamento
+            await this.simulateProcessing();
             
-            // Atualizar status
-            this.updateAnalysisStatus('Carregando arquivo de áudio...', 10);
+            console.log('🎵 Iniciando análise...');
             
             // Executar análise
             const results = await this.analyzer.analyzeFile(this.selectedFile);
             
-            console.log('✅ Análise FASE 2 concluída:', results);
+            console.log('✅ Análise concluída:', results);
             
-            // Mostrar resultados
+            // Esconder processamento e mostrar resultados
+            processingSection.style.display = 'none';
+            
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            // Mostrar botão de nova análise
+            document.getElementById('newAnalysisButton').style.display = 'block';
+            
+            // Exibir resultados
             this.displayResults(results);
-            
-            // Esconder status, mostrar resultados
-            analysisStatus.style.display = 'none';
-            resultsContainer.style.display = 'block';
             
         } catch (error) {
             console.error('❌ Erro na análise:', error);
@@ -327,6 +320,54 @@ class AudioAnalyzerV2Integration {
         } finally {
             this.isAnalyzing = false;
         }
+    }
+    
+    async simulateProcessing() {
+        const steps = [
+            { text: 'Carregando arquivo...', duration: 1000 },
+            { text: 'Decodificando áudio...', duration: 1500 },
+            { text: 'Extraindo características...', duration: 2000 },
+            { text: 'Calculando métricas...', duration: 1500 },
+            { text: 'Finalizando análise...', duration: 1000 }
+        ];
+        
+        const progressFill = document.getElementById('progressFill');
+        const processingTitle = document.getElementById('processingTitle');
+        const processingStatus = document.getElementById('processingStatus');
+        
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            const progress = ((i + 1) / steps.length) * 100;
+            
+            processingTitle.textContent = step.text;
+            processingStatus.textContent = `Etapa ${i + 1} de ${steps.length}`;
+            progressFill.style.width = `${progress}%`;
+            
+            await new Promise(resolve => setTimeout(resolve, step.duration));
+        }
+    }
+    
+    resetAnalysis() {
+        // Reset do estado
+        document.getElementById('uploadSection').style.display = 'block';
+        document.getElementById('processingSection').style.display = 'none';
+        document.getElementById('resultsSection').style.display = 'none';
+        document.getElementById('analyzeButton').style.display = 'none';
+        document.getElementById('newAnalysisButton').style.display = 'none';
+        
+        // Reset da interface de upload
+        const uploadContent = document.querySelector('.upload-content');
+        uploadContent.innerHTML = `
+            <div class="upload-icon">📁</div>
+            <p>Clique ou arraste um arquivo de áudio</p>
+            <p class="upload-formats">MP3, WAV, M4A, FLAC</p>
+        `;
+        
+        // Reset da barra de progresso
+        document.getElementById('progressFill').style.width = '0%';
+        
+        this.selectedFile = null;
+        this.isAnalyzing = false;
     }
     
     updateAnalysisStatus(text, progress = 0) {
