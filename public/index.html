@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI.SYNTH - Mentor Virtual</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="audio-analyzer.css">
+    <link rel="stylesheet" href="audio-analyzer-v2-FASE2.css?v=20250809-fase2">
     <link rel="stylesheet" href="music-button-below-chat.css">
     
     <!-- Fontes otimizadas -->
@@ -220,8 +220,9 @@
         <script src="voice-clean.js" defer></script>
     
     <!-- 🎵 AUDIO ANALYZER - Carregar os scripts -->
-    <script src="audio-analyzer.js" defer></script>
-    <script src="audio-analyzer-integration.js" defer></script>
+    <!-- Scripts V1 REMOVIDOS - Agora usando V2 completo -->
+    <!-- <script src="audio-analyzer.js" defer></script> -->
+    <!-- <script src="audio-analyzer-integration.js" defer></script> -->
     
     <!-- Inicializar Audio Analyzer -->
     <script>
@@ -366,8 +367,14 @@
                   close();
                 }
                 if (btn.dataset.action === 'analyze') {
-                  if (typeof window.openAudioModal === 'function') window.openAudioModal();
-                  else window.dispatchEvent(new CustomEvent('chat:analyze-audio-request'));
+                  // Tentar usar Audio Analyzer V2 primeiro
+                  if (window.audioAnalyzerV2Integration?.openModalV2) {
+                    window.audioAnalyzerV2Integration.openModalV2();
+                  } else if (typeof window.openAudioModal === 'function') {
+                    window.openAudioModal(); // Fallback V1
+                  } else {
+                    window.dispatchEvent(new CustomEvent('chat:analyze-audio-request'));
+                  }
                   close();
                 }
               });
@@ -378,6 +385,13 @@
     <!-- Scripts de monitoramento desabilitados para performance -->
     <!-- <script src="plan-monitor.js"></script> -->
     <!-- <script src="force-visibility.js"></script> -->
+    
+    <!-- Audio Analyzer V2 - FASE 2: Core Features (12 Métricas) -->
+    <script src="https://cdn.jsdelivr.net/npm/meyda@5.5.1/dist/web/meyda.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.js"></script>
+    <script src="audio-analyzer-v2-FASE2.js?v=20250809-fase2"></script>
+    <script src="audio-analyzer-v2-FASE2-integration.js?v=20250809-fase2"></script>
+    
     <script src="plan-monitor.js"></script>
     <script src="force-visibility.js"></script>
 </body>

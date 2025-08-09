@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Audio Analyzer V2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: white;
+        }
+        .test-button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #00d4ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0099cc;
+        }
+        .log {
+            background: #222;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Teste Audio Analyzer V2</h1>
+    
+    <h2>Status:</h2>
+    <div id="status" class="log">Carregando...</div>
+    
+    <h2>Testes:</h2>
+    <button class="test-button" onclick="testV2Config()">Testar Config</button>
+    <button class="test-button" onclick="testV2Class()">Testar AudioAnalyzerV2</button>
+    <button class="test-button" onclick="testV2Integration()">Testar Integration</button>
+    <button class="test-button" onclick="testMeyda()">Testar Meyda</button>
+    <button class="test-button" onclick="testV2Modal()">Testar Modal V2</button>
+    
+    <h2>Console:</h2>
+    <div id="console" class="log"></div>
+
+    <!-- Scripts V2 -->
+    <script src="audio-analyzer-v2-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meyda@5.5.1/dist/web/meyda.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/zod@3.22.4/lib/index.umd.js"></script>
+    <script src="audio-analyzer-v2.js"></script>
+    <script src="audio-analyzer-v2-integration.js"></script>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const consoleDiv = document.getElementById('console');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        function updateStatus() {
+            let status = 'Status dos componentes:\n';
+            status += `✅ AudioAnalyzerV2Config: ${typeof AudioAnalyzerV2Config !== 'undefined' ? 'OK' : 'FALHOU'}\n`;
+            status += `✅ Meyda: ${typeof Meyda !== 'undefined' ? 'OK' : 'FALHOU'}\n`;
+            status += `✅ Zod: ${typeof window.Zod !== 'undefined' ? 'OK' : 'FALHOU'}\n`;
+            status += `✅ AudioAnalyzerV2: ${typeof window.AudioAnalyzerV2 !== 'undefined' ? 'OK' : 'FALHOU'}\n`;
+            status += `✅ audioAnalyzerV2Integration: ${typeof window.audioAnalyzerV2Integration !== 'undefined' ? 'OK' : 'FALHOU'}\n`;
+            
+            statusDiv.textContent = status;
+            
+            if (typeof window.audioAnalyzerV2Integration !== 'undefined') {
+                log('✅ Todos os componentes V2 carregados com sucesso!');
+            } else {
+                log('❌ Alguns componentes V2 não carregaram');
+            }
+        }
+        
+        function testV2Config() {
+            try {
+                if (typeof AudioAnalyzerV2Config === 'undefined') {
+                    log('❌ AudioAnalyzerV2Config não encontrado');
+                    return;
+                }
+                
+                log('✅ Config encontrado:');
+                log(`Version: ${AudioAnalyzerV2Config.version.current}`);
+                log(`Features V2 enabled: ${AudioAnalyzerV2Config.features.enableV2}`);
+                log(`Use V2 as default: ${AudioAnalyzerV2Config.features.useV2AsDefault}`);
+            } catch (error) {
+                log(`❌ Erro no config: ${error.message}`);
+            }
+        }
+        
+        function testV2Class() {
+            try {
+                if (typeof window.AudioAnalyzerV2 === 'undefined') {
+                    log('❌ AudioAnalyzerV2 class não encontrada');
+                    return;
+                }
+                
+                const analyzer = new window.AudioAnalyzerV2();
+                log('✅ AudioAnalyzerV2 instanciado com sucesso');
+                log(`Config version: ${analyzer.config.version}`);
+            } catch (error) {
+                log(`❌ Erro na class: ${error.message}`);
+            }
+        }
+        
+        function testV2Integration() {
+            try {
+                if (typeof window.audioAnalyzerV2Integration === 'undefined') {
+                    log('❌ audioAnalyzerV2Integration não encontrado');
+                    return;
+                }
+                
+                log('✅ Integration encontrado:');
+                log(`Version: ${window.audioAnalyzerV2Integration.config.version}`);
+                log(`V2 enabled: ${window.audioAnalyzerV2Integration.isV2Enabled}`);
+                
+                if (typeof window.audioAnalyzerV2Integration.openModalV2 === 'function') {
+                    log('✅ openModalV2 method disponível');
+                } else {
+                    log('❌ openModalV2 method não encontrado');
+                }
+            } catch (error) {
+                log(`❌ Erro na integration: ${error.message}`);
+            }
+        }
+        
+        function testMeyda() {
+            try {
+                if (typeof Meyda === 'undefined') {
+                    log('❌ Meyda não carregado');
+                    return;
+                }
+                
+                log('✅ Meyda disponível');
+                log(`Features disponíveis: ${Object.keys(Meyda.featureExtractors).join(', ')}`);
+            } catch (error) {
+                log(`❌ Erro no Meyda: ${error.message}`);
+            }
+        }
+        
+        function testV2Modal() {
+            try {
+                if (typeof window.audioAnalyzerV2Integration === 'undefined') {
+                    log('❌ Integration V2 não disponível');
+                    return;
+                }
+                
+                if (typeof window.audioAnalyzerV2Integration.openModalV2 !== 'function') {
+                    log('❌ openModalV2 não é uma função');
+                    return;
+                }
+                
+                log('🎵 Tentando abrir modal V2...');
+                window.audioAnalyzerV2Integration.openModalV2();
+                log('✅ Modal V2 executado (verifique se abriu)');
+            } catch (error) {
+                log(`❌ Erro ao abrir modal: ${error.message}`);
+            }
+        }
+        
+        // Inicializar
+        setTimeout(() => {
+            updateStatus();
+            log('🎵 Teste V2 inicializado');
+        }, 2000);
+        
+        // Update status periodically
+        setInterval(updateStatus, 5000);
+        
+        // Original console.log override for debugging
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log(`Console: ${args.join(' ')}`);
+        };
+    </script>
+</body>
+</html>
