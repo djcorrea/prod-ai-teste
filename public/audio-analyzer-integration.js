@@ -442,6 +442,29 @@ function displayModalResults(analysis) {
                         </div>`).join('');
                     blocks.push(`<div class="diag-section"><div class="diag-heading">Sugestões:</div>${list}</div>`);
                 }
+                // Subbloco opcional com diagnósticos do V2 (quando disponíveis)
+                if (analysis.v2Diagnostics) {
+                    const v2p = (analysis.v2Diagnostics.problems || []).slice(0, 4).map(p => `
+                        <div class="diag-item danger">
+                            <div class="diag-title">${p.message}</div>
+                            <div class="diag-tip">${p.solution || ''}</div>
+                        </div>`).join('');
+                    const v2s = (analysis.v2Diagnostics.suggestions || []).slice(0, 4).map(s => `
+                        <div class="diag-item info">
+                            <div class="diag-title">${s.message}</div>
+                            <div class="diag-tip">${s.action || ''}</div>
+                        </div>`).join('');
+                    const anyV2 = v2p || v2s;
+                    if (anyV2) {
+                        const v2Block = `
+                            <div class="diag-section">
+                                <div class="diag-heading">(V2) Diagnósticos Avançados:</div>
+                                ${v2p ? `<div class=\"diag-subheading\">Problemas (V2)</div>${v2p}` : ''}
+                                ${v2s ? `<div class=\"diag-subheading\">Sugestões (V2)</div>${v2s}` : ''}
+                            </div>`;
+                        blocks.push(v2Block);
+                    }
+                }
                 return blocks.join('') || '<div class="diag-empty">Sem diagnósticos</div>';
             };
 

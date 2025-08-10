@@ -10,106 +10,132 @@ class AudioAnalyzerV2 {
 		this.audioContext = null;
 		this.isInitialized = false;
 		this.config = {
-			version: '2.0',
-			enableAdvanced: false,
-			quality: 'balanced', // fast, balanced, accurate
-			maxFileSize: 25 * 1024 * 1024, // 25MB
-			timeout: 45000 // 45 segundos
+			maxFileSize: 60 * 1024 * 1024,
+			defaultQuality: 'balanced'
 		};
-    
-		if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 initialized');
 	}
 
-	// 🎤 Inicializar contexto de áudio
 	async initialize() {
-		if (this.isInitialized) return true;
-    
-		try {
-			this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-			// Configurar Meyda
-			if (typeof Meyda !== 'undefined') {
-				Meyda.audioContext = this.audioContext;
-				if (window.DEBUG_ANALYZER === true) console.log('✅ Meyda configurado com sucesso');
-			} else {
-				if (window.DEBUG_ANALYZER === true) console.warn('⚠️ Meyda não disponível - análise espectral limitada');
-			}
-      
-			this.isInitialized = true;
-			if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 inicializado com sucesso');
-			return true;
-		} catch (error) {
-			if (window.DEBUG_ANALYZER === true) console.error('❌ Erro ao inicializar Audio Analyzer V2:', error);
-			return false;
-		}
+		if (this.isInitialized) return;
+		this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+		this.isInitialized = true;
+		if (window.DEBUG_ANALYZER === true) console.log('� Audio Analyzer V2 inicializado');
 	}
 
-	// 📁 Analisar arquivo de áudio (método principal)
-	async analyzeFile(file, options = {}) {
-		if (window.DEBUG_ANALYZER === true) console.log(`🎵 Iniciando análise V2 de: ${file.name} (${this.formatFileSize(file.size)})`);
-    
-		// Validações iniciais
-		const validation = this.validateFile(file);
-		if (!validation.valid) {
-			throw new Error(validation.error);
+	async analyzeFile(file) {
+		if (typeof this.validateFile === 'function') {
+			const v = this.validateFile(file);
+			if (!v.valid) throw new Error(v.error || 'Arquivo inválido');
 		}
+		await this.initialize();
+		const arrayBuffer = await new Promise((resolve, reject) => {
+			const fr = new FileReader();
+			fr.onload = () => resolve(fr.result);
+			fr.onerror = (e) => reject(e);
+			fr.readAsArrayBuffer(file);
+		});
+		const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+		const config = { quality: this.config.defaultQuality, features: ['core','spectral','stereo','quality'] };
+		return this.performFullAnalysis(audioBuffer, config);
+	}
 
-		if (!this.isInitialized) {
-			await this.initialize();
-		}
+	// 📊 CÁLCULO DE SCORES (contínuo)
+	calculateQualityScores(metrics) {
+		if (window.DEBUG_ANALYZER === true) console.log('🏆 Calculando scores de qualidade (contínuo)...');
 
-		const config = {
-			...this.config,
-			...options,
-			features: options.features || ['core', 'spectral', 'stereo'],
-			enableAdvanced: options.enableAdvanced || false
+		const core = metrics.core || {};
+		const stereo = metrics.stereo;
+
+		// Helpers contínuos
+		const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+		const lerp = (a, b, t) => a + (b - a) * t;
+		const mapLin = (x, x1, x2, y1, y2) => {
+			if (!isFinite(x)) return null;
+			if (x1 === x2) return y1;
+			const t = clamp((x - x1) / (x2 - x1), 0, 1);
+			return lerp(y1, y2, t);
 		};
 
-		return new Promise((resolve, reject) => {
-			const timeout = setTimeout(() => {
-				reject(new Error(`Timeout na análise (${config.timeout}ms)`));
-			}, config.timeout);
+		const scores = { dynamics: 50, frequency: 50, stereo: 50, loudness: 50, technical: 50 };
 
-			const reader = new FileReader();
-      
-			reader.onload = async (e) => {
-				try {
-					clearTimeout(timeout);
-					const arrayBuffer = e.target.result;
-          
-					// Decodificar áudio
-					if (window.DEBUG_ANALYZER === true) console.log('🔬 Decodificando áudio...');
-					const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-          
-					// Realizar análise completa
-					if (window.DEBUG_ANALYZER === true) console.log('📊 Realizando análise completa V2...');
-					const analysis = await this.performFullAnalysis(audioBuffer, config);
-          
-					if (window.DEBUG_ANALYZER === true) console.log('✅ Análise V2 concluída!', {
-						duration: `${audioBuffer.duration.toFixed(1)}s`,
-						features: Object.keys(analysis.metrics).length,
-						problems: analysis.diagnostics.problems.length,
-						score: analysis.metrics.quality?.overall || 'N/A'
-					});
-          
-					resolve(analysis);
-				} catch (error) {
-					clearTimeout(timeout);
-					if (window.DEBUG_ANALYZER === true) console.error('❌ Erro na análise V2:', error);
-					reject(error);
-				}
-			};
-      
-			reader.onerror = () => {
-				clearTimeout(timeout);
-				reject(new Error('Erro ao ler arquivo'));
-			};
-      
-			reader.readAsArrayBuffer(file);
-		});
+		// Dinâmica: DR 2→30 dB => 30→95
+		if (isFinite(core.dynamicRange)) {
+			const dr = clamp(core.dynamicRange, 2, 30);
+			scores.dynamics = Math.round(mapLin(dr, 2, 30, 30, 95));
+		}
+
+		// Loudness: RMS -35..-8 → 40..95 com pico suave por volta de -14
+		if (isFinite(core.rms)) {
+			const rms = clamp(core.rms, -35, -8);
+			const left = mapLin(rms, -35, -14, 40, 95);
+			const right = mapLin(rms, -14, -8, 95, 60);
+			scores.loudness = Math.round(rms <= -14 ? left : right);
+		}
+
+		// Técnico: penalizações contínuas
+		let technical = 100;
+		if (isFinite(core.clippingPercentage)) {
+			const clipPct = clamp(core.clippingPercentage, 0, 5);
+			technical -= Math.round(mapLin(clipPct, 0, 5, 0, 50));
+		}
+		if (isFinite(core.dcOffset)) {
+			const dc = Math.abs(core.dcOffset);
+			const dcLim = clamp(dc, 0, 0.05);
+			technical -= Math.round(mapLin(dcLim, 0.005, 0.05, 0, 15));
+		}
+		if (isFinite(core.peak) && core.peak > -1) technical -= 20;
+		scores.technical = clamp(Math.round(technical), 0, 100);
+
+		// Frequência: centroid 200..8000 Hz com pico em 1500..3000 Hz
+		if (isFinite(core.spectralCentroid)) {
+			const c = clamp(core.spectralCentroid, 200, 8000);
+			const left = mapLin(c, 200, 1500, 45, 85);
+			const mid = mapLin(c, 1500, 3000, 85, 90);
+			const right = mapLin(c, 3000, 8000, 90, 60);
+			scores.frequency = Math.round(c <= 1500 ? left : (c <= 3000 ? mid : right));
+		}
+
+		// Estéreo: base pela compatibilidade + ajustes contínuos
+		if (stereo) {
+			const base = stereo.monoCompatibility === 'excellent' ? 90
+				: stereo.monoCompatibility === 'good' ? 75
+				: stereo.monoCompatibility === 'fair' ? 60 : 40;
+			let st = base;
+			if (isFinite(stereo.width)) {
+				const w = stereo.width;
+				if (w > 1.8) st -= 10; else st += Math.round(mapLin(clamp(w, 0.2, 1.5), 0.2, 1.5, -5, 8));
+			}
+			if (isFinite(stereo.balance)) {
+				const b = Math.abs(clamp(stereo.balance, -1, 1));
+				st -= Math.round(mapLin(clamp(b, 0.1, 0.6), 0.1, 0.6, 0, 15));
+			}
+			scores.stereo = clamp(Math.round(st), 0, 100);
+		}
+
+		// Pesos mantidos
+		const weights = {
+			dynamics: 0.25,
+			frequency: 0.20,
+			stereo: stereo ? 0.20 : 0,
+			loudness: 0.20,
+			technical: 0.15
+		};
+		if (!stereo) {
+			weights.dynamics = 0.30; weights.frequency = 0.25; weights.loudness = 0.25; weights.technical = 0.20;
+		}
+
+		const overall = Math.round(
+			scores.dynamics * weights.dynamics +
+			scores.frequency * weights.frequency +
+			scores.stereo * weights.stereo +
+			scores.loudness * weights.loudness +
+			scores.technical * weights.technical
+		);
+
+		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score geral (contínuo): ${overall}/100`, scores);
+
+		return { overall: Math.max(0, Math.min(100, overall)), breakdown: scores };
 	}
-
-	// 🔬 Análise completa (core do sistema)
 	async performFullAnalysis(audioBuffer, config) {
 		const startTime = performance.now();
 		const steps = [];
@@ -203,6 +229,19 @@ class AudioAnalyzerV2 {
 			}
 			analysisPerformance.tonal_balance = performance.now() - tonalStart;
 
+			// 5.1. MÉTRICAS PRO POR BANDA (somente se feature flag ativa)
+			if (typeof window !== 'undefined' && window.DIAG_V2_PRO === true) {
+				steps.push('pro_band_metrics');
+				const proStart = performance.now();
+				try {
+					const pro = this.computeProBandMetrics(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate, config.quality, metrics);
+					metrics.v2ProMetrics = pro;
+				} catch (e) {
+					warnings.push('Falha no cálculo PRO por banda: ' + (e && e.message ? e.message : e));
+				}
+				analysisPerformance.pro_bands = performance.now() - proStart;
+			}
+
 			// 4. SCORES DE QUALIDADE
 			if (config.features.includes('quality') || config.features.includes('core')) {
 				steps.push('quality_scoring');
@@ -217,6 +256,17 @@ class AudioAnalyzerV2 {
 			const diagnosticsStart = performance.now();
       
 			const diagnostics = this.generateDiagnostics(metrics, metadata);
+			// 5.2. DIAGNÓSTICO PROFISSIONAL (somente se feature flag ativa)
+			if (typeof window !== 'undefined' && window.DIAG_V2_PRO === true && metrics.v2ProMetrics) {
+				steps.push('pro_diagnostics');
+				const proDiagStart = performance.now();
+				try {
+					diagnostics.v2Pro = this.generateProDiagnostics(metrics, metadata);
+				} catch (e) {
+					warnings.push('Falha no diagnóstico PRO: ' + (e && e.message ? e.message : e));
+				}
+				analysisPerformance.pro_diagnostics = performance.now() - proDiagStart;
+			}
 			analysisPerformance.diagnostics = performance.now() - diagnosticsStart;
 
 			// 6. MÉTRICAS AVANÇADAS (futuro)
@@ -509,8 +559,8 @@ class AudioAnalyzerV2 {
 		};
 	}
 
-	// 📊 CÁLCULO DE SCORES
-	calculateQualityScores(metrics) {
+	// 📊 CÁLCULO DE SCORES (versão original baseada em faixas) - mantida como fallback interno
+	calculateQualityScoresLegacy(metrics) {
 		if (window.DEBUG_ANALYZER === true) console.log('🏆 Calculando scores de qualidade...');
     
 		const core = metrics.core;
@@ -597,7 +647,7 @@ class AudioAnalyzerV2 {
 			scores.technical * weights.technical
 		);
     
-		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score geral: ${overall}/100 (Dinâmica:${scores.dynamics}, Técnico:${scores.technical})`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score geral (legacy): ${overall}/100 (Dinâmica:${scores.dynamics}, Técnico:${scores.technical})`);
     
 		return {
 			overall: Math.max(0, Math.min(100, overall)),
@@ -746,6 +796,61 @@ class AudioAnalyzerV2 {
 		};
 	}
 
+	// ===== PRO: Diagnóstico profissional com justificativas numéricas =====
+	generateProDiagnostics(metrics, metadata) {
+		const out = { problems: [], suggestions: [], feedback: [] };
+		const core = metrics.core || {};
+		const pro = metrics.v2ProMetrics || {};
+		const b = (id) => pro.bands?.[id] || {};
+		const idx = pro.indices || {};
+
+		// Regras explicáveis
+		// 1) Pouca presença de graves
+		if (isFinite(idx.bpi) && idx.bpi < -3 && isFinite(b('low').lufs) && isFinite(idx.headroomTP) && idx.headroomTP >= 2) {
+			const msg = `BPI ${idx.bpi} dB; Low ${b('low').lufs} dB vs Mid/Presence; HeadroomTP ${idx.headroomTP} dB; TP ${metrics.truePeak?.true_peak_dbtp} dBTP`;
+			out.suggestions.push({ type: 'low_end', priority: 'medium', message: 'Pouca presença de graves', action: 'Aumentar 60–80 Hz em +2 a +3 dB (Q 0.7–1.0); considerar sub-synth se Sub muito baixo; verificar KBI/sidechain 3–6 dB GR', details: msg });
+		}
+
+		// 2) Excesso de lama (200–400 Hz)
+		if (isFinite(idx.mmi) && idx.mmi > 3 && isFinite(core.spectralCentroid) && core.spectralCentroid < 2000) {
+			const msg = `MMI ${idx.mmi} dB; Centroid ${core.spectralCentroid} Hz`;
+			out.suggestions.push({ type: 'mud', priority: 'medium', message: 'Excesso de lama (200–400 Hz)', action: 'Cortar −2 a −4 dB em 250–350 Hz (Q 1.2–1.6) no buss; avaliar multibanda se LRA < 6 dB', details: msg });
+		}
+
+		// 3) Brilho/agudos insuficientes
+		if (isFinite(idx.hpi) && idx.hpi < -3 && isFinite(idx.rolloff85Hz) && idx.rolloff85Hz < 6000) {
+			const msg = `HPI ${idx.hpi} dB; Rolloff85 ${idx.rolloff85Hz} Hz`;
+			out.suggestions.push({ type: 'highs', priority: 'low', message: 'Brilho/agudos insuficientes', action: 'Shelf +1.5 a +3 dB em 10–12 kHz; checar sibilância 6–8 kHz', details: msg });
+		}
+
+		// 4) Estéreo estreito/mono
+		const wMid = b('mid').width; const cMid = b('mid').corr; const wPres = b('presence').width; const cPres = b('presence').corr;
+		if (isFinite(idx.sti) && idx.sti < 40 && isFinite(wMid) && wMid < 0.8 && isFinite(cMid) && cMid > 0.9) {
+			const msg = `STI ${idx.sti}; width_mid ${wMid}; corr_mid ${cMid}; width_presence ${wPres}; corr_presence ${cPres}`;
+			out.suggestions.push({ type: 'stereo', priority: 'low', message: 'Estéreo estreito/mono', action: 'Widening em 2–8 kHz; evitar estéreo <120 Hz', details: msg });
+		}
+
+		// 5) Loudness fora do alvo
+		if (isFinite(metrics.loudness?.lufs_integrated)) {
+			const lufs = metrics.loudness.lufs_integrated;
+			const tp = metrics.truePeak?.true_peak_dbtp;
+			const clipPct = core.clippingPercentage;
+			const headroomTP = idx.headroomTP;
+			const msg = `LUFS ${lufs} LUFS; TP ${tp} dBTP; HeadroomTP ${headroomTP} dB; Clipping% ${clipPct}`;
+			out.suggestions.push({ type: 'loudness', priority: 'high', message: 'Loudness fora do alvo', action: 'Ajustar gain/limiter até −1 dBTP; se Clipping% > 0.2% reduzir 1–2 dB antes', details: msg });
+		}
+
+		// Problemas técnicos adicionais
+		if (isFinite(core.dcOffset) && Math.abs(core.dcOffset) > 0.01) {
+			out.problems.push({ type: 'dc_offset', severity: 'low', message: `DC offset ${core.dcOffset}`, solution: 'Aplicar high-pass 5–20 Hz' });
+		}
+		if (isFinite(core.clippingPercentage) && core.clippingPercentage > 0.2) {
+			out.problems.push({ type: 'clipping', severity: core.clippingPercentage > 1 ? 'high' : 'medium', message: `Clipping% ${core.clippingPercentage}`, solution: 'Reduzir ganho de entrada e/ou usar limitador brick-wall' });
+		}
+
+		return out;
+	}
+
 	// 🛠️ FUNÇÕES UTILITÁRIAS
 
 	validateFile(file) {
@@ -775,6 +880,151 @@ class AudioAnalyzerV2 {
 	calculateAverage(values) {
 		const validValues = values.filter(v => isFinite(v) && !isNaN(v));
 		return validValues.length > 0 ? validValues.reduce((sum, v) => sum + v, 0) / validValues.length : null;
+	}
+
+	// ===== PRO: Cálculo por bandas e índices derivativos (sem arredondamento) =====
+	computeProBandMetrics(left, right, sampleRate, quality = 'balanced', baseMetrics = {}) {
+		const q = quality === 'fast' ? { frame: 512, hop: 256, max: 60 } : quality === 'accurate' ? { frame: 2048, hop: 512, max: 200 } : { frame: 1024, hop: 512, max: 120 };
+		const bands = [
+			{ id: 'sub', lo: 20, hi: 40 },
+			{ id: 'low', lo: 40, hi: 80 },
+			{ id: 'lowmid', lo: 80, hi: 200 },
+			{ id: 'mud', lo: 200, hi: 400 },
+			{ id: 'mid', lo: 400, hi: 2000 },
+			{ id: 'presence', lo: 2000, hi: 6000 },
+			{ id: 'brilho', lo: 6000, hi: 10000 },
+			{ id: 'air', lo: 10000, hi: 16000 }
+		];
+
+		// STFT simples reaproveitando computeFFT; medição por banda no espectro
+		const frame = q.frame, hop = q.hop, maxFrames = q.max;
+		const makeSpec = (slice) => this.computeFFT(slice);
+		const hzPerBin = (N) => (sampleRate / N);
+
+		// Acumuladores por banda
+		const acc = bands.reduce((m, b) => (m[b.id] = { energy: 0, energyCount: 0, flatGeoSum: 0, flatCount: 0, fluxSum: 0, fluxDen: 0, peak: 0, leftP: 0, rightP: 0, midP: 0, sideP: 0 }, m), {});
+
+		let frames = 0;
+		let prevSpecL = null, prevSpecR = null;
+		const minLen = Math.min(left.length, right.length);
+		for (let i = 0; i + frame <= minLen && frames < maxFrames; i += hop) {
+			const sliceL = left.slice(i, i + frame);
+			const sliceR = right.slice(i, i + frame);
+			const specL = makeSpec(sliceL);
+			const specR = makeSpec(sliceR);
+			const N = frame; const half = Math.floor(N / 2);
+			const hzb = hzPerBin(N);
+
+			// energia/flatness/flux por banda
+			for (let b of bands) {
+				const startBin = Math.max(1, Math.floor(b.lo / hzb));
+				const endBin = Math.min(half - 1, Math.ceil(b.hi / hzb));
+				let eSum = 0, gmSum = 0, count = 0, posFlux = 0, den = 0;
+				for (let k = startBin; k <= endBin; k++) {
+					const magL = specL[k] || 0; const magR = specR[k] || 0;
+					const mag = (magL + magR) / 2;
+					eSum += mag * mag; // potência
+					gmSum += Math.log(Math.max(1e-12, mag));
+					den += Math.max(1e-12, mag);
+					if (prevSpecL && prevSpecR) {
+						const pL = prevSpecL[k] || 0; const pR = prevSpecR[k] || 0;
+						const d = ((magL + magR) / 2) - ((pL + pR) / 2);
+						if (d > 0) posFlux += d;
+					}
+					count++;
+				}
+				acc[b.id].energy += eSum;
+				acc[b.id].energyCount += count;
+				acc[b.id].flatGeoSum += gmSum;
+				acc[b.id].flatCount += count;
+				acc[b.id].fluxSum += posFlux;
+				acc[b.id].fluxDen += den;
+			}
+
+			// pico e M/S por banda (proxy via RMS de janelas filtradas simples)
+			// Aproximação: usar potência por banda para mid/side
+			for (let b of bands) {
+				const startBin = Math.max(1, Math.floor(b.lo / hzb));
+				const endBin = Math.min(half - 1, Math.ceil(b.hi / hzb));
+				let pL = 0, pR = 0, pM = 0, pS = 0;
+				for (let k = startBin; k <= endBin; k++) {
+					const l = specL[k] || 0; const r = specR[k] || 0;
+					pL += l * l; pR += r * r;
+					const m = (l + r) / 2; const s = (l - r) / 2;
+					pM += m * m; pS += s * s;
+				}
+				acc[b.id].leftP += pL; acc[b.id].rightP += pR; acc[b.id].midP += pM; acc[b.id].sideP += pS;
+			}
+
+			// pico temporal aproximado da janela
+			for (let s of [sliceL, sliceR]) {
+				for (let n = 0; n < s.length; n++) {
+					const v = Math.abs(s[n]); if (v > acc.__peak) acc.__peak = v;
+				}
+			}
+
+			prevSpecL = specL; prevSpecR = specR; frames++;
+		}
+
+		// Conversões finais por banda
+		const out = { bands: {}, indices: {} };
+		const totalEnergy = Object.values(acc).reduce((s, v) => s + (v.energy || 0), 0) || 1;
+		for (let b of bands) {
+			const a = acc[b.id];
+			const rms = a.energyCount > 0 ? Math.sqrt(a.energy / Math.max(1, a.energyCount)) : 0;
+			const lufs = rms > 0 ? 20 * Math.log10(rms) : -Infinity; // proxy por banda
+			const flatGeom = a.flatCount > 0 ? Math.exp(a.flatGeoSum / a.flatCount) : 0;
+			const flatArith = a.energyCount > 0 ? (a.energy / Math.max(1, a.energyCount)) : 0;
+			const flatness = flatArith > 0 ? (flatGeom / Math.sqrt(flatArith)) : 0;
+			const flux = a.fluxDen > 0 ? (a.fluxSum / a.fluxDen) : 0;
+			const peakDbfs = a.__peakBand ? 20 * Math.log10(a.__peakBand) : null; // não mensurado por banda temporalmente aqui
+			const crestDb = (rms > 0 && a.__peakBand > 0) ? (20 * Math.log10(a.__peakBand / rms)) : null;
+			const width = a.midP > 0 ? Math.sqrt(a.sideP / a.midP) : 0;
+			const corr = (a.leftP > 0 && a.rightP > 0) ? ((a.midP - a.sideP) / Math.sqrt(a.leftP * a.rightP)) : 1; // proxy coeficiente
+			const balance = (a.leftP + a.rightP) > 0 ? ((a.rightP - a.leftP) / (a.rightP + a.leftP)) : 0;
+			out.bands[b.id] = { lufs, peakDbfs, crestDb, flatness, flux, width, corr, balance, energyShare: (a.energy / totalEnergy) };
+		}
+
+		// Índices
+		const bget = (id) => out.bands[id] || {};
+		const Low = bget('low').lufs ?? -Infinity;
+		const Mid = bget('mid').lufs ?? -Infinity;
+		const Presence = bget('presence').lufs ?? -Infinity;
+		const Mud = bget('mud').lufs ?? -Infinity;
+		const LowMid = bget('lowmid').lufs ?? -Infinity;
+		const Brilho = bget('brilho').lufs ?? -Infinity;
+
+		const bpi = Low - (0.5 * Mid + 0.5 * Presence);
+		const mmi = Mud - (0.5 * LowMid + 0.5 * Mid);
+		const meanAll = Object.values(out.bands).reduce((s, v) => s + (isFinite(v.lufs) ? v.lufs : 0), 0) / Math.max(1, Object.keys(out.bands).length);
+		const hpi = Brilho - meanAll;
+
+		// STI: compor médias ponderadas por bandas úteis
+		const wMid = bget('mid').width ?? 0; const cMid = bget('mid').corr ?? 1;
+		const wPres = bget('presence').width ?? 0; const cPres = bget('presence').corr ?? 1;
+		const wLow = bget('low').width ?? 0; const wSub = bget('sub').width ?? 0;
+		let sti = 0;
+		sti += Math.max(0, (wMid - 0.6)) * 25; // estimular largura saudável
+		sti += Math.max(0, (wPres - 0.6)) * 25;
+		sti -= Math.max(0, (1 - cMid)) * 20; // se correlação cai, penaliza
+		sti -= Math.max(0, (1 - cPres)) * 20;
+		sti -= Math.max(0, (wLow - 0.4)) * 20; // penalizar largura em graves
+		sti -= Math.max(0, (wSub - 0.3)) * 20;
+
+		// KBI: overlap de 45–70 (kick) e 55–120 (baixo) via energia
+		const kickBand = { lo: 45, hi: 70 }, bassBand = { lo: 55, hi: 120 };
+		// Proxy: usar shares de energia Low/Sub e LowMid
+		const kbi = ((bget('low').energyShare || 0) + (bget('sub').energyShare || 0)) * (bget('lowmid').energyShare || 0);
+
+		// Headroom real
+		const tp = baseMetrics.truePeak?.true_peak_dbtp;
+		const spL = baseMetrics.truePeak?.sample_peak_left_db;
+		const spR = baseMetrics.truePeak?.sample_peak_right_db;
+		const headroomTP = isFinite(tp) ? (-1 - tp) : null;
+		const headroomSP = Math.min(isFinite(spL) ? (0 - spL) : Infinity, isFinite(spR) ? (0 - spR) : Infinity);
+
+		out.indices = { bpi, mmi, hpi, sti, kbi, headroomTP, headroomSP, rolloff85Hz: baseMetrics.core?.spectralRolloff, centroidHz: baseMetrics.core?.spectralCentroid };
+		return out;
 	}
 
 	// FFT simples para análise de frequências

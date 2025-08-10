@@ -132,6 +132,10 @@ class AudioAnalyzer {
   }
   const v2res = await v2.performFullAnalysis(audioBuffer, { quality: 'fast', features: ['core','spectral','stereo','quality'] });
   const metrics = v2res?.metrics || {};
+  // Disponibilizar diagnósticos V2 para a UI (sem alterar o que já existe do V1)
+  if (v2res?.diagnostics) {
+    baseAnalysis.v2Diagnostics = v2res.diagnostics;
+  }
     const loud = metrics.loudness || {};
     const tp = metrics.truePeak || {};
     const core = metrics.core || {};
