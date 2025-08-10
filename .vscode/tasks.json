@@ -8,6 +8,13 @@
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Servir projeto PROD.AI",
+			"type": "shell",
+			"command": "python -m http.server 3000",
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }

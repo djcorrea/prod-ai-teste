@@ -2,6 +2,7 @@
 // Conecta o sistema de análise de áudio com o chat existente
 
 let currentModalAnalysis = null;
+let __audioIntegrationInitialized = false; // evita listeners duplicados
 
 // Inicializar quando DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
@@ -10,6 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function initializeAudioAnalyzerIntegration() {
+    if (__audioIntegrationInitialized) {
+        console.log('ℹ️ Integração do Audio Analyzer já inicializada. Ignorando chamada duplicada.');
+        return;
+    }
+    __audioIntegrationInitialized = true;
     console.log('🎵 Inicializando integração do Audio Analyzer...');
     
     // Botão de análise de música (novo design)
@@ -155,33 +161,41 @@ async function handleModalFileSelection(file) {
     try {
         // Mostrar loading com progresso detalhado
         showModalLoading();
-        updateModalProgress(10, 'Inicializando analisador...');
+        updateModalProgress(10, '⚡ Carregando Algoritmos Avançados...');
         
         // Aguardar audio analyzer carregar se necessário
         if (!window.audioAnalyzer) {
             console.log('⏳ Aguardando Audio Analyzer carregar...');
-            updateModalProgress(20, 'Carregando motor de análise...');
+            updateModalProgress(20, '🔧 Inicializando V2 Engine...');
             await waitForAudioAnalyzer();
         }
         
         // Analisar arquivo
         console.log('🔬 Iniciando análise...');
-        updateModalProgress(40, 'Decodificando arquivo de áudio...');
+        updateModalProgress(40, '🎵 Processando Waveform Digital...');
         
-        const analysis = await window.audioAnalyzer.analyzeAudioFile(file);
+    const analysis = await window.audioAnalyzer.analyzeAudioFile(file);
         currentModalAnalysis = analysis;
         
         console.log('✅ Análise concluída:', analysis);
         
-        updateModalProgress(90, 'Gerando relatório...');
+        updateModalProgress(90, '🧠 Computando Métricas Avançadas...');
         
         // Aguardar um pouco para melhor UX
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        updateModalProgress(100, 'Análise concluída!');
+        updateModalProgress(100, '✨ Análise Completa - Pronto!');
         
         // Mostrar resultados
         setTimeout(() => {
+            // Telemetria: verificar elementos alvo antes de preencher o modal
+            const exists = {
+                audioUploadArea: !!document.getElementById('audioUploadArea'),
+                audioAnalysisLoading: !!document.getElementById('audioAnalysisLoading'),
+                audioAnalysisResults: !!document.getElementById('audioAnalysisResults'),
+                modalTechnicalData: !!document.getElementById('modalTechnicalData')
+            };
+            console.log('🛰️ [Telemetry] Front antes de preencher modal (existência de elementos):', exists);
             displayModalResults(analysis);
         }, 800);
         
@@ -275,7 +289,7 @@ function showModalLoading() {
     if (loading) loading.style.display = 'block';
     
     // Reset progress
-    updateModalProgress(0, 'Iniciando análise...');
+    updateModalProgress(0, '🔄 Inicializando Engine de Análise...');
 }
 
 // 📈 Simular progresso
@@ -319,43 +333,159 @@ function displayModalResults(analysis) {
     // Mostrar resultados
     results.style.display = 'block';
     
-    // Construir dados técnicos
-    technicalData.innerHTML = `
-        <div class="data-row">
-            <span class="label">📈 Peak:</span>
-            <span class="value">${analysis.technicalData.peak.toFixed(1)} dB</span>
-        </div>
-        <div class="data-row">
-            <span class="label">🔊 RMS:</span>
-            <span class="value">${analysis.technicalData.rms.toFixed(1)} dB</span>
-        </div>
-        <div class="data-row">
-            <span class="label">📊 Dinâmica:</span>
-            <span class="value">${analysis.technicalData.dynamicRange.toFixed(1)} dB</span>
-        </div>
-        <div class="data-row">
-            <span class="label">⏱️ Duração:</span>
-            <span class="value">${analysis.duration.toFixed(1)}s</span>
-        </div>
-        ${analysis.technicalData.dominantFrequencies.length > 0 ? `
-        <div class="data-row">
-            <span class="label">🎯 Freq. Dominante:</span>
-            <span class="value">${Math.round(analysis.technicalData.dominantFrequencies[0].frequency)} Hz</span>
-        </div>
-        ` : ''}
-        ${analysis.problems.length > 0 ? `
-        <div class="data-row">
-            <span class="label">🚨 Problemas:</span>
-            <span class="value" style="color: #ff6b6b;">${analysis.problems.length} detectado(s)</span>
-        </div>
-        ` : ''}
-        ${analysis.suggestions.length > 0 ? `
-        <div class="data-row">
-            <span class="label">💡 Sugestões:</span>
-            <span class="value" style="color: #51cf66;">${analysis.suggestions.length} disponível(s)</span>
-        </div>
-        ` : ''}
-    `;
+    // Helpers seguros
+    const safeFixed = (v, d=1) => (Number.isFinite(v) ? v.toFixed(d) : '—');
+    const safeHz = (v) => (Number.isFinite(v) ? `${Math.round(v)} Hz` : '—');
+    const pct = (v, d=0) => (Number.isFinite(v) ? `${(v*100).toFixed(d)}%` : '—');
+    const tonalSummary = (tb) => {
+        if (!tb || typeof tb !== 'object') return '—';
+        const parts = [];
+        if (tb.sub && Number.isFinite(tb.sub.rms_db)) parts.push(`Sub ${tb.sub.rms_db.toFixed(1)}dB`);
+        if (tb.low && Number.isFinite(tb.low.rms_db)) parts.push(`Low ${tb.low.rms_db.toFixed(1)}dB`);
+        if (tb.mid && Number.isFinite(tb.mid.rms_db)) parts.push(`Mid ${tb.mid.rms_db.toFixed(1)}dB`);
+        if (tb.high && Number.isFinite(tb.high.rms_db)) parts.push(`High ${tb.high.rms_db.toFixed(1)}dB`);
+        return parts.length ? parts.join(' • ') : '—';
+    };
+
+        // Layout com cards e KPIs, mantendo o container #modalTechnicalData
+        const kpi = (value, label, cls='') => `
+            <div class="kpi ${cls}">
+                <div class="kpi-value">${value}</div>
+                <div class="kpi-label">${label}</div>
+            </div>`;
+
+        const scoreKpi = Number.isFinite(analysis.qualityOverall) ? kpi(Math.round(analysis.qualityOverall), 'SCORE GERAL', 'kpi-score') : '';
+        const timeKpi = Number.isFinite(analysis.processingMs) ? kpi(analysis.processingMs, 'TEMPO (MS)', 'kpi-time') : '';
+
+        const row = (label, valHtml) => `
+            <div class="data-row">
+                <span class="label">${label}</span>
+                <span class="value">${valHtml}</span>
+            </div>`;
+
+        const safePct = (v) => (Number.isFinite(v) ? `${(v*100).toFixed(0)}%` : '—');
+        const monoCompat = (s) => s ? s : '—';
+
+        const col1 = [
+            row('Peak', `${safeFixed(analysis.technicalData.peak)} dB`),
+            row('RMS', `${safeFixed(analysis.technicalData.rms)} dB`),
+            row('Dinâmica', `${safeFixed(analysis.technicalData.dynamicRange)} dB`),
+            row('Crest Factor', `${safeFixed(analysis.technicalData.crestFactor)}`),
+            row('True Peak', Number.isFinite(analysis.technicalData.truePeakDbtp) ? `${safeFixed(analysis.technicalData.truePeakDbtp)} dBTP` : '—'),
+            row('LUFS (Int.)', Number.isFinite(analysis.technicalData.lufsIntegrated) ? `${safeFixed(analysis.technicalData.lufsIntegrated)} LUFS` : '—'),
+            row('LRA', Number.isFinite(analysis.technicalData.lra) ? `${safeFixed(analysis.technicalData.lra)} dB` : '—')
+        ].join('');
+
+        const col2 = [
+            row('Correlação', Number.isFinite(analysis.technicalData.stereoCorrelation) ? safeFixed(analysis.technicalData.stereoCorrelation, 2) : '—'),
+            row('Largura', Number.isFinite(analysis.technicalData.stereoWidth) ? safeFixed(analysis.technicalData.stereoWidth, 2) : '—'),
+            row('Balance', Number.isFinite(analysis.technicalData.balanceLR) ? safePct(analysis.technicalData.balanceLR) : '—'),
+            row('Mono Compat.', monoCompat(analysis.technicalData.monoCompatibility)),
+            row('Centroide', Number.isFinite(analysis.technicalData.spectralCentroid) ? safeHz(analysis.technicalData.spectralCentroid) : '—'),
+            row('Rolloff (85%)', Number.isFinite(analysis.technicalData.spectralRolloff85) ? safeHz(analysis.technicalData.spectralRolloff85) : '—'),
+            row('Flux', Number.isFinite(analysis.technicalData.spectralFlux) ? safeFixed(analysis.technicalData.spectralFlux, 3) : '—'),
+            row('Flatness', Number.isFinite(analysis.technicalData.spectralFlatness) ? safeFixed(analysis.technicalData.spectralFlatness, 3) : '—')
+        ].join('');
+
+            const col3 = [
+                row('Tonal Balance', analysis.technicalData?.tonalBalance ? tonalSummary(analysis.technicalData.tonalBalance) : '—'),
+                (analysis.technicalData.dominantFrequencies.length > 0 ? row('Freq. Dominante', `${Math.round(analysis.technicalData.dominantFrequencies[0].frequency)} Hz`) : ''),
+                row('Problemas', analysis.problems.length > 0 ? `<span class="tag tag-danger">${analysis.problems.length} detectado(s)</span>` : '—'),
+                row('Sugestões', analysis.suggestions.length > 0 ? `<span class="tag tag-success">${analysis.suggestions.length} disponível(s)</span>` : '—')
+            ].join('');
+
+            // Card extra: Problemas Técnicos detalhados
+            const techProblems = () => {
+                const rows = [];
+                if (Number.isFinite(analysis.technicalData?.clippingSamples)) {
+                    rows.push(row('Clipping', `<span class="warn">${analysis.technicalData.clippingSamples} samples</span>`));
+                }
+                if (Number.isFinite(analysis.technicalData?.dcOffset)) {
+                    rows.push(row('DC Offset', `${safeFixed(analysis.technicalData.dcOffset, 4)}`));
+                }
+                return rows.join('') || row('Status', 'Sem problemas críticos');
+            };
+
+            // Card extra: Diagnóstico & Sugestões listados
+            const diagCard = () => {
+                const blocks = [];
+                if (analysis.problems.length > 0) {
+                    const list = analysis.problems.slice(0, 4).map(p => `
+                        <div class="diag-item danger">
+                            <div class="diag-title">${p.message}</div>
+                            <div class="diag-tip">${p.solution || ''}</div>
+                        </div>`).join('');
+                    blocks.push(`<div class="diag-section"><div class="diag-heading">Problemas:</div>${list}</div>`);
+                }
+                if (analysis.suggestions.length > 0) {
+                    const list = analysis.suggestions.slice(0, 4).map(s => `
+                        <div class="diag-item info">
+                            <div class="diag-title">${s.message}</div>
+                            <div class="diag-tip">${s.action || ''}</div>
+                        </div>`).join('');
+                    blocks.push(`<div class="diag-section"><div class="diag-heading">Sugestões:</div>${list}</div>`);
+                }
+                return blocks.join('') || '<div class="diag-empty">Sem diagnósticos</div>';
+            };
+
+        const breakdown = analysis.qualityBreakdown || {};
+        
+        // Função para renderizar score com barra de progresso
+        const renderScoreWithProgress = (label, value, color = '#00ffff') => {
+            const numValue = parseFloat(value) || 0;
+            const displayValue = value != null ? value : '—';
+            
+            if (value == null) {
+                return `<div class="data-row">
+                    <span class="label">${label}:</span>
+                    <span class="value">—</span>
+                </div>`;
+            }
+            
+            return `<div class="data-row metric-with-progress">
+                <span class="label">${label}:</span>
+                <div class="metric-value-progress">
+                    <span class="value">${displayValue}/100</span>
+                    <div class="progress-bar-mini">
+                        <div class="progress-fill-mini" style="width: ${Math.min(Math.max(numValue, 0), 100)}%; background: ${color}; color: ${color};"></div>
+                    </div>
+                </div>
+            </div>`;
+        };
+        
+        const scoreRows = breakdown ? `
+            ${renderScoreWithProgress('Dinâmica', breakdown.dynamics, '#ffd700')}
+            ${renderScoreWithProgress('Técnico', breakdown.technical, '#00ff92')}
+            ${renderScoreWithProgress('Loudness', breakdown.loudness, '#ff3366')}
+            ${renderScoreWithProgress('Frequência', breakdown.frequency, '#00ffff')}
+        ` : '';
+
+        technicalData.innerHTML = `
+            <div class="kpi-row">${scoreKpi}${timeKpi}</div>
+                    <div class="cards-grid">
+                        <div class="card">
+                    <div class="card-title">🎛️ Métricas Principais</div>
+                    ${col1}
+                </div>
+                        <div class="card">
+                    <div class="card-title">🎧 Análise Estéreo & Espectral</div>
+                    ${col2}
+                </div>
+                        <div class="card">
+                    <div class="card-title">🏆 Scores & Diagnóstico</div>
+                    ${scoreRows}
+                    ${col3}
+                </div>
+                        <div class="card card-span-2">
+                            <div class="card-title">⚠️ Problemas Técnicos</div>
+                            ${techProblems()}
+                        </div>
+                        <div class="card card-span-2">
+                            <div class="card-title">🩺 Diagnóstico & Sugestões</div>
+                            ${diagCard()}
+                        </div>
+            </div>
+        `;
     
     console.log('📊 Resultados exibidos no modal');
 }
@@ -643,8 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Fallback: se o DOM já estiver carregado
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeAudioAnalyzerIntegration);
-} else {
+if (document.readyState !== 'loading') {
+    // se DOM já pronto, inicializar uma vez
     initializeAudioAnalyzerIntegration();
 }

@@ -7,6 +7,8 @@ class AudioAnalyzer {
     this.analyzer = null;
     this.dataArray = null;
     this.isAnalyzing = false;
+  this._v2Loaded = false;
+  this._v2LoadingPromise = null;
   }
 
   // 🎤 Inicializar análise de áudio
@@ -33,6 +35,14 @@ class AudioAnalyzer {
 
   // 📁 Analisar arquivo de áudio
   async analyzeAudioFile(file) {
+    const tsStart = new Date().toISOString();
+    console.log('🛰️ [Telemetry] Front antes do fetch (modo local, sem fetch):', {
+      route: '(client-only) audio-analyzer.js',
+      method: 'N/A',
+      file: file?.name,
+      sizeBytes: file?.size,
+      startedAt: tsStart
+    });
     console.log(`🎵 Iniciando análise de: ${file.name}`);
     
     if (!this.audioContext) {
@@ -54,11 +64,24 @@ class AudioAnalyzer {
           const audioBuffer = await this.audioContext.decodeAudioData(audioData);
           
           console.log('🔬 Realizando análise completa...');
-          // Análise completa do áudio
-          const analysis = this.performFullAnalysis(audioBuffer);
+          // Análise completa do áudio (V1)
+          let analysis = this.performFullAnalysis(audioBuffer);
+
+          // Enriquecimento Fase 2 (sem alterar UI): tenta carregar V2 e mapear novas métricas
+          try {
+            analysis = await this._enrichWithPhase2Metrics(audioBuffer, analysis, file);
+          } catch (enrichErr) {
+            console.warn('⚠️ Falha ao enriquecer com métricas Fase 2:', enrichErr?.message || enrichErr);
+          }
           
           clearTimeout(timeout);
           console.log('✅ Análise concluída com sucesso!');
+          // Telemetria pós-json: chaves de 1º nível
+          try {
+            const topKeys = analysis ? Object.keys(analysis) : [];
+            const techKeys = analysis?.technicalData ? Object.keys(analysis.technicalData) : [];
+            console.log('🛰️ [Telemetry] Front após "json" (obj pronto):', { topLevelKeys: topKeys, technicalKeys: techKeys });
+          } catch {}
           resolve(analysis);
         } catch (error) {
           clearTimeout(timeout);
@@ -76,6 +99,123 @@ class AudioAnalyzer {
       reader.readAsArrayBuffer(file);
     });
   }
+
+  // 🔌 Enriquecer com métricas da Fase 2 usando motor V2 (carregado dinamicamente)
+  async _enrichWithPhase2Metrics(audioBuffer, baseAnalysis, fileRef) {
+    // Carregar V2 dinamicamente se disponível no projeto (sem alterar HTML)
+    if (!this._v2Loaded && typeof window.AudioAnalyzerV2 === 'undefined') {
+      if (!this._v2LoadingPromise) {
+        this._v2LoadingPromise = new Promise((resolve, reject) => {
+          const pagePath = (typeof location !== 'undefined') ? location.pathname : '/';
+          // Candidatos robustos, mantendo paths relativos ao index atual
+          const candidates = [];
+          // 1) relativo ao documento atual
+          candidates.push('audio-analyzer-v2.js');
+          candidates.push('./audio-analyzer-v2.js');
+          // 2) se a página estiver em /public/, tente raiz e /public/
+          if (pagePath.includes('/public/')) {
+            candidates.push('/public/audio-analyzer-v2.js');
+          } else {
+            candidates.push('public/audio-analyzer-v2.js');
+            candidates.push('/public/audio-analyzer-v2.js');
+          }
+
+          console.log('🛰️ [Telemetry] Tentando carregar V2 a partir de:', candidates);
+
+          let idx = 0;
+          const tryNext = () => {
+            if (idx >= candidates.length) {
+              reject(new Error('Falha ao carregar audio-analyzer-v2.js de todos os caminhos candidatos'));
+              return;
+            }
+            const url = candidates[idx++];
+            const s = document.createElement('script');
+            s.src = url;
+            s.async = true;
+            s.onload = () => { this._v2Loaded = true; console.log('✅ V2 carregado de', url); resolve(); };
+            s.onerror = () => { console.warn('⚠️ Falha ao carregar V2 em', url); tryNext(); };
+            document.head.appendChild(s);
+          };
+          tryNext();
+        });
+      }
+      try { await this._v2LoadingPromise; } catch (e) { console.warn('⚠️ V2 indisponível:', e.message); }
+    }
+
+    if (typeof window.AudioAnalyzerV2 !== 'function') {
+      console.log('ℹ️ Motor V2 não disponível. Mantendo apenas métricas básicas.');
+      return baseAnalysis;
+    }
+
+  // Executar análise V2 de forma leve usando diretamente o AudioBuffer (evita re-decodificação)
+  const v2 = new window.AudioAnalyzerV2();
+  await v2.initialize?.();
+  console.log('🛰️ [Telemetry] V2: performFullAnalysis com audioBuffer.');
+  const v2res = await v2.performFullAnalysis(audioBuffer, { quality: 'fast', features: ['core','spectral','stereo','quality'] });
+  const metrics = v2res?.metrics || {};
+    const loud = metrics.loudness || {};
+    const tp = metrics.truePeak || {};
+    const core = metrics.core || {};
+    const stereo = metrics.stereo || {};
+    const tonal = metrics.tonalBalance || {};
+
+    // Adapter: mapear para o formato já consumido pelo front (technicalData)
+    baseAnalysis.technicalData = baseAnalysis.technicalData || {};
+    const td = baseAnalysis.technicalData;
+
+    // Não remover chaves existentes; adicionar novas como opcionais
+    td.lufsIntegrated = isFinite(loud.lufs_integrated) ? loud.lufs_integrated : null;
+    td.lra = isFinite(loud.lra) ? loud.lra : (loud.lra === 0 ? 0 : null);
+    td.truePeakDbtp = isFinite(tp.true_peak_dbtp) ? tp.true_peak_dbtp : null;
+    td.spectralCentroid = isFinite(core.spectralCentroid) ? core.spectralCentroid : null;
+    td.spectralRolloff85 = isFinite(core.spectralRolloff) ? core.spectralRolloff : null;
+    td.spectralFlux = isFinite(core.spectralFlux) ? core.spectralFlux : null;
+    td.stereoCorrelation = isFinite(stereo.correlation) ? stereo.correlation : null;
+    td.balanceLR = isFinite(stereo.balance) ? stereo.balance : null;
+    td.tonalBalance = tonal && typeof tonal === 'object' ? tonal : null;
+  // Extras para visual completo
+  td.crestFactor = isFinite(core.crestFactor) ? core.crestFactor : null;
+  td.stereoWidth = isFinite(stereo.width) ? stereo.width : null;
+  td.monoCompatibility = typeof stereo.monoCompatibility === 'string' ? stereo.monoCompatibility : null;
+  td.spectralFlatness = isFinite(core.spectralFlatness) ? core.spectralFlatness : null;
+  td.dcOffset = isFinite(core.dcOffset) ? core.dcOffset : null;
+  td.clippingSamples = Number.isFinite(core.clippingEvents) ? core.clippingEvents : null;
+  td.clippingPct = isFinite(core.clippingPercentage) ? core.clippingPercentage : null;
+
+  // Scores de qualidade e tempo total de processamento
+  baseAnalysis.qualityOverall = isFinite(metrics?.quality?.overall) ? metrics.quality.overall : null;
+  baseAnalysis.qualityBreakdown = metrics?.quality?.breakdown || null;
+  baseAnalysis.processingMs = Number.isFinite(v2res?.processingTime) ? v2res.processingTime : null;
+
+    // Frequências dominantes: manter existentes; se vazio, usar do V2
+    if ((!Array.isArray(td.dominantFrequencies) || td.dominantFrequencies.length === 0) && metrics?.spectral?.dominantFrequencies) {
+      td.dominantFrequencies = metrics.spectral.dominantFrequencies;
+    }
+
+    // Telemetria: chaves novas adicionadas
+  const added = ['lufsIntegrated','lra','truePeakDbtp','spectralCentroid','spectralRolloff85','spectralFlux','stereoCorrelation','balanceLR','tonalBalance','crestFactor','stereoWidth','monoCompatibility','spectralFlatness','dcOffset','clippingSamples','clippingPct','qualityOverall','processingMs'];
+    console.log('🛰️ [Telemetry] Adapter Fase2 aplicado (novas chaves):', added.filter(k => k in td));
+    console.log('🛰️ [Telemetry] Valores mapeados:', {
+      lufsIntegrated: td.lufsIntegrated,
+      lra: td.lra,
+      truePeakDbtp: td.truePeakDbtp,
+      spectralCentroid: td.spectralCentroid,
+      spectralRolloff85: td.spectralRolloff85,
+      spectralFlux: td.spectralFlux,
+      stereoCorrelation: td.stereoCorrelation,
+      balanceLR: td.balanceLR,
+      tonalBalance: td.tonalBalance ? {
+        sub: td.tonalBalance.sub?.rms_db,
+        low: td.tonalBalance.low?.rms_db,
+        mid: td.tonalBalance.mid?.rms_db,
+        high: td.tonalBalance.high?.rms_db,
+      } : null
+    });
+
+    return baseAnalysis;
+  }
+
+  // (remoção do conversor WAV — não é mais necessário)
 
   // 🔬 Realizar análise completa
   performFullAnalysis(audioBuffer) {
