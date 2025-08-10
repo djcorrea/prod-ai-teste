@@ -7,8 +7,32 @@ class AudioAnalyzer {
     this.analyzer = null;
     this.dataArray = null;
     this.isAnalyzing = false;
-  this._v2Loaded = false;
-  this._v2LoadingPromise = null;
+    this._v2Loaded = false;
+    this._v2LoadingPromise = null;
+    this._analysisState = null; // Estado atual da análise
+  }
+
+  // 🧹 Reset completo do estado entre análises
+  resetAnalysisState() {
+    if (window.DEBUG_ANALYZER === true) console.log('🧹 [V1] Resetando estado de análise...');
+    
+    this._analysisState = null;
+    this.isAnalyzing = false;
+    
+    // Limpar contexto anterior se existir
+    if (this.audioContext && this.audioContext.state !== 'closed') {
+      try {
+        this.audioContext.close();
+      } catch (e) {
+        // Ignorar erros de close
+      }
+    }
+    this.audioContext = null;
+    this.analyzer = null;
+    this.dataArray = null;
+    
+    // Forçar limpeza de memória
+    if (window.gc) window.gc();
   }
 
   // 🎤 Inicializar análise de áudio
@@ -35,6 +59,9 @@ class AudioAnalyzer {
 
   // 📁 Analisar arquivo de áudio
   async analyzeAudioFile(file) {
+    // RESET OBRIGATÓRIO: limpar estado anterior
+    this.resetAnalysisState();
+    
     const tsStart = new Date().toISOString();
   if (window.DEBUG_ANALYZER === true) console.log('🛰️ [Telemetry] Front antes do fetch (modo local, sem fetch):', {
       route: '(client-only) audio-analyzer.js',
@@ -59,12 +86,13 @@ class AudioAnalyzer {
       
       reader.onload = async (e) => {
         try {
-          if (window.DEBUG_ANALYZER === true) console.log('� Decodificando áudio...');
+          if (window.DEBUG_ANALYZER === true) console.log('🔬 Decodificando áudio...');
           const audioData = e.target.result;
-          const audioBuffer = await this.audioContext.decodeAudioData(audioData);
+          // OBRIGATÓRIO: criar cópia do buffer para evitar reuso
+          const audioBuffer = await this.audioContext.decodeAudioData(audioData.slice(0));
           
-          if (window.DEBUG_ANALYZER === true) console.log('🔬 Realizando análise completa...');
-          // Análise completa do áudio (V1)
+          if (window.DEBUG_ANALYZER === true) console.log('🔬 Realizando análise completa V1 (PCM real)...');
+          // Análise completa do áudio (V1) - SEMPRE calculado do PCM real
           let analysis = this.performFullAnalysis(audioBuffer);
 
           // Enriquecimento Fase 2 (sem alterar UI): tenta carregar V2 e mapear novas métricas
@@ -120,8 +148,9 @@ class AudioAnalyzer {
     }
 
     if (typeof window.AudioAnalyzerV2 !== 'function') {
-      // Mantém apenas métricas básicas quando V2 não disponível
-      return baseAnalysis;
+      // V2 não disponível: usar APENAS V1 com métricas reais (sem fallbacks genéricos)
+      if (window.DEBUG_ANALYZER === true) console.log('⚠️ V2 não disponível - usando apenas V1 com métricas calculadas do PCM real');
+      return baseAnalysis; // V1 já calcula tudo do PCM real
     }
 
   // Executar análise V2 de forma leve usando diretamente o AudioBuffer (evita re-decodificação)

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Testes de Validação - Audio Analyzer Fixed</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .test-btn {
+            background: #00aa00;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            font-family: inherit;
+        }
+        .test-btn:hover {
+            background: #00ff00;
+        }
+        .test-btn:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #000;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            font-family: inherit;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        h1, h2, h3 { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .status.pass { background: #004400; color: #00ff00; }
+        .status.fail { background: #440000; color: #ff4444; }
+        .status.running { background: #444400; color: #ffff00; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .metric {
+            background: #1a1a1a;
+            padding: 8px;
+            border-radius: 3px;
+            border: 1px solid #333;
+        }
+        .metric-label { color: #aaa; font-size: 10px; }
+        .metric-value { color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 VALIDAÇÃO DO AUDIO ANALYZER CORRIGIDO</h1>
+        <p>Sistema de testes para verificar eliminação de valores genéricos/mock</p>
+        
+        <!-- Status do Sistema -->
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <button class="test-btn" onclick="checkSystemStatus()">Verificar Sistema</button>
+            <button class="test-btn" onclick="enableDebug()">Habilitar Debug</button>
+            <div id="systemStatus" class="log">Sistema não verificado...</div>
+        </div>
+        
+        <!-- Testes Automáticos de Aceitação -->
+        <div class="test-section">
+            <h3>🎯 Testes Automáticos de Aceitação</h3>
+            <p>Executa os 5 testes especificados nos critérios de qualidade:</p>
+            <button class="test-btn" onclick="runAcceptanceTests()" id="acceptanceBtn">Executar Todos os Testes</button>
+            <button class="test-btn" onclick="runSingleTest('gain')" id="gainBtn">Teste Ganho +3dB</button>
+            <button class="test-btn" onclick="runSingleTest('stereo')" id="stereoBtn">Teste Estéreo→Mono</button>
+            <button class="test-btn" onclick="runSingleTest('filter')" id="filterBtn">Teste Low-pass</button>
+            <button class="test-btn" onclick="runSingleTest('dc')" id="dcBtn">Teste DC Offset</button>
+            <button class="test-btn" onclick="runSingleTest('determinism')" id="detBtn">Teste Determinismo</button>
+            <div id="acceptanceResults" class="log"></div>
+        </div>
+        
+        <!-- Teste de Upload Manual -->
+        <div class="test-section">
+            <h3>📁 Teste Manual com Arquivo Real</h3>
+            <input type="file" id="testFile" accept="audio/*" style="margin: 10px 0;">
+            <br>
+            <button class="test-btn" onclick="testRealFile()" id="realTestBtn">Analisar Arquivo</button>
+            <button class="test-btn" onclick="testRealFileComparison()" id="compareBtn">Teste Comparativo (2x)</button>
+            <div id="realTestResults" class="log"></div>
+        </div>
+        
+        <!-- Análise de Métricas -->
+        <div class="test-section">
+            <h3>📈 Análise Detalhada de Métricas</h3>
+            <div id="metricsDisplay" class="metrics"></div>
+        </div>
+        
+        <!-- Log de Debug -->
+        <div class="test-section">
+            <h3>🔍 Log de Debug</h3>
+            <button class="test-btn" onclick="clearDebugLog()">Limpar Log</button>
+            <div id="debugLog" class="log"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="public/audio-analyzer.js"></script>
+    <script src="public/audio-analyzer-v2.js"></script>
+    <script src="audio-analyzer-tests.js"></script>
+    
+    <script>
+        // Estado global dos testes
+        let testRunner = null;
+        let currentAnalysis = null;
+        
+        // Interceptar console.log para debug
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        function logToDebug(type, ...args) {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const className = type === 'error' ? 'error' : type === 'warn' ? 'warning' : 'info';
+            debugLog.innerHTML += `<span class="${className}">[${timestamp}] ${type.toUpperCase()}: ${message}</span>\n`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        function enableDebug() {
+            window.DEBUG_ANALYZER = true;
+            console.log = (...args) => {
+                originalLog(...args);
+                logToDebug('info', ...args);
+            };
+            console.warn = (...args) => {
+                originalWarn(...args);
+                logToDebug('warn', ...args);
+            };
+            console.error = (...args) => {
+                originalError(...args);
+                logToDebug('error', ...args);
+            };
+            alert('✅ Debug habilitado! Todos os logs aparecerão no painel de debug.');
+        }
+        
+        function clearDebugLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+        
+        // Verificar status do sistema
+        async function checkSystemStatus() {
+            const statusDiv = document.getElementById('systemStatus');
+            statusDiv.innerHTML = 'Verificando sistema...';
+            
+            const status = {
+                audioContext: false,
+                audioAnalyzer: false,
+                audioAnalyzerV2: false,
+                testRunner: false,
+                webAudio: false
+            };
+            
+            try {
+                // AudioContext support
+                status.webAudio = !!(window.AudioContext || window.webkitAudioContext);
+                
+                // AudioAnalyzer V1
+                status.audioAnalyzer = typeof window.AudioAnalyzer === 'function';
+                if (status.audioAnalyzer) {
+                    const analyzer = new AudioAnalyzer();
+                    status.audioContext = await analyzer.initializeAnalyzer();
+                }
+                
+                // AudioAnalyzer V2
+                status.audioAnalyzerV2 = typeof window.AudioAnalyzerV2 === 'function';
+                
+                // Test Runner
+                status.testRunner = typeof window.AudioAnalyzerTests === 'function';
+                if (status.testRunner) {
+                    testRunner = new AudioAnalyzerTests();
+                }
+                
+            } catch (error) {
+                statusDiv.innerHTML += `\nErro: ${error.message}`;
+            }
+            
+            let statusText = '📊 STATUS DO SISTEMA:\n';
+            Object.entries(status).forEach(([key, value]) => {
+                const icon = value ? '✅' : '❌';
+                const name = key.replace(/([A-Z])/g, ' $1').toUpperCase();
+                statusText += `${icon} ${name}: ${value}\n`;
+            });
+            
+            statusDiv.innerHTML = statusText;
+            
+            const allGood = Object.values(status).every(v => v);
+            if (allGood) {
+                statusText += '\n🚀 Sistema pronto para testes!';
+            } else {
+                statusText += '\n⚠️  Alguns componentes não estão disponíveis.';
+            }
+            
+            statusDiv.innerHTML = statusText;
+        }
+        
+        // Executar testes de aceitação
+        async function runAcceptanceTests() {
+            if (!testRunner) {
+                alert('❌ Test runner não inicializado. Execute "Verificar Sistema" primeiro.');
+                return;
+            }
+            
+            const btn = document.getElementById('acceptanceBtn');
+            const resultsDiv = document.getElementById('acceptanceResults');
+            
+            btn.disabled = true;
+            btn.textContent = 'Executando...';
+            resultsDiv.innerHTML = '🧪 Iniciando testes de aceitação...\n';
+            
+            try {
+                const results = await testRunner.runAllAcceptanceTests();
+                displayTestResults(results, resultsDiv);
+            } catch (error) {
+                resultsDiv.innerHTML += `\n❌ Erro: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Executar Todos os Testes';
+            }
+        }
+        
+        // Executar teste individual
+        async function runSingleTest(testType) {
+            if (!testRunner) {
+                alert('❌ Test runner não inicializado.');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('acceptanceResults');
+            resultsDiv.innerHTML = `🧪 Executando teste: ${testType}...\n`;
+            
+            try {
+                let result;
+                switch (testType) {
+                    case 'gain':
+                        await testRunner.testGainIncrease();
+                        break;
+                    case 'stereo':
+                        await testRunner.testStereoToMono();
+                        break;
+                    case 'filter':
+                        await testRunner.testLowPassFiltering();
+                        break;
+                    case 'dc':
+                        await testRunner.testDCOffset();
+                        break;
+                    case 'determinism':
+                        await testRunner.testDeterminism();
+                        break;
+                }
+                
+                const lastResult = testRunner.testResults[testRunner.testResults.length - 1];
+                displayTestResults({
+                    summary: { passed: lastResult.passed ? 1 : 0, total: 1, passRate: lastResult.passed ? '100%' : '0%' },
+                    results: [lastResult]
+                }, resultsDiv);
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `\n❌ Erro: ${error.message}`;
+            }
+        }
+        
+        // Testar arquivo real
+        async function testRealFile() {
+            const fileInput = document.getElementById('testFile');
+            const resultsDiv = document.getElementById('realTestResults');
+            const btn = document.getElementById('realTestBtn');
+            
+            if (!fileInput.files[0]) {
+                alert('Selecione um arquivo de áudio primeiro.');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Analisando...';
+            resultsDiv.innerHTML = 'Iniciando análise do arquivo real...\n';
+            
+            try {
+                const analyzer = new AudioAnalyzerV2();
+                await analyzer.initialize();
+                
+                const startTime = performance.now();
+                const analysis = await analyzer.analyzeFile(fileInput.files[0]);
+                const endTime = performance.now();
+                
+                currentAnalysis = analysis;
+                displayAnalysis(analysis, resultsDiv, endTime - startTime);
+                displayMetrics(analysis);
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `\n❌ Erro: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Analisar Arquivo';
+            }
+        }
+        
+        // Teste comparativo (2x o mesmo arquivo)
+        async function testRealFileComparison() {
+            const fileInput = document.getElementById('testFile');
+            const resultsDiv = document.getElementById('realTestResults');
+            const btn = document.getElementById('compareBtn');
+            
+            if (!fileInput.files[0]) {
+                alert('Selecione um arquivo de áudio primeiro.');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Comparando...';
+            resultsDiv.innerHTML = 'Executando análise comparativa (determinismo)...\n';
+            
+            try {
+                const analyzer1 = new AudioAnalyzerV2();
+                const analyzer2 = new AudioAnalyzerV2();
+                
+                await analyzer1.initialize();
+                await analyzer2.initialize();
+                
+                resultsDiv.innerHTML += 'Primeira análise...\n';
+                const analysis1 = await analyzer1.analyzeFile(fileInput.files[0]);
+                
+                resultsDiv.innerHTML += 'Segunda análise...\n';
+                const analysis2 = await analyzer2.analyzeFile(fileInput.files[0]);
+                
+                // Comparar métricas críticas
+                const comparison = compareAnalyses(analysis1, analysis2);
+                displayComparison(comparison, resultsDiv);
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `\n❌ Erro: ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Teste Comparativo (2x)';
+            }
+        }
+        
+        // Exibir resultados dos testes
+        function displayTestResults(results, container) {
+            let output = `\n📊 RESULTADOS DOS TESTES:\n`;
+            output += `✅ Aprovados: ${results.summary.passed}/${results.summary.total} (${results.summary.passRate})\n\n`;
+            
+            results.results.forEach((test, i) => {
+                const status = test.passed ? '✅ PASSOU' : '❌ FALHOU';
+                output += `${i + 1}. ${test.test}: ${status}\n`;
+                
+                if (test.error) {
+                    output += `   Erro: ${test.error}\n`;
+                } else if (test.details) {
+                    Object.entries(test.details).forEach(([key, value]) => {
+                        if (typeof value === 'object' && !Array.isArray(value)) {
+                            output += `   ${key}:\n`;
+                            Object.entries(value).forEach(([subKey, subValue]) => {
+                                output += `     ${subKey}: ${subValue}\n`;
+                            });
+                        } else {
+                            output += `   ${key}: ${value}\n`;
+                        }
+                    });
+                }
+                output += '\n';
+            });
+            
+            container.innerHTML = output;
+        }
+        
+        // Exibir análise detalhada
+        function displayAnalysis(analysis, container, processingTime) {
+            const core = analysis.metrics.core;
+            const loudness = analysis.metrics.loudness;
+            const truePeak = analysis.metrics.truePeak;
+            const quality = analysis.metrics.quality;
+            
+            let output = `\n🎵 ANÁLISE COMPLETA:\n`;
+            output += `⏱️ Tempo de processamento: ${processingTime.toFixed(1)}ms\n\n`;
+            
+            output += `📊 MÉTRICAS PRINCIPAIS:\n`;
+            output += `• LUFS Integrado: ${loudness?.lufs_integrated?.toFixed(2) || 'N/A'} dB\n`;
+            output += `• True Peak: ${truePeak?.true_peak_dbtp?.toFixed(2) || 'N/A'} dBTP\n`;
+            output += `• Dynamic Range: ${core?.dynamicRange?.toFixed(1) || 'N/A'} dB\n`;
+            output += `• RMS: ${core?.rms?.toFixed(1) || 'N/A'} dB\n`;
+            output += `• DC Offset: ${((core?.dcOffset || 0) * 100).toFixed(3)}%\n`;
+            output += `• Clipping: ${core?.clippingSamples || 0} samples (${(core?.clippingPercentage || 0).toFixed(3)}%)\n`;
+            output += `• Spectral Centroid: ${core?.spectralCentroid?.toFixed(0) || 'N/A'} Hz\n\n`;
+            
+            if (quality) {
+                output += `🏆 SCORES DE QUALIDADE:\n`;
+                output += `• Overall: ${quality.overall}/100\n`;
+                if (quality.breakdown) {
+                    Object.entries(quality.breakdown).forEach(([key, value]) => {
+                        output += `• ${key}: ${value}/100\n`;
+                    });
+                }
+                output += '\n';
+            }
+            
+            if (analysis.diagnostics?.problems?.length > 0) {
+                output += `🚨 PROBLEMAS DETECTADOS:\n`;
+                analysis.diagnostics.problems.forEach(problem => {
+                    output += `• ${problem.message}\n`;
+                    output += `  Solução: ${problem.solution}\n`;
+                });
+                output += '\n';
+            }
+            
+            container.innerHTML = output;
+        }
+        
+        // Exibir métricas em grid
+        function displayMetrics(analysis) {
+            const metricsDiv = document.getElementById('metricsDisplay');
+            const metrics = analysis.metrics;
+            
+            const metricsList = [
+                { label: 'LUFS Integrado', value: metrics.loudness?.lufs_integrated, unit: 'dB' },
+                { label: 'LUFS Short-term', value: metrics.loudness?.lufs_short_term, unit: 'dB' },
+                { label: 'LRA', value: metrics.loudness?.lra, unit: 'LU' },
+                { label: 'True Peak', value: metrics.truePeak?.true_peak_dbtp, unit: 'dBTP' },
+                { label: 'Dynamic Range', value: metrics.core?.dynamicRange, unit: 'dB' },
+                { label: 'RMS', value: metrics.core?.rms, unit: 'dB' },
+                { label: 'Peak', value: metrics.core?.peak, unit: 'dB' },
+                { label: 'DC Offset', value: (metrics.core?.dcOffset || 0) * 100, unit: '%' },
+                { label: 'Clipping Samples', value: metrics.core?.clippingSamples, unit: '' },
+                { label: 'Spectral Centroid', value: metrics.core?.spectralCentroid, unit: 'Hz' },
+                { label: 'Spectral Rolloff', value: metrics.spectral?.rolloff85_hz, unit: 'Hz' },
+                { label: 'Stereo Correlation', value: metrics.stereo?.correlation, unit: '' },
+                { label: 'Stereo Width', value: metrics.stereo?.width, unit: '' },
+                { label: 'Quality Overall', value: metrics.quality?.overall, unit: '/100' }
+            ];
+            
+            metricsDiv.innerHTML = metricsList.map(metric => {
+                const value = metric.value !== null && metric.value !== undefined ? 
+                    (typeof metric.value === 'number' ? metric.value.toFixed(metric.unit === 'Hz' ? 0 : 2) : metric.value) : 'N/A';
+                return `
+                    <div class="metric">
+                        <div class="metric-label">${metric.label}</div>
+                        <div class="metric-value">${value}${metric.unit}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Comparar duas análises
+        function compareAnalyses(analysis1, analysis2) {
+            const differences = [];
+            const tolerance = 0.001; // 0.1% tolerância
+            
+            const compareMetric = (path, name, unit = '') => {
+                const value1 = getNestedValue(analysis1, path);
+                const value2 = getNestedValue(analysis2, path);
+                
+                if (value1 !== null && value2 !== null && typeof value1 === 'number' && typeof value2 === 'number') {
+                    const diff = Math.abs(value1 - value2);
+                    const relativeDiff = diff / Math.abs(value1);
+                    
+                    differences.push({
+                        metric: name,
+                        value1: value1.toFixed(3),
+                        value2: value2.toFixed(3),
+                        difference: diff.toFixed(6),
+                        relativeDiff: (relativeDiff * 100).toFixed(3) + '%',
+                        unit,
+                        identical: relativeDiff < tolerance
+                    });
+                }
+            };
+            
+            compareMetric('metrics.loudness.lufs_integrated', 'LUFS Integrado', 'dB');
+            compareMetric('metrics.truePeak.true_peak_dbtp', 'True Peak', 'dBTP');
+            compareMetric('metrics.core.dynamicRange', 'Dynamic Range', 'dB');
+            compareMetric('metrics.core.rms', 'RMS', 'dB');
+            compareMetric('metrics.core.dcOffset', 'DC Offset', '%');
+            compareMetric('metrics.core.spectralCentroid', 'Spectral Centroid', 'Hz');
+            compareMetric('metrics.quality.overall', 'Quality Score', '/100');
+            
+            return differences;
+        }
+        
+        // Obter valor nested de objeto
+        function getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => current?.[key], obj);
+        }
+        
+        // Exibir comparação
+        function displayComparison(comparison, container) {
+            let output = '\n🔍 ANÁLISE COMPARATIVA (TESTE DE DETERMINISMO):\n\n';
+            
+            const identical = comparison.filter(c => c.identical).length;
+            const total = comparison.length;
+            const passRate = (identical / total * 100).toFixed(1);
+            
+            output += `✅ Métricas idênticas: ${identical}/${total} (${passRate}%)\n`;
+            output += `🎯 Tolerância: 0.1%\n\n`;
+            
+            comparison.forEach(metric => {
+                const status = metric.identical ? '✅' : '❌';
+                output += `${status} ${metric.metric}: ${metric.value1} vs ${metric.value2} ${metric.unit}\n`;
+                output += `   Diferença: ${metric.difference} (${metric.relativeDiff})\n\n`;
+            });
+            
+            if (identical === total) {
+                output += '🎉 DETERMINISMO PERFEITO! Todas as métricas são idênticas.\n';
+            } else {
+                output += '⚠️  Detectadas diferenças. Verificar se há randomização indevida.\n';
+            }
+            
+            container.innerHTML += output;
+        }
+        
+        // Inicializar quando a página carrega
+        window.addEventListener('load', () => {
+            console.log('🧪 Sistema de testes carregado');
+        });
+    </script>
+</body>
+</html>
