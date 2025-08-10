@@ -1,7 +1,31 @@
-// 🎵 AUDIO ANALYSIS SCHEMA V2
-// Schema de validação para análise de áudio usando Zod
+// 🎵 AUDIO ANALYSIS SCHEMA V2 - PHASE 2
+// Schema de validação com 12 métricas core implementadas
 
 import { z } from 'zod';
+
+// 📊 Constants - Updated for Phase 2
+export const ANALYSIS_CONSTANTS = {
+  MAX_FILE_SIZE: 25 * 1024 * 1024, // 25MB
+  MAX_DURATION: 600, // 10 minutos
+  MIN_DURATION: 0.1, // 100ms
+  SUPPORTED_FORMATS: ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac', 'webm'],
+  SAMPLE_RATES: [22050, 44100, 48000, 88200, 96000],
+  FREQUENCY_BANDS: {
+    sub: [20, 60],
+    bass: [60, 250],
+    'low-mid': [250, 500],
+    mid: [500, 2000],
+    'high-mid': [2000, 4000],
+    high: [4000, 8000],
+    air: [8000, 20000]
+  },
+  QUALITY_THRESHOLDS: {
+    excellent: 90,
+    good: 75,
+    fair: 60,
+    poor: 45
+  }
+};
 
 // Schema para frequências dominantes
 const DominantFrequencySchema = z.object({
@@ -206,11 +230,13 @@ export function validateAnalysisRequest(data) {
   }
 }
 
-// Constantes úteis
+// 📊 Constants - Updated for Phase 2 
 export const ANALYSIS_CONSTANTS = {
   MAX_FILE_SIZE: 25 * 1024 * 1024, // 25MB
   MAX_DURATION: 600, // 10 minutos
+  MIN_DURATION: 0.1, // 100ms
   SUPPORTED_FORMATS: ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'flac', 'webm'],
+  SAMPLE_RATES: [22050, 44100, 48000, 88200, 96000],
   FREQUENCY_BANDS: {
     sub: [20, 60],
     bass: [60, 250],
@@ -228,4 +254,4 @@ export const ANALYSIS_CONSTANTS = {
   }
 };
 
-console.log('🎵 Audio Analysis Schema V2 carregado');
+console.log('🎵 Audio Analysis Schema V2 - Phase 2 loaded');

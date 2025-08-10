@@ -100,11 +100,71 @@ class AudioAnalyzer {
     // 🎯 Análise de Frequências Dominantes
     analysis.technicalData.dominantFrequencies = this.findDominantFrequencies(leftChannel, audioBuffer.sampleRate);
 
-    // 🔍 Detectar Problemas Comuns
+  // 🔍 Detectar Problemas Comuns
     this.detectCommonProblems(analysis);
 
     // 💡 Gerar Sugestões Técnicas
     this.generateTechnicalSuggestions(analysis);
+
+    // 🎯 Enriquecer com métricas Fase 2 (sem mudar HTML/CSS/IDs)
+    try {
+      if (window.AudioAnalyzerV2) {
+        const v2 = new window.AudioAnalyzerV2();
+        if (!v2.isInitialized) {
+          try { v2.initialize(); } catch {}
+        }
+        // Loudness (LUFS/LRA)
+        try {
+          const lm = v2.calculateLoudnessMetrics(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+          analysis.technicalData.lufs_integrated = lm.lufs_integrated ?? null;
+          analysis.technicalData.lufs_short_term = lm.lufs_short_term ?? null;
+          analysis.technicalData.lufs_momentary = lm.lufs_momentary ?? null;
+          analysis.technicalData.lra = lm.lra ?? null;
+          analysis.technicalData.headroom_db = lm.headroom_db ?? null;
+        } catch {}
+
+        // True Peak
+        try {
+          const tp = v2.analyzeTruePeaks(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+          analysis.technicalData.true_peak_dbtp = tp.true_peak_dbtp ?? null;
+          analysis.technicalData.sample_peak_left_db = tp.sample_peak_left_db ?? null;
+          analysis.technicalData.sample_peak_right_db = tp.sample_peak_right_db ?? null;
+          analysis.technicalData.exceeds_minus1dbtp = tp.exceeds_minus1dbtp ?? null;
+        } catch {}
+
+        // Espectral (centroid/rolloff/flux) + espectro compacto
+        try {
+          v2.analyzeSpectralFeatures(leftChannel, audioBuffer.sampleRate, 'balanced').then(spec => {
+            analysis.technicalData.centroid_hz = spec?.spectralCentroid ?? null;
+            analysis.technicalData.rolloff85_hz = spec?.spectralRolloff ?? null;
+            analysis.technicalData.spectral_flux = spec?.spectralFlux ?? null;
+          }).catch(()=>{});
+          // Espectro médio compactado (para possível uso futuro no relatório)
+          const compact = v2.computeAverageSpectrumCompact(leftChannel, audioBuffer.sampleRate, 'balanced');
+          analysis.technicalData.spectrum_avg = Array.isArray(compact) ? compact.slice(0, 256) : null;
+        } catch {}
+
+        // Estéreo (correlação/balance)
+        try {
+          if (audioBuffer.numberOfChannels > 1) {
+            const st = v2.analyzeStereoMetrics(leftChannel, rightChannel);
+            analysis.technicalData.stereo_correlation = st?.correlation ?? null;
+            analysis.technicalData.balance_lr = st?.balance ?? null;
+          } else {
+            analysis.technicalData.stereo_correlation = null;
+            analysis.technicalData.balance_lr = null;
+          }
+        } catch {}
+
+        // Tonal Balance (bandas)
+        try {
+          const tb = v2.calculateTonalBalance(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+          analysis.technicalData.tonal_balance = tb || null; // { sub/low/mid/high: {rms_db,...} }
+        } catch {}
+      }
+    } catch (e) {
+      console.warn('⚠️ Falha ao enriquecer métricas Fase 2 no V1:', e.message);
+    }
 
     return analysis;
   }

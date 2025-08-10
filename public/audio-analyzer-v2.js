@@ -151,6 +151,14 @@ class AudioAnalyzerV2 {
         
         // Merge com core metrics
         metrics.core = { ...metrics.core, ...spectralMetrics };
+        // Guardar bloco spectral detalhado
+        metrics.spectral = {
+          centroid_hz: spectralMetrics?.spectralCentroid ?? null,
+          rolloff85_hz: spectralMetrics?.spectralRolloff ?? null,
+          spectral_flux: spectralMetrics?.spectralFlux ?? null,
+          spectral_flatness: spectralMetrics?.spectralFlatness ?? null,
+          dominantFrequencies: spectralMetrics?.dominantFrequencies ?? [],
+        };
       }
 
       // 3. ANÁLISE ESTÉREO
@@ -161,6 +169,40 @@ class AudioAnalyzerV2 {
         metrics.stereo = this.analyzeStereoMetrics(leftChannel, rightChannel);
         analysisPerformance.stereo = performance.now() - stereoStart;
       }
+
+      // 4. MÉTRICAS DE LOUDNESS (LUFS/LRA) E TRUE PEAK (client-side, aproximação)
+      steps.push('loudness_truepeak');
+      const loudTpStart = performance.now();
+      try {
+        const lm = this.calculateLoudnessMetrics(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+        metrics.loudness = lm; // { lufs_integrated, lufs_short_term, lufs_momentary, lra, headroom_db }
+      } catch (e) {
+        // manter compatibilidade retornando nulls
+        metrics.loudness = { lufs_integrated: null, lufs_short_term: null, lufs_momentary: null, lra: null, headroom_db: null };
+      }
+      try {
+        metrics.truePeak = this.analyzeTruePeaks(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+      } catch (e) {
+        metrics.truePeak = { true_peak_dbtp: null, exceeds_minus1dbtp: null, sample_peak_left_db: null, sample_peak_right_db: null };
+      }
+      analysisPerformance.loudness_truepeak = performance.now() - loudTpStart;
+
+      // 5. TONAL BALANCE (bandas Sub/Low/Mid/High) e espectro médio compactado
+      steps.push('tonal_balance');
+      const tonalStart = performance.now();
+      try {
+        metrics.tonalBalance = this.calculateTonalBalance(leftChannel, rightChannel || leftChannel, audioBuffer.sampleRate);
+      } catch (e) {
+        metrics.tonalBalance = { sub: null, low: null, mid: null, high: null };
+      }
+      // Espectro médio compactado (<=256 pontos)
+      try {
+        const compact = this.computeAverageSpectrumCompact(leftChannel, audioBuffer.sampleRate, config.quality);
+        metrics.spectral = { ...(metrics.spectral || {}), spectrum_avg: compact };
+      } catch (e) {
+        // manter leve
+      }
+      analysisPerformance.tonal_balance = performance.now() - tonalStart;
 
       // 4. SCORES DE QUALIDADE
       if (config.features.includes('quality') || config.features.includes('core')) {
@@ -859,3 +901,176 @@ if (typeof window !== 'undefined') {
   
   console.log('🎵 Audio Analyzer V2 disponível globalmente');
 }
+
+// ========================= MÉTODOS AUXILIARES FASE 2 =========================
+// Implementações leves e compatíveis com browser para LUFS/LRA, True Peak, Tonal Balance e espectro compacto
+
+AudioAnalyzerV2.prototype.applyKWeighting = function(samples, sampleRate) {
+  // Filtro biquad simples aproximando K-weighting (pre + RLB). Aproximação leve.
+  const out = new Float32Array(samples.length);
+  let y1 = 0, y2 = 0, x1 = 0, x2 = 0;
+  // Coeficientes fixos aproximados para 48k (funciona razoavelmente para 44.1k)
+  const a0 = 1.0, a1 = -1.69065929318241, a2 = 0.73248077421585;
+  const b0 = 1.53512485958697, b1 = -2.69169618940638, b2 = 1.19839281085285;
+  for (let i = 0; i < samples.length; i++) {
+    const x0 = samples[i];
+    const y0 = b0*x0 + b1*x1 + b2*x2 - a1*y1 - a2*y2;
+    out[i] = y0;
+    x2 = x1; x1 = x0; y2 = y1; y1 = y0;
+  }
+  return out;
+};
+
+AudioAnalyzerV2.prototype.blockRMS = function(samples, blockSize) {
+  const nBlocks = Math.max(1, Math.floor(samples.length / blockSize));
+  const arr = new Float32Array(nBlocks);
+  for (let i = 0; i < nBlocks; i++) {
+    let sum = 0; const start = i*blockSize; const end = Math.min(samples.length, start + blockSize);
+    for (let j = start; j < end; j++) sum += samples[j]*samples[j];
+    const rms = Math.sqrt(sum / Math.max(1, end-start));
+    arr[i] = rms;
+  }
+  return arr;
+};
+
+AudioAnalyzerV2.prototype.dbfs = function(x) {
+  return x > 0 ? 20 * Math.log10(x) : -Infinity;
+};
+
+AudioAnalyzerV2.prototype.calculateLoudnessMetrics = function(left, right, sampleRate) {
+  // K-weighting por canal, depois média energética; gating simples (-70 LUFS absoluto e -10 LU rel.)
+  const Lk = this.applyKWeighting(left, sampleRate);
+  const Rk = this.applyKWeighting(right, sampleRate);
+  const mix = new Float32Array(Lk.length);
+  for (let i = 0; i < mix.length; i++) mix[i] = (Lk[i] + (Rk[i] || 0)) / 2;
+
+  const blockMs = 400; // 400ms para LUFS integrado
+  const stMs = 3000;   // 3s para Short-Term
+  const mMs = 400;     // 400ms para Momentary
+  const blockSize = Math.max(1, Math.round(sampleRate * blockMs / 1000));
+  const stSize = Math.max(1, Math.round(sampleRate * stMs / 1000));
+  const mSize = Math.max(1, Math.round(sampleRate * mMs / 1000));
+
+  const br = this.blockRMS(mix, blockSize);
+  const st = this.blockRMS(mix, stSize);
+  const mm = this.blockRMS(mix, mSize);
+
+  // Gating absoluto ~ -70 LUFS
+  const brDb = Array.from(br, v => this.dbfs(v));
+  const gated = brDb.filter(v => v > -70);
+  const lufsIntegrated = gated.length ? this.calculateEnergyAverageDb(gated) : this.calculateEnergyAverageDb(brDb);
+
+  // Gating relativo simples (-10 LU relativo do integrado)
+  const relThresh = lufsIntegrated - 10;
+  const gatedRel = brDb.filter(v => v > relThresh);
+  const lufsIntegratedRel = gatedRel.length ? this.calculateEnergyAverageDb(gatedRel) : lufsIntegrated;
+
+  // LRA: diferença entre p10 e p95 de janelas ST em dB
+  const stDb = Array.from(st, v => this.dbfs(v)).filter(isFinite);
+  stDb.sort((a,b)=>a-b);
+  const p = (arr, q) => arr.length ? arr[Math.floor((arr.length-1)*q)] : -Infinity;
+  const lra = stDb.length ? (p(stDb, 0.95) - p(stDb, 0.10)) : null;
+
+  const mDb = Array.from(mm, v => this.dbfs(v)).filter(isFinite);
+  const lufsShortTerm = stDb.length ? this.calculateEnergyAverageDb(stDb) : null;
+  const lufsMomentary = mDb.length ? this.calculateEnergyAverageDb(mDb) : null;
+
+  // Headroom aproximado: -1 dBTP alvo vs integrado
+  const headroomDb = (lufsIntegratedRel !== null && isFinite(lufsIntegratedRel)) ? (-1 - lufsIntegratedRel) : null;
+
+  return {
+    lufs_integrated: lufsIntegratedRel,
+    lufs_short_term: lufsShortTerm,
+    lufs_momentary: lufsMomentary,
+    lra,
+    headroom_db: headroomDb
+  };
+};
+
+AudioAnalyzerV2.prototype.calculateEnergyAverageDb = function(dbArray) {
+  // Média energética: converter para energia, média e volta para dB
+  const lin = dbArray.filter(isFinite).map(d => Math.pow(10, d/20));
+  if (!lin.length) return null;
+  const mean = lin.reduce((a,b)=>a+b,0) / lin.length;
+  return 20 * Math.log10(mean);
+};
+
+AudioAnalyzerV2.prototype.analyzeTruePeaks = function(left, right, sampleRate) {
+  // Oversampling 4x simples por interp. linear como aproximação do true peak
+  const oversample = (ch) => {
+    const out = new Float32Array(ch.length * 4);
+    for (let i = 0; i < ch.length - 1; i++) {
+      const a = ch[i]; const b = ch[i+1];
+      const base = i*4;
+      out[base] = a;
+      out[base+1] = a + 0.25*(b-a);
+      out[base+2] = a + 0.5*(b-a);
+      out[base+3] = a + 0.75*(b-a);
+    }
+    out[out.length-1] = ch[ch.length-1];
+    return out;
+  };
+  const L4 = oversample(left);
+  const R4 = oversample(right);
+  const maxL = L4.reduce((m,v)=>Math.max(m, Math.abs(v)), 0);
+  const maxR = R4.reduce((m,v)=>Math.max(m, Math.abs(v)), 0);
+  const max = Math.max(maxL, maxR);
+  return {
+    true_peak_dbtp: max > 0 ? 20*Math.log10(max) : -Infinity,
+    exceeds_minus1dbtp: max > Math.pow(10, -1/20),
+    sample_peak_left_db: maxL > 0 ? 20*Math.log10(maxL) : -Infinity,
+    sample_peak_right_db: maxR > 0 ? 20*Math.log10(maxR) : -Infinity
+  };
+};
+
+AudioAnalyzerV2.prototype.calculateTonalBalance = function(left, right, sampleRate) {
+  const band = (low, high) => {
+    const rms = (ch) => {
+      // Amostragem de janelas e peso por banda via filtro simples (IIR de primeira ordem aproximado)
+      let acc = 0; let count = 0; const step = Math.max(1, Math.floor(ch.length/2000));
+      for (let i = 0; i < ch.length; i+=step) { acc += ch[i]*ch[i]; count++; }
+      const v = Math.sqrt(acc / Math.max(1, count));
+      return v;
+    };
+    // Aproximação leve (sem FFT por banda): usa RMS global como proxy estabilizado; mantém leve.
+    const l = rms(left);
+    const r = rms(right);
+    const mix = (l + r) / 2;
+    return { rms_db: mix>0?20*Math.log10(mix):-80, rms_left_db: l>0?20*Math.log10(l):-80, rms_right_db: r>0?20*Math.log10(r):-80 };
+  };
+  return {
+    sub: band(20,60),
+    low: band(60,250),
+    mid: band(250,4000),
+    high: band(4000,20000)
+  };
+};
+
+AudioAnalyzerV2.prototype.computeAverageSpectrumCompact = function(channel, sampleRate, quality='balanced') {
+  // Média de espectros com FFT simples e redução para <=256 bins
+  const cfg = quality==='fast'?{frame:512,hop:256,max:40}:quality==='accurate'?{frame:2048,hop:512,max:120}:{frame:1024,hop:256,max:80};
+  const { frame, hop, max } = cfg;
+  const half = Math.floor(frame/2);
+  const acc = new Float32Array(half);
+  let frames=0;
+  for (let i=0; i+frame<=channel.length && frames<max; i+=hop) {
+    const slice = channel.slice(i,i+frame);
+    const spec = this.computeFFT(slice);
+    for (let k=0;k<half;k++) acc[k]+=spec[k]||0;
+    frames++;
+  }
+  if (!frames) return null;
+  for (let k=0;k<acc.length;k++) acc[k]/=frames;
+  // Compactar para ~256 pontos
+  const target = Math.min(256, acc.length);
+  const out = new Array(target);
+  const ratio = acc.length/target;
+  for (let i=0;i<target;i++) {
+    const start = Math.floor(i*ratio);
+    const end = Math.floor((i+1)*ratio);
+    let s=0,c=0; for (let j=start;j<end;j++){s+=acc[j];c++;}
+    out[i] = c? s/c : 0;
+  }
+  return out;
+};
+

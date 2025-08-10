@@ -4,32 +4,16 @@
 class AudioAnalyzerIntegrationV2 {
   constructor() {
     this.analyzer = new window.AudioAnalyzerV2();
-    this.advancedAnalyzer = null; // Will be initialized if available
     this.currentAnalysis = null;
     this.isV2Enabled = true; // Feature flag
     this.config = {
       version: '2.0',
-      features: ['core', 'spectral', 'stereo', 'quality', 'advanced'],
-      enableAdvanced: true,
-      usePresets: true,
-      enableRealTimeViz: true,
+      features: ['core', 'spectral', 'stereo', 'quality'],
+      enableAdvanced: false,
       autoDetectQuality: true
     };
     
-    // Initialize advanced analyzer if available
-    this.initializeAdvancedFeatures();
-    
     console.log('🎵 Audio Analyzer Integration V2 initialized');
-  }
-
-  // 🚀 Initialize advanced features
-  initializeAdvancedFeatures() {
-    if (typeof window.AudioAnalyzerV2Advanced !== 'undefined') {
-      this.advancedAnalyzer = new window.AudioAnalyzerV2Advanced();
-      console.log('✅ Advanced features enabled');
-    } else {
-      console.warn('⚠️ Advanced features not available');
-    }
   }
 
   // 🎤 Inicializar integração

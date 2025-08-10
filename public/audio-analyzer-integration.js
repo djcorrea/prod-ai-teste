@@ -319,7 +319,7 @@ function displayModalResults(analysis) {
     // Mostrar resultados
     results.style.display = 'block';
     
-    // Construir dados técnicos
+    // Construir dados técnicos (mantendo layout existente e IDs)
     technicalData.innerHTML = `
         <div class="data-row">
             <span class="label">📈 Peak:</span>
@@ -343,6 +343,46 @@ function displayModalResults(analysis) {
             <span class="value">${Math.round(analysis.technicalData.dominantFrequencies[0].frequency)} Hz</span>
         </div>
         ` : ''}
+        ${Number.isFinite(analysis.technicalData.true_peak_dbtp) ? `
+        <div class="data-row">
+            <span class="label">🏔️ True Peak:</span>
+            <span class="value">${analysis.technicalData.true_peak_dbtp.toFixed(2)} dBTP</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.lufs_integrated === 'number' ? `
+        <div class="data-row">
+            <span class="label">📏 LUFS Integrado:</span>
+            <span class="value">${analysis.technicalData.lufs_integrated.toFixed(1)} LUFS</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.lra === 'number' ? `
+        <div class="data-row">
+            <span class="label">🎚️ LRA:</span>
+            <span class="value">${analysis.technicalData.lra.toFixed(1)} LU</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.centroid_hz === 'number' ? `
+        <div class="data-row">
+            <span class="label">🌈 Centroid:</span>
+            <span class="value">${Math.round(analysis.technicalData.centroid_hz)} Hz</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.rolloff85_hz === 'number' ? `
+        <div class="data-row">
+            <span class="label">🌈 Rolloff 85%:</span>
+            <span class="value">${Math.round(analysis.technicalData.rolloff85_hz)} Hz</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.spectral_flux === 'number' ? `
+        <div class="data-row">
+            <span class="label">🌈 Spectral Flux:</span>
+            <span class="value">${analysis.technicalData.spectral_flux.toFixed(3)}</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.stereo_correlation === 'number' ? `
+        <div class="data-row">
+            <span class="label">🔊 Correlação Estéreo:</span>
+            <span class="value">${analysis.technicalData.stereo_correlation.toFixed(2)}</span>
+        </div>` : ''}
+        ${typeof analysis.technicalData.balance_lr === 'number' ? `
+        <div class="data-row">
+            <span class="label">🔊 Balance LR:</span>
+            <span class="value">${(analysis.technicalData.balance_lr*100).toFixed(0)}%</span>
+        </div>` : ''}
         ${analysis.problems.length > 0 ? `
         <div class="data-row">
             <span class="label">🚨 Problemas:</span>
