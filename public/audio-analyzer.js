@@ -132,9 +132,34 @@ class AudioAnalyzer {
   }
   const v2res = await v2.performFullAnalysis(audioBuffer, { quality: 'fast', features: ['core','spectral','stereo','quality'] });
   const metrics = v2res?.metrics || {};
+  // Se BPI indicar excesso de graves, remova sugestão V1 de "Pouca presença de graves"
+  try {
+    const bpi = v2res?.metrics?.v2ProMetrics?.indices?.bpi;
+    if (Number.isFinite(bpi) && bpi > 2 && Array.isArray(baseAnalysis.suggestions)) {
+      baseAnalysis.suggestions = baseAnalysis.suggestions.filter(s => s?.type !== 'bass_enhancement' && !/Pouca presença de graves/i.test(s?.message || ''));
+    }
+  } catch {}
   // Disponibilizar diagnósticos V2 para a UI (sem alterar o que já existe do V1)
   if (v2res?.diagnostics) {
     baseAnalysis.v2Diagnostics = v2res.diagnostics;
+    // Mesclar sugestões/problemas avançados no resultado principal por padrão (sem mudar layout/IDs)
+    try {
+      const advDefaultOn = (typeof window !== 'undefined') ? (window.SUGESTOES_AVANCADAS !== false) : false;
+      if (advDefaultOn) {
+        const v2d = v2res.diagnostics || {};
+        const mergeUnique = (a = [], b = [], key = (x) => `${x.type||''}|${x.message||''}`) => {
+          const seen = new Set((a||[]).map(key));
+          const out = Array.isArray(a) ? a.slice() : [];
+          for (const item of (b||[])) {
+            const k = key(item);
+            if (!seen.has(k)) { seen.add(k); out.push(item); }
+          }
+          return out;
+        };
+        baseAnalysis.problems = mergeUnique(baseAnalysis.problems, v2d.problems);
+        baseAnalysis.suggestions = mergeUnique(baseAnalysis.suggestions, v2d.suggestions);
+      }
+    } catch {}
   }
     const loud = metrics.loudness || {};
     const tp = metrics.truePeak || {};

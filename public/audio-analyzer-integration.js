@@ -426,34 +426,75 @@ function displayModalResults(analysis) {
             // Card extra: Diagnóstico & Sugestões listados
             const diagCard = () => {
                 const blocks = [];
+
+                // Helpers para embelezar as sugestões sem mudar layout/IDs
+                const formatNumbers = (text, decimals = 2) => {
+                    if (!text || typeof text !== 'string') return '';
+                    return text.replace(/(-?\d+\.\d{3,})/g, (m) => {
+                        const n = parseFloat(m);
+                        return Number.isFinite(n) ? n.toFixed(decimals) : m;
+                    });
+                };
+                const renderSuggestionItem = (sug) => {
+                    const title = sug.message || '';
+                    let action = sug.action || '';
+                    let extra = '';
+                    // Se a ação tiver métrica após " — ", mover para detalhes
+                    const split = action.split(' — ');
+                    if (split.length > 1) {
+                        action = split[0];
+                        extra = split.slice(1).join(' — ');
+                    }
+                    // Unificar detalhes e remover duplicados para ficar limpo
+                    const rawPieces = [sug.details || '', extra || '']
+                        .filter(Boolean)
+                        .join(' • ')
+                        .split(/[;•]+/)
+                        .map(s => s.trim())
+                        .filter(Boolean);
+                    const seen = new Set();
+                    const uniquePieces = rawPieces.filter(p => {
+                        const key = p.toLowerCase();
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    });
+                    const prettyDetails = formatNumbers(uniquePieces.join(' • '), 2);
+                    return `
+                        <div class="diag-item info">
+                            <div class="diag-title">${title}</div>
+                            ${action ? `<div class="diag-tip">${action}</div>` : ''}
+                            ${prettyDetails ? `<div class="diag-tip" style="opacity:.85;font-size:12px;">${prettyDetails}</div>` : ''}
+                        </div>`;
+                };
                 if (analysis.problems.length > 0) {
-                    const list = analysis.problems.slice(0, 4).map(p => `
+                    const list = analysis.problems.map(p => {
+                        const msg = typeof p.message === 'string' ? p.message.replace(/(-?\d+\.\d{3,})/g, m => {
+                            const n = parseFloat(m); return Number.isFinite(n) ? n.toFixed(2) : m;
+                        }) : p.message;
+                        const sol = typeof p.solution === 'string' ? p.solution.replace(/(-?\d+\.\d{3,})/g, m => {
+                            const n = parseFloat(m); return Number.isFinite(n) ? n.toFixed(2) : m;
+                        }) : p.solution;
+                        return `
                         <div class="diag-item danger">
-                            <div class="diag-title">${p.message}</div>
-                            <div class="diag-tip">${p.solution || ''}</div>
-                        </div>`).join('');
+                            <div class="diag-title">${msg}</div>
+                            <div class="diag-tip">${sol || ''}</div>
+                        </div>`;
+                    }).join('');
                     blocks.push(`<div class="diag-section"><div class="diag-heading">Problemas:</div>${list}</div>`);
                 }
                 if (analysis.suggestions.length > 0) {
-                    const list = analysis.suggestions.slice(0, 4).map(s => `
-                        <div class="diag-item info">
-                            <div class="diag-title">${s.message}</div>
-                            <div class="diag-tip">${s.action || ''}</div>
-                        </div>`).join('');
+                    const list = analysis.suggestions.map(s => renderSuggestionItem(s)).join('');
                     blocks.push(`<div class="diag-section"><div class="diag-heading">Sugestões:</div>${list}</div>`);
                 }
                 // Subbloco opcional com diagnósticos do V2 (quando disponíveis)
-                if (analysis.v2Diagnostics) {
-                    const v2p = (analysis.v2Diagnostics.problems || []).slice(0, 4).map(p => `
+                if (analysis.v2Diagnostics && (typeof window === 'undefined' || window.SUGESTOES_AVANCADAS === false)) {
+                    const v2p = (analysis.v2Diagnostics.problems || []).map(p => `
                         <div class="diag-item danger">
                             <div class="diag-title">${p.message}</div>
                             <div class="diag-tip">${p.solution || ''}</div>
                         </div>`).join('');
-                    const v2s = (analysis.v2Diagnostics.suggestions || []).slice(0, 4).map(s => `
-                        <div class="diag-item info">
-                            <div class="diag-title">${s.message}</div>
-                            <div class="diag-tip">${s.action || ''}</div>
-                        </div>`).join('');
+                    const v2s = (analysis.v2Diagnostics.suggestions || []).map(s => renderSuggestionItem(s)).join('');
                     const anyV2 = v2p || v2s;
                     if (anyV2) {
                         const v2Block = `

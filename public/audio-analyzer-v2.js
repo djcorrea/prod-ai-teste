@@ -64,8 +64,14 @@ class AudioAnalyzerV2 {
 			scores.dynamics = Math.round(mapLin(dr, 2, 30, 30, 95));
 		}
 
-		// Loudness: RMS -35..-8 → 40..95 com pico suave por volta de -14
-		if (isFinite(core.rms)) {
+		// Loudness: preferir LUFS integrado quando disponível; senão usar RMS como proxy
+		const lufsInt = metrics.loudness?.lufs_integrated;
+		if (isFinite(lufsInt)) {
+			const l = clamp(lufsInt, -35, -8);
+			const left = mapLin(l, -35, -14, 40, 95);
+			const right = mapLin(l, -14, -8, 95, 60);
+			scores.loudness = Math.round(l <= -14 ? left : right);
+		} else if (isFinite(core.rms)) {
 			const rms = clamp(core.rms, -35, -8);
 			const left = mapLin(rms, -35, -14, 40, 95);
 			const right = mapLin(rms, -14, -8, 95, 60);
@@ -75,9 +81,12 @@ class AudioAnalyzerV2 {
 		// Técnico: penalizações contínuas
 		let technical = 100;
 		if (isFinite(core.clippingPercentage)) {
-			const clipPct = clamp(core.clippingPercentage, 0, 5);
-			technical -= Math.round(mapLin(clipPct, 0, 5, 0, 50));
+			const clipPct = Math.max(0, core.clippingPercentage);
+			// até 0.2% leve; cresce rápido acima de 1%
+			if (clipPct > 1) technical -= 50; else if (clipPct > 0.2) technical -= 25; else if (clipPct > 0.05) technical -= 10;
 		}
+		// penalizar true peak acima de -1 dBTP
+		if (metrics.truePeak?.exceeds_minus1dbtp) technical -= 20;
 		if (isFinite(core.dcOffset)) {
 			const dc = Math.abs(core.dcOffset);
 			const dcLim = clamp(dc, 0, 0.05);
@@ -230,7 +239,8 @@ class AudioAnalyzerV2 {
 			analysisPerformance.tonal_balance = performance.now() - tonalStart;
 
 			// 5.1. MÉTRICAS PRO POR BANDA (somente se feature flag ativa)
-			if (typeof window !== 'undefined' && window.DIAG_V2_PRO === true) {
+			const __PRO_FLAG__ = (typeof window !== 'undefined') ? ((window.SUGESTOES_AVANCADAS !== false) || (window.DIAG_V2_PRO === true)) : false;
+			if (__PRO_FLAG__) {
 				steps.push('pro_band_metrics');
 				const proStart = performance.now();
 				try {
@@ -257,11 +267,18 @@ class AudioAnalyzerV2 {
       
 			const diagnostics = this.generateDiagnostics(metrics, metadata);
 			// 5.2. DIAGNÓSTICO PROFISSIONAL (somente se feature flag ativa)
-			if (typeof window !== 'undefined' && window.DIAG_V2_PRO === true && metrics.v2ProMetrics) {
+			if (__PRO_FLAG__ && metrics.v2ProMetrics) {
 				steps.push('pro_diagnostics');
 				const proDiagStart = performance.now();
 				try {
 					diagnostics.v2Pro = this.generateProDiagnostics(metrics, metadata);
+					// Mesclar sugestões/problemas PRO por padrão (pode ser desativado com window.SUGESTOES_AVANCADAS=false)
+					const __MERGE_ADV__ = (typeof window !== 'undefined') ? (window.SUGESTOES_AVANCADAS !== false) : false;
+					if (__MERGE_ADV__) {
+						const pro = diagnostics.v2Pro || { problems: [], suggestions: [] };
+						diagnostics.problems = [ ...(diagnostics.problems || []), ...(pro.problems || []) ].slice(0, 8);
+						diagnostics.suggestions = [ ...(diagnostics.suggestions || []), ...(pro.suggestions || []) ].slice(0, 8);
+					}
 				} catch (e) {
 					warnings.push('Falha no diagnóstico PRO: ' + (e && e.message ? e.message : e));
 				}
@@ -803,31 +820,48 @@ class AudioAnalyzerV2 {
 		const pro = metrics.v2ProMetrics || {};
 		const b = (id) => pro.bands?.[id] || {};
 		const idx = pro.indices || {};
+		const __DBG__ = (typeof window !== 'undefined' && window.DEBUG_ANALYZER === true);
 
 		// Regras explicáveis
-		// 1) Pouca presença de graves
-		if (isFinite(idx.bpi) && idx.bpi < -3 && isFinite(b('low').lufs) && isFinite(idx.headroomTP) && idx.headroomTP >= 2) {
-			const msg = `BPI ${idx.bpi} dB; Low ${b('low').lufs} dB vs Mid/Presence; HeadroomTP ${idx.headroomTP} dB; TP ${metrics.truePeak?.true_peak_dbtp} dBTP`;
-			out.suggestions.push({ type: 'low_end', priority: 'medium', message: 'Pouca presença de graves', action: 'Aumentar 60–80 Hz em +2 a +3 dB (Q 0.7–1.0); considerar sub-synth se Sub muito baixo; verificar KBI/sidechain 3–6 dB GR', details: msg });
+		// 1) Pouca presença de graves (menos sensível; exige bpi < -4 e headroom)
+		if (isFinite(idx.bpi) && idx.bpi < -4 && isFinite(idx.headroomTP) && idx.headroomTP >= 2) {
+			const msg = `BPI ${idx.bpi.toFixed(2)} dB; LowEnd ${idx.lowEndDb?.toFixed?.(2)} dB vs Mid/High ${idx.midHighDb?.toFixed?.(2)} dB; HeadroomTP ${idx.headroomTP?.toFixed?.(2)} dB; TP ${metrics.truePeak?.true_peak_dbtp?.toFixed?.(2)} dBTP`;
+			const action = `Aumentar 60–80 Hz em +2 a +3 dB (Q 0.7–1.0); considerar sub-synth se Sub muito baixo; verificar KBI/sidechain 3–6 dB GR — ${msg}`;
+			out.suggestions.push({ type: 'low_end', priority: 'medium', message: 'Pouca presença de graves', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: low_end', { criteria: { bpi: idx.bpi, headroomTP: idx.headroomTP }, action });
+		}
+
+		// 1b) Excesso de graves (novo: quando bpi > +4)
+		if (isFinite(idx.bpi) && idx.bpi > 4) {
+			const msg = `BPI ${idx.bpi.toFixed(2)} dB; LowEnd ${idx.lowEndDb?.toFixed?.(2)} dB acima de Mid/High ${idx.midHighDb?.toFixed?.(2)} dB; KBI ${(idx.kbi??metrics.v2ProMetrics?.indices?.kbi)?.toFixed?.(3)}`;
+			const action = `Reduzir 60–100 Hz em −2 a −4 dB (Q 0.8–1.2) no buss; usar sidechain (3–6 dB GR) entre kick e baixo; checar sub < 40 Hz com HPF — ${msg}`;
+			out.suggestions.push({ type: 'low_end_excess', priority: 'high', message: 'Excesso de graves', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: low_end_excess', { criteria: { bpi: idx.bpi }, action });
 		}
 
 		// 2) Excesso de lama (200–400 Hz)
 		if (isFinite(idx.mmi) && idx.mmi > 3 && isFinite(core.spectralCentroid) && core.spectralCentroid < 2000) {
 			const msg = `MMI ${idx.mmi} dB; Centroid ${core.spectralCentroid} Hz`;
-			out.suggestions.push({ type: 'mud', priority: 'medium', message: 'Excesso de lama (200–400 Hz)', action: 'Cortar −2 a −4 dB em 250–350 Hz (Q 1.2–1.6) no buss; avaliar multibanda se LRA < 6 dB', details: msg });
+			const action = `Cortar −2 a −4 dB em 250–350 Hz (Q 1.2–1.6) no buss; avaliar multibanda se LRA < 6 dB — ${msg}`;
+			out.suggestions.push({ type: 'mud', priority: 'medium', message: 'Excesso de lama (200–400 Hz)', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: mud', { criteria: { mmi: idx.mmi, centroidHz: core.spectralCentroid }, action });
 		}
 
 		// 3) Brilho/agudos insuficientes
 		if (isFinite(idx.hpi) && idx.hpi < -3 && isFinite(idx.rolloff85Hz) && idx.rolloff85Hz < 6000) {
 			const msg = `HPI ${idx.hpi} dB; Rolloff85 ${idx.rolloff85Hz} Hz`;
-			out.suggestions.push({ type: 'highs', priority: 'low', message: 'Brilho/agudos insuficientes', action: 'Shelf +1.5 a +3 dB em 10–12 kHz; checar sibilância 6–8 kHz', details: msg });
+			const action = `Shelf +1.5 a +3 dB em 10–12 kHz; checar sibilância 6–8 kHz — ${msg}`;
+			out.suggestions.push({ type: 'highs', priority: 'low', message: 'Brilho/agudos insuficientes', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: highs', { criteria: { hpi: idx.hpi, rolloff85Hz: idx.rolloff85Hz }, action });
 		}
 
 		// 4) Estéreo estreito/mono
 		const wMid = b('mid').width; const cMid = b('mid').corr; const wPres = b('presence').width; const cPres = b('presence').corr;
 		if (isFinite(idx.sti) && idx.sti < 40 && isFinite(wMid) && wMid < 0.8 && isFinite(cMid) && cMid > 0.9) {
 			const msg = `STI ${idx.sti}; width_mid ${wMid}; corr_mid ${cMid}; width_presence ${wPres}; corr_presence ${cPres}`;
-			out.suggestions.push({ type: 'stereo', priority: 'low', message: 'Estéreo estreito/mono', action: 'Widening em 2–8 kHz; evitar estéreo <120 Hz', details: msg });
+			const action = `Widening em 2–8 kHz; evitar estéreo <120 Hz — ${msg}`;
+			out.suggestions.push({ type: 'stereo', priority: 'low', message: 'Estéreo estreito/mono', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: stereo', { criteria: { sti: idx.sti, width_mid: wMid, corr_mid: cMid }, action });
 		}
 
 		// 5) Loudness fora do alvo
@@ -837,7 +871,9 @@ class AudioAnalyzerV2 {
 			const clipPct = core.clippingPercentage;
 			const headroomTP = idx.headroomTP;
 			const msg = `LUFS ${lufs} LUFS; TP ${tp} dBTP; HeadroomTP ${headroomTP} dB; Clipping% ${clipPct}`;
-			out.suggestions.push({ type: 'loudness', priority: 'high', message: 'Loudness fora do alvo', action: 'Ajustar gain/limiter até −1 dBTP; se Clipping% > 0.2% reduzir 1–2 dB antes', details: msg });
+			const action = `Ajustar gain/limiter até −1 dBTP; se Clipping% > 0.2% reduzir 1–2 dB antes — ${msg}`;
+			out.suggestions.push({ type: 'loudness', priority: 'high', message: 'Loudness fora do alvo', action, details: msg });
+			if (__DBG__) console.log('[PRO] regra: loudness', { criteria: { lufs, tp, headroomTP, clipPct }, action });
 		}
 
 		// Problemas técnicos adicionais
@@ -969,32 +1005,53 @@ class AudioAnalyzerV2 {
 		// Conversões finais por banda
 		const out = { bands: {}, indices: {} };
 		const totalEnergy = Object.values(acc).reduce((s, v) => s + (v.energy || 0), 0) || 1;
+		const eps = 1e-12;
 		for (let b of bands) {
 			const a = acc[b.id];
-			const rms = a.energyCount > 0 ? Math.sqrt(a.energy / Math.max(1, a.energyCount)) : 0;
-			const lufs = rms > 0 ? 20 * Math.log10(rms) : -Infinity; // proxy por banda
+			// Usar potência média por bin (energia média) para neutralizar a largura de banda
+			const meanPower = a.energyCount > 0 ? (a.energy / Math.max(1, a.energyCount)) : eps;
+			const levelDb = 10 * Math.log10(Math.max(eps, meanPower));
 			const flatGeom = a.flatCount > 0 ? Math.exp(a.flatGeoSum / a.flatCount) : 0;
 			const flatArith = a.energyCount > 0 ? (a.energy / Math.max(1, a.energyCount)) : 0;
 			const flatness = flatArith > 0 ? (flatGeom / Math.sqrt(flatArith)) : 0;
 			const flux = a.fluxDen > 0 ? (a.fluxSum / a.fluxDen) : 0;
-			const peakDbfs = a.__peakBand ? 20 * Math.log10(a.__peakBand) : null; // não mensurado por banda temporalmente aqui
-			const crestDb = (rms > 0 && a.__peakBand > 0) ? (20 * Math.log10(a.__peakBand / rms)) : null;
+			const peakDbfs = a.__peakBand ? 20 * Math.log10(a.__peakBand) : null;
+			const crestDb = null; // não confiável sem pico por banda temporal
 			const width = a.midP > 0 ? Math.sqrt(a.sideP / a.midP) : 0;
-			const corr = (a.leftP > 0 && a.rightP > 0) ? ((a.midP - a.sideP) / Math.sqrt(a.leftP * a.rightP)) : 1; // proxy coeficiente
+			const corr = (a.leftP > 0 && a.rightP > 0) ? ((a.midP - a.sideP) / Math.sqrt(a.leftP * a.rightP)) : 1;
 			const balance = (a.leftP + a.rightP) > 0 ? ((a.rightP - a.leftP) / (a.rightP + a.leftP)) : 0;
-			out.bands[b.id] = { lufs, peakDbfs, crestDb, flatness, flux, width, corr, balance, energyShare: (a.energy / totalEnergy) };
+			out.bands[b.id] = { lufs: levelDb, peakDbfs, crestDb, flatness, flux, width, corr, balance, energyShare: (a.energy / totalEnergy) };
 		}
 
 		// Índices
 		const bget = (id) => out.bands[id] || {};
+		const Sub = bget('sub').lufs ?? -Infinity;
 		const Low = bget('low').lufs ?? -Infinity;
+		const LowMid = bget('lowmid').lufs ?? -Infinity;
+		const Mud = bget('mud').lufs ?? -Infinity;
 		const Mid = bget('mid').lufs ?? -Infinity;
 		const Presence = bget('presence').lufs ?? -Infinity;
-		const Mud = bget('mud').lufs ?? -Infinity;
-		const LowMid = bget('lowmid').lufs ?? -Infinity;
 		const Brilho = bget('brilho').lufs ?? -Infinity;
 
-		const bpi = Low - (0.5 * Mid + 0.5 * Presence);
+		// Média ponderada em domínio de potência (linear) e convertida de volta para dB
+		const lin = (db) => (isFinite(db) ? Math.pow(10, db/10) : 0);
+		const wAvgDb = (pairs) => {
+			let num = 0, den = 0;
+			for (const {db, w} of pairs) { num += w * lin(db); den += w; }
+			return den > 0 ? 10 * Math.log10(Math.max(1e-20, num / den)) : -Infinity;
+		};
+
+		const lowEndDb = wAvgDb([
+			{ db: Sub, w: 0.6 },
+			{ db: Low, w: 1.0 },
+			{ db: LowMid, w: 0.8 }
+		]);
+		const midHighDb = wAvgDb([
+			{ db: Mid, w: 0.7 },
+			{ db: Presence, w: 1.0 }
+		]);
+
+		const bpi = lowEndDb - midHighDb; // Bass Presence Index (positivo = mais graves que médios/agudos)
 		const mmi = Mud - (0.5 * LowMid + 0.5 * Mid);
 		const meanAll = Object.values(out.bands).reduce((s, v) => s + (isFinite(v.lufs) ? v.lufs : 0), 0) / Math.max(1, Object.keys(out.bands).length);
 		const hpi = Brilho - meanAll;
@@ -1010,6 +1067,8 @@ class AudioAnalyzerV2 {
 		sti -= Math.max(0, (1 - cPres)) * 20;
 		sti -= Math.max(0, (wLow - 0.4)) * 20; // penalizar largura em graves
 		sti -= Math.max(0, (wSub - 0.3)) * 20;
+		// garantir faixa 0–100
+		sti = Math.max(0, Math.min(100, sti));
 
 		// KBI: overlap de 45–70 (kick) e 55–120 (baixo) via energia
 		const kickBand = { lo: 45, hi: 70 }, bassBand = { lo: 55, hi: 120 };
@@ -1023,7 +1082,7 @@ class AudioAnalyzerV2 {
 		const headroomTP = isFinite(tp) ? (-1 - tp) : null;
 		const headroomSP = Math.min(isFinite(spL) ? (0 - spL) : Infinity, isFinite(spR) ? (0 - spR) : Infinity);
 
-		out.indices = { bpi, mmi, hpi, sti, kbi, headroomTP, headroomSP, rolloff85Hz: baseMetrics.core?.spectralRolloff, centroidHz: baseMetrics.core?.spectralCentroid };
+		out.indices = { bpi, mmi, hpi, sti, kbi, headroomTP, headroomSP, lowEndDb, midHighDb, rolloff85Hz: baseMetrics.core?.spectralRolloff, centroidHz: baseMetrics.core?.spectralCentroid };
 		return out;
 	}
 
