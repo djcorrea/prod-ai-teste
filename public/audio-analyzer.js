@@ -55,7 +55,7 @@ class AudioAnalyzer {
           
           console.log('🔬 Realizando análise completa...');
           // Análise completa do áudio
-          const analysis = this.performFullAnalysis(audioBuffer);
+          const analysis = await this.performFullAnalysis(audioBuffer);
           
           clearTimeout(timeout);
           console.log('✅ Análise concluída com sucesso!');
@@ -78,7 +78,7 @@ class AudioAnalyzer {
   }
 
   // 🔬 Realizar análise completa
-  performFullAnalysis(audioBuffer) {
+  async performFullAnalysis(audioBuffer) {
     const analysis = {
       duration: audioBuffer.duration,
       sampleRate: audioBuffer.sampleRate,
@@ -111,7 +111,7 @@ class AudioAnalyzer {
       if (window.AudioAnalyzerV2) {
         const v2 = new window.AudioAnalyzerV2();
         if (!v2.isInitialized) {
-          try { v2.initialize(); } catch {}
+          try { await v2.initialize(); } catch {}
         }
         // Loudness (LUFS/LRA)
         try {
@@ -134,11 +134,10 @@ class AudioAnalyzer {
 
         // Espectral (centroid/rolloff/flux) + espectro compacto
         try {
-          v2.analyzeSpectralFeatures(leftChannel, audioBuffer.sampleRate, 'balanced').then(spec => {
-            analysis.technicalData.centroid_hz = spec?.spectralCentroid ?? null;
-            analysis.technicalData.rolloff85_hz = spec?.spectralRolloff ?? null;
-            analysis.technicalData.spectral_flux = spec?.spectralFlux ?? null;
-          }).catch(()=>{});
+          const spec = await v2.analyzeSpectralFeatures(leftChannel, audioBuffer.sampleRate, 'balanced');
+          analysis.technicalData.centroid_hz = spec?.spectralCentroid ?? null;
+          analysis.technicalData.rolloff85_hz = spec?.spectralRolloff ?? null;
+          analysis.technicalData.spectral_flux = spec?.spectralFlux ?? null;
           // Espectro médio compactado (para possível uso futuro no relatório)
           const compact = v2.computeAverageSpectrumCompact(leftChannel, audioBuffer.sampleRate, 'balanced');
           analysis.technicalData.spectrum_avg = Array.isArray(compact) ? compact.slice(0, 256) : null;

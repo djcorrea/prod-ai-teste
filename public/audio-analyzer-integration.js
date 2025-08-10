@@ -383,6 +383,16 @@ function displayModalResults(analysis) {
             <span class="label">🔊 Balance LR:</span>
             <span class="value">${(analysis.technicalData.balance_lr*100).toFixed(0)}%</span>
         </div>` : ''}
+                ${analysis.technicalData.tonal_balance ? `
+                <div class=\"data-row\">
+                        <span class=\"label\">🎚️ Tonal Balance:</span>
+                        <span class=\"value\">
+                            Sub ${Math.round(analysis.technicalData.tonal_balance.sub?.rms_db ?? -80)} dB,
+                            Low ${Math.round(analysis.technicalData.tonal_balance.low?.rms_db ?? -80)} dB,
+                            Mid ${Math.round(analysis.technicalData.tonal_balance.mid?.rms_db ?? -80)} dB,
+                            High ${Math.round(analysis.technicalData.tonal_balance.high?.rms_db ?? -80)} dB
+                        </span>
+                </div>` : ''}
         ${analysis.problems.length > 0 ? `
         <div class="data-row">
             <span class="label">🚨 Problemas:</span>
