@@ -25,7 +25,7 @@ class AudioAnalyzer {
       const bufferLength = this.analyzer.frequencyBinCount;
       this.dataArray = new Uint8Array(bufferLength);
       
-      console.log('🎵 Analisador de áudio inicializado com sucesso');
+  if (window.DEBUG_ANALYZER === true) console.log('🎵 Analisador de áudio inicializado com sucesso');
       return true;
     } catch (error) {
       console.error('❌ Erro ao inicializar analisador:', error);
@@ -36,14 +36,14 @@ class AudioAnalyzer {
   // 📁 Analisar arquivo de áudio
   async analyzeAudioFile(file) {
     const tsStart = new Date().toISOString();
-    console.log('🛰️ [Telemetry] Front antes do fetch (modo local, sem fetch):', {
+  if (window.DEBUG_ANALYZER === true) console.log('🛰️ [Telemetry] Front antes do fetch (modo local, sem fetch):', {
       route: '(client-only) audio-analyzer.js',
       method: 'N/A',
       file: file?.name,
       sizeBytes: file?.size,
       startedAt: tsStart
     });
-    console.log(`🎵 Iniciando análise de: ${file.name}`);
+  if (window.DEBUG_ANALYZER === true) console.log(`🎵 Iniciando análise de: ${file.name}`);
     
     if (!this.audioContext) {
       await this.initializeAnalyzer();
@@ -59,11 +59,11 @@ class AudioAnalyzer {
       
       reader.onload = async (e) => {
         try {
-          console.log('📊 Decodificando áudio...');
+          if (window.DEBUG_ANALYZER === true) console.log('� Decodificando áudio...');
           const audioData = e.target.result;
           const audioBuffer = await this.audioContext.decodeAudioData(audioData);
           
-          console.log('🔬 Realizando análise completa...');
+          if (window.DEBUG_ANALYZER === true) console.log('🔬 Realizando análise completa...');
           // Análise completa do áudio (V1)
           let analysis = this.performFullAnalysis(audioBuffer);
 
@@ -75,12 +75,12 @@ class AudioAnalyzer {
           }
           
           clearTimeout(timeout);
-          console.log('✅ Análise concluída com sucesso!');
+          if (window.DEBUG_ANALYZER === true) console.log('✅ Análise concluída com sucesso!');
           // Telemetria pós-json: chaves de 1º nível
           try {
             const topKeys = analysis ? Object.keys(analysis) : [];
             const techKeys = analysis?.technicalData ? Object.keys(analysis.technicalData) : [];
-            console.log('🛰️ [Telemetry] Front após "json" (obj pronto):', { topLevelKeys: topKeys, technicalKeys: techKeys });
+            if (window.DEBUG_ANALYZER === true) console.log('🛰️ [Telemetry] Front após "json" (obj pronto):', { topLevelKeys: topKeys, technicalKeys: techKeys });
           } catch {}
           resolve(analysis);
         } catch (error) {
@@ -102,55 +102,34 @@ class AudioAnalyzer {
 
   // 🔌 Enriquecer com métricas da Fase 2 usando motor V2 (carregado dinamicamente)
   async _enrichWithPhase2Metrics(audioBuffer, baseAnalysis, fileRef) {
-    // Carregar V2 dinamicamente se disponível no projeto (sem alterar HTML)
+    // Carregar V2 dinamicamente a partir de um único caminho confiável (reduz 404); seguir silencioso se indisponível
+    const __DEBUG_ANALYZER__ = (typeof window !== 'undefined' && window.DEBUG_ANALYZER === true);
     if (!this._v2Loaded && typeof window.AudioAnalyzerV2 === 'undefined') {
       if (!this._v2LoadingPromise) {
-        this._v2LoadingPromise = new Promise((resolve, reject) => {
-          const pagePath = (typeof location !== 'undefined') ? location.pathname : '/';
-          // Candidatos robustos, mantendo paths relativos ao index atual
-          const candidates = [];
-          // 1) relativo ao documento atual
-          candidates.push('audio-analyzer-v2.js');
-          candidates.push('./audio-analyzer-v2.js');
-          // 2) se a página estiver em /public/, tente raiz e /public/
-          if (pagePath.includes('/public/')) {
-            candidates.push('/public/audio-analyzer-v2.js');
-          } else {
-            candidates.push('public/audio-analyzer-v2.js');
-            candidates.push('/public/audio-analyzer-v2.js');
-          }
-
-          console.log('🛰️ [Telemetry] Tentando carregar V2 a partir de:', candidates);
-
-          let idx = 0;
-          const tryNext = () => {
-            if (idx >= candidates.length) {
-              reject(new Error('Falha ao carregar audio-analyzer-v2.js de todos os caminhos candidatos'));
-              return;
-            }
-            const url = candidates[idx++];
-            const s = document.createElement('script');
-            s.src = url;
-            s.async = true;
-            s.onload = () => { this._v2Loaded = true; console.log('✅ V2 carregado de', url); resolve(); };
-            s.onerror = () => { console.warn('⚠️ Falha ao carregar V2 em', url); tryNext(); };
-            document.head.appendChild(s);
-          };
-          tryNext();
+        this._v2LoadingPromise = new Promise((resolve) => {
+          const url = 'audio-analyzer-v2.js?v=20250810';
+          const s = document.createElement('script');
+          s.src = url;
+          s.async = true;
+          s.onload = () => { this._v2Loaded = true; if (__DEBUG_ANALYZER__) console.log('✅ V2 carregado de', url); resolve(); };
+          s.onerror = () => { if (__DEBUG_ANALYZER__) console.warn('⚠️ V2 não disponível em', url); resolve(); };
+          document.head.appendChild(s);
         });
       }
-      try { await this._v2LoadingPromise; } catch (e) { console.warn('⚠️ V2 indisponível:', e.message); }
+      try { await this._v2LoadingPromise; } catch (e) { /* segue silencioso */ }
     }
 
     if (typeof window.AudioAnalyzerV2 !== 'function') {
-      console.log('ℹ️ Motor V2 não disponível. Mantendo apenas métricas básicas.');
+      // Mantém apenas métricas básicas quando V2 não disponível
       return baseAnalysis;
     }
 
   // Executar análise V2 de forma leve usando diretamente o AudioBuffer (evita re-decodificação)
   const v2 = new window.AudioAnalyzerV2();
   await v2.initialize?.();
-  console.log('🛰️ [Telemetry] V2: performFullAnalysis com audioBuffer.');
+  if (typeof window !== 'undefined' && window.DEBUG_ANALYZER === true) {
+    console.log('🛰️ [Telemetry] V2: performFullAnalysis com audioBuffer.');
+  }
   const v2res = await v2.performFullAnalysis(audioBuffer, { quality: 'fast', features: ['core','spectral','stereo','quality'] });
   const metrics = v2res?.metrics || {};
     const loud = metrics.loudness || {};
@@ -165,8 +144,15 @@ class AudioAnalyzer {
 
     // Não remover chaves existentes; adicionar novas como opcionais
     td.lufsIntegrated = isFinite(loud.lufs_integrated) ? loud.lufs_integrated : null;
+  // Novas métricas de loudness (V2)
+  td.lufsShortTerm = isFinite(loud.lufs_short_term) ? loud.lufs_short_term : null;
+  td.lufsMomentary = isFinite(loud.lufs_momentary) ? loud.lufs_momentary : null;
+  td.headroomDb = isFinite(loud.headroom_db) ? loud.headroom_db : null;
     td.lra = isFinite(loud.lra) ? loud.lra : (loud.lra === 0 ? 0 : null);
     td.truePeakDbtp = isFinite(tp.true_peak_dbtp) ? tp.true_peak_dbtp : null;
+  // Picos por canal (aprox)
+  td.samplePeakLeftDb = isFinite(tp.sample_peak_left_db) ? tp.sample_peak_left_db : null;
+  td.samplePeakRightDb = isFinite(tp.sample_peak_right_db) ? tp.sample_peak_right_db : null;
     td.spectralCentroid = isFinite(core.spectralCentroid) ? core.spectralCentroid : null;
     td.spectralRolloff85 = isFinite(core.spectralRolloff) ? core.spectralRolloff : null;
     td.spectralFlux = isFinite(core.spectralFlux) ? core.spectralFlux : null;
@@ -193,7 +179,8 @@ class AudioAnalyzer {
     }
 
     // Telemetria: chaves novas adicionadas
-  const added = ['lufsIntegrated','lra','truePeakDbtp','spectralCentroid','spectralRolloff85','spectralFlux','stereoCorrelation','balanceLR','tonalBalance','crestFactor','stereoWidth','monoCompatibility','spectralFlatness','dcOffset','clippingSamples','clippingPct','qualityOverall','processingMs'];
+  const added = ['lufsIntegrated','lufsShortTerm','lufsMomentary','headroomDb','lra','truePeakDbtp','samplePeakLeftDb','samplePeakRightDb','spectralCentroid','spectralRolloff85','spectralFlux','stereoCorrelation','balanceLR','tonalBalance','crestFactor','stereoWidth','monoCompatibility','spectralFlatness','dcOffset','clippingSamples','clippingPct','qualityOverall','processingMs'];
+  if (typeof window !== 'undefined' && window.DEBUG_ANALYZER === true) {
     console.log('🛰️ [Telemetry] Adapter Fase2 aplicado (novas chaves):', added.filter(k => k in td));
     console.log('🛰️ [Telemetry] Valores mapeados:', {
       lufsIntegrated: td.lufsIntegrated,
@@ -211,6 +198,7 @@ class AudioAnalyzer {
         high: td.tonalBalance.high?.rms_db,
       } : null
     });
+  }
 
     return baseAnalysis;
   }
@@ -236,6 +224,30 @@ class AudioAnalyzer {
     analysis.technicalData.peak = this.findPeakLevel(leftChannel);
     analysis.technicalData.rms = this.calculateRMS(leftChannel);
     analysis.technicalData.dynamicRange = this.calculateDynamicRange(leftChannel);
+
+    // ⚙️ Métricas técnicas básicas extras (fallback quando V2 não estiver disponível)
+    try {
+      let dcSum = 0;
+      let clipped = 0;
+      const len = leftChannel.length;
+      const clipThreshold = 0.95; // igual ao V2
+      for (let i = 0; i < len; i++) {
+        const s = leftChannel[i];
+        dcSum += s;
+        if (Math.abs(s) >= clipThreshold) clipped++;
+      }
+      const dcOffset = dcSum / Math.max(1, len);
+      const clippingPct = (clipped / Math.max(1, len)) * 100;
+      if (!Number.isFinite(analysis.technicalData.dcOffset)) {
+        analysis.technicalData.dcOffset = dcOffset;
+      }
+      if (!Number.isFinite(analysis.technicalData.clippingSamples)) {
+        analysis.technicalData.clippingSamples = clipped;
+      }
+      if (!Number.isFinite(analysis.technicalData.clippingPct)) {
+        analysis.technicalData.clippingPct = clippingPct;
+      }
+    } catch {}
 
     // 🎯 Análise de Frequências Dominantes
     analysis.technicalData.dominantFrequencies = this.findDominantFrequencies(leftChannel, audioBuffer.sampleRate);
@@ -290,7 +302,7 @@ class AudioAnalyzer {
 
   // 🎵 Encontrar frequências dominantes
   findDominantFrequencies(channelData, sampleRate) {
-    console.log('🎯 Iniciando análise de frequências...');
+  if (window.DEBUG_ANALYZER === true) console.log('🎯 Iniciando análise de frequências...');
     
     // Implementação simplificada e mais rápida
     const fftSize = 256; // Reduzido para melhor performance
@@ -327,7 +339,7 @@ class AudioAnalyzer {
       }
     }
 
-    console.log(`🎯 Frequências encontradas: ${frequencies.length}`);
+  if (window.DEBUG_ANALYZER === true) console.log(`🎯 Frequências encontradas: ${frequencies.length}`);
 
     // Encontrar as frequências mais comuns
     const freqGroups = this.groupFrequencies(frequencies);

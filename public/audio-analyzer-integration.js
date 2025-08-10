@@ -1,6 +1,11 @@
 // 🎵 AUDIO ANALYZER INTEGRATION
 // Conecta o sistema de análise de áudio com o chat existente
 
+// Debug flag (silencia logs em produção; defina window.DEBUG_ANALYZER = true para habilitar)
+const __DEBUG_ANALYZER__ = (typeof window !== 'undefined' && window.DEBUG_ANALYZER === true);
+const __dbg = (...a) => { if (__DEBUG_ANALYZER__) console.log(...a); };
+const __dwrn = (...a) => { if (__DEBUG_ANALYZER__) console.warn(...a); };
+
 let currentModalAnalysis = null;
 let __audioIntegrationInitialized = false; // evita listeners duplicados
 
@@ -12,28 +17,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeAudioAnalyzerIntegration() {
     if (__audioIntegrationInitialized) {
-        console.log('ℹ️ Integração do Audio Analyzer já inicializada. Ignorando chamada duplicada.');
+        __dbg('ℹ️ Integração do Audio Analyzer já inicializada. Ignorando chamada duplicada.');
         return;
     }
     __audioIntegrationInitialized = true;
-    console.log('🎵 Inicializando integração do Audio Analyzer...');
+    __dbg('🎵 Inicializando integração do Audio Analyzer...');
     
     // Botão de análise de música (novo design)
     const musicAnalysisBtn = document.getElementById('musicAnalysisBtn');
     if (musicAnalysisBtn) {
         musicAnalysisBtn.addEventListener('click', openAudioModal);
-        console.log('✅ Botão de Análise de Música configurado');
+        __dbg('✅ Botão de Análise de Música configurado');
     }
     
     // Modal de áudio
     setupAudioModal();
     
-    console.log('🎵 Audio Analyzer Integration carregada com sucesso!');
+    __dbg('🎵 Audio Analyzer Integration carregada com sucesso!');
 }
 
 // 🎵 Abrir modal de análise de áudio
 function openAudioModal() {
-    console.log('🎵 Abrindo modal de análise de áudio...');
+    __dbg('🎵 Abrindo modal de análise de áudio...');
     
     const modal = document.getElementById('audioAnalysisModal');
     if (modal) {
@@ -50,7 +55,7 @@ function openAudioModal() {
 
 // ❌ Fechar modal de análise de áudio
 function closeAudioModal() {
-    console.log('❌ Fechando modal de análise de áudio...');
+    __dbg('❌ Fechando modal de análise de áudio...');
     
     const modal = document.getElementById('audioAnalysisModal');
     if (modal) {
@@ -83,7 +88,7 @@ function setupAudioModal() {
     const uploadArea = document.getElementById('audioUploadArea');
     
     if (!modal || !fileInput || !uploadArea) {
-        console.warn('⚠️ Elementos do modal não encontrados');
+        __dwrn('⚠️ Elementos do modal não encontrados');
         return;
     }
     
@@ -129,9 +134,9 @@ function setupAudioModal() {
     
     // File input change event
     fileInput.addEventListener('change', (e) => {
-        console.log('📁 File input change triggered');
+        __dbg('📁 File input change triggered');
         if (e.target.files.length > 0) {
-            console.log('📁 File selected:', e.target.files[0].name);
+            __dbg('📁 File selected:', e.target.files[0].name);
             handleModalFileSelection(e.target.files[0]);
         }
     });
@@ -139,12 +144,12 @@ function setupAudioModal() {
     // Não adicionar nenhum listener JS ao botão/label de upload!
     uploadArea.onclick = null;
     
-    console.log('✅ Modal de áudio configurado com sucesso');
+    __dbg('✅ Modal de áudio configurado com sucesso');
 }
 
 // 📁 Processar arquivo selecionado no modal
 async function handleModalFileSelection(file) {
-    console.log('📁 Arquivo selecionado no modal:', file.name);
+    __dbg('📁 Arquivo selecionado no modal:', file.name);
     
     // Validar tipo de arquivo
     if (!file.type.startsWith('audio/')) {
@@ -165,19 +170,19 @@ async function handleModalFileSelection(file) {
         
         // Aguardar audio analyzer carregar se necessário
         if (!window.audioAnalyzer) {
-            console.log('⏳ Aguardando Audio Analyzer carregar...');
+            __dbg('⏳ Aguardando Audio Analyzer carregar...');
             updateModalProgress(20, '🔧 Inicializando V2 Engine...');
             await waitForAudioAnalyzer();
         }
         
         // Analisar arquivo
-        console.log('🔬 Iniciando análise...');
+        __dbg('🔬 Iniciando análise...');
         updateModalProgress(40, '🎵 Processando Waveform Digital...');
         
     const analysis = await window.audioAnalyzer.analyzeAudioFile(file);
         currentModalAnalysis = analysis;
         
-        console.log('✅ Análise concluída:', analysis);
+        __dbg('✅ Análise concluída:', analysis);
         
         updateModalProgress(90, '🧠 Computando Métricas Avançadas...');
         
@@ -195,7 +200,7 @@ async function handleModalFileSelection(file) {
                 audioAnalysisResults: !!document.getElementById('audioAnalysisResults'),
                 modalTechnicalData: !!document.getElementById('modalTechnicalData')
             };
-            console.log('🛰️ [Telemetry] Front antes de preencher modal (existência de elementos):', exists);
+            __dbg('🛰️ [Telemetry] Front antes de preencher modal (existência de elementos):', exists);
             displayModalResults(analysis);
         }, 800);
         
@@ -241,7 +246,7 @@ function updateModalProgress(percentage, message) {
         progressText.textContent = message || `${percentage}%`;
     }
     
-    console.log(`📈 Progresso: ${percentage}% - ${message}`);
+    __dbg(`📈 Progresso: ${percentage}% - ${message}`);
 }
 
 // ❌ Mostrar erro no modal
@@ -293,26 +298,7 @@ function showModalLoading() {
 }
 
 // 📈 Simular progresso
-function simulateProgress() {
-    const progressFill = document.getElementById('audioProgressFill');
-    if (!progressFill) return;
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress >= 95) {
-            progress = 95; // Parar em 95% até análise concluir
-            clearInterval(interval);
-        }
-        progressFill.style.width = progress + '%';
-    }, 150);
-    
-    // Completar ao final
-    setTimeout(() => {
-        clearInterval(interval);
-        progressFill.style.width = '100%';
-    }, 3000);
-}
+// (função de simulação de progresso removida — não utilizada)
 
 // 📊 Mostrar resultados no modal
 function displayModalResults(analysis) {
@@ -394,16 +380,47 @@ function displayModalResults(analysis) {
                 row('Sugestões', analysis.suggestions.length > 0 ? `<span class="tag tag-success">${analysis.suggestions.length} disponível(s)</span>` : '—')
             ].join('');
 
+            // Card extra: Métricas Avançadas (novo card)
+            const advancedMetricsCard = () => {
+                const rows = [];
+                // LUFS ST/M e Headroom
+                if (Number.isFinite(analysis.technicalData?.lufsShortTerm)) {
+                    rows.push(row('LUFS (Short‑Term)', `${safeFixed(analysis.technicalData.lufsShortTerm, 1)} LUFS`));
+                }
+                if (Number.isFinite(analysis.technicalData?.lufsMomentary)) {
+                    rows.push(row('LUFS (Momentary)', `${safeFixed(analysis.technicalData.lufsMomentary, 1)} LUFS`));
+                }
+                if (Number.isFinite(analysis.technicalData?.headroomDb)) {
+                    rows.push(row('Headroom', `${safeFixed(analysis.technicalData.headroomDb, 1)} dB`));
+                }
+                // Picos por canal
+                if (Number.isFinite(analysis.technicalData?.samplePeakLeftDb)) {
+                    rows.push(row('Sample Peak (L)', `${safeFixed(analysis.technicalData.samplePeakLeftDb, 1)} dB`));
+                }
+                if (Number.isFinite(analysis.technicalData?.samplePeakRightDb)) {
+                    rows.push(row('Sample Peak (R)', `${safeFixed(analysis.technicalData.samplePeakRightDb, 1)} dB`));
+                }
+                // Clipping (%)
+                if (Number.isFinite(analysis.technicalData?.clippingPct)) {
+                    rows.push(row('Clipping (%)', `${safeFixed(analysis.technicalData.clippingPct, 2)}%`));
+                }
+                // Frequências dominantes extras
+                if (Array.isArray(analysis.technicalData?.dominantFrequencies) && analysis.technicalData.dominantFrequencies.length > 1) {
+                    const extra = analysis.technicalData.dominantFrequencies.slice(1, 4)
+                        .map((f, idx) => `${idx+2}. ${Math.round(f.frequency)} Hz (${f.occurrences || 1}x)`).join('<br>');
+                    if (extra) rows.push(row('Top Freq. adicionais', `<span style="opacity:.9">${extra}</span>`));
+                }
+                return rows.join('') || row('Status', 'Sem métricas adicionais');
+            };
+
             // Card extra: Problemas Técnicos detalhados
             const techProblems = () => {
                 const rows = [];
-                if (Number.isFinite(analysis.technicalData?.clippingSamples)) {
-                    rows.push(row('Clipping', `<span class="warn">${analysis.technicalData.clippingSamples} samples</span>`));
-                }
-                if (Number.isFinite(analysis.technicalData?.dcOffset)) {
-                    rows.push(row('DC Offset', `${safeFixed(analysis.technicalData.dcOffset, 4)}`));
-                }
-                return rows.join('') || row('Status', 'Sem problemas críticos');
+                const clipVal = Number.isFinite(analysis.technicalData?.clippingSamples) ? analysis.technicalData.clippingSamples : 0;
+                const dcVal = Number.isFinite(analysis.technicalData?.dcOffset) ? analysis.technicalData.dcOffset : 0;
+                rows.push(row('Clipping', `<span class="warn">${clipVal} samples</span>`));
+                rows.push(row('DC Offset', `${safeFixed(dcVal, 4)}`));
+                return rows.join('');
             };
 
             // Card extra: Diagnóstico & Sugestões listados
@@ -476,6 +493,10 @@ function displayModalResults(analysis) {
                     ${scoreRows}
                     ${col3}
                 </div>
+                        <div class="card">
+                            <div class="card-title">🧠 Métricas Avançadas</div>
+                            ${advancedMetricsCard()}
+                        </div>
                         <div class="card card-span-2">
                             <div class="card-title">⚠️ Problemas Técnicos</div>
                             ${techProblems()}
@@ -487,38 +508,38 @@ function displayModalResults(analysis) {
             </div>
         `;
     
-    console.log('📊 Resultados exibidos no modal');
+    __dbg('📊 Resultados exibidos no modal');
 }
 
 // 🤖 Enviar análise para chat
 window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
-    console.log('🎯 BOTÃO CLICADO: Pedir Ajuda à IA');
+    __dbg('🎯 BOTÃO CLICADO: Pedir Ajuda à IA');
     
     if (!currentModalAnalysis) {
         alert('Nenhuma análise disponível');
-        console.log('❌ Erro: currentModalAnalysis não existe');
+        __dbg('❌ Erro: currentModalAnalysis não existe');
         return;
     }
     
-    console.log('🤖 Enviando análise para chat...', currentModalAnalysis);
+    __dbg('🤖 Enviando análise para chat...', currentModalAnalysis);
     
     try {
         // Gerar prompt personalizado baseado nos problemas encontrados
         const prompt = window.audioAnalyzer.generateAIPrompt(currentModalAnalysis);
         const message = `🎵 Analisei meu áudio e preciso de ajuda para melhorar. Aqui estão os dados técnicos:\n\n${prompt}`;
         
-        console.log('📝 Prompt gerado:', message.substring(0, 200) + '...');
+        __dbg('📝 Prompt gerado:', message.substring(0, 200) + '...');
         
         // Tentar diferentes formas de integrar com o chat
         let messageSent = false;
         
         // Método 1: Usar diretamente o ProdAI Chatbot quando disponível
         if (window.prodAIChatbot) {
-            console.log('🎯 Tentando enviar via ProdAI Chatbot...');
+            __dbg('🎯 Tentando enviar via ProdAI Chatbot...');
             try {
                 // Se o chat ainda não está ativo, ativar com a mensagem
                 if (!window.prodAIChatbot.isActive && typeof window.prodAIChatbot.activateChat === 'function') {
-                    console.log('🚀 Chat inativo. Ativando com a primeira mensagem...');
+                    __dbg('🚀 Chat inativo. Ativando com a primeira mensagem...');
                     await window.prodAIChatbot.activateChat(message);
                     showTemporaryFeedback('🎵 Análise enviada para o chat!');
                     closeAudioModal();
@@ -537,17 +558,17 @@ window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
                     }
                 }
             } catch (err) {
-                console.warn('⚠️ Falha ao usar ProdAIChatbot direto, tentando fallback...', err);
+                __dwrn('⚠️ Falha ao usar ProdAIChatbot direto, tentando fallback...', err);
             }
         }
         // Método 2: Inserir diretamente no input e simular envio
         else {
-            console.log('🎯 Tentando método alternativo...');
+            __dbg('🎯 Tentando método alternativo...');
             
             const input = document.getElementById('chatbotActiveInput') || document.getElementById('chatbotMainInput');
             const sendBtn = document.getElementById('chatbotActiveSendBtn') || document.getElementById('chatbotSendButton');
             
-            console.log('🔍 Elementos encontrados:', { input: !!input, sendBtn: !!sendBtn });
+            __dbg('🔍 Elementos encontrados:', { input: !!input, sendBtn: !!sendBtn });
             
             if (input && sendBtn) {
                 input.value = message;
@@ -560,7 +581,7 @@ window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
                 // Aguardar um pouco e clicar no botão
                 setTimeout(() => {
                     sendBtn.click();
-                    console.log('✅ Botão clicado');
+                    __dbg('✅ Botão clicado');
                     showTemporaryFeedback('🎵 Análise enviada para o chat!');
                     closeAudioModal();
                 }, 500);
@@ -570,12 +591,12 @@ window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
         }
         
         if (!messageSent) {
-            console.log('❌ Não foi possível enviar automaticamente, copiando para clipboard...');
+            __dbg('❌ Não foi possível enviar automaticamente, copiando para clipboard...');
             
             // Fallback: copiar para clipboard
             await navigator.clipboard.writeText(message);
             showTemporaryFeedback('📋 Análise copiada! Cole no chat manualmente.');
-            console.log('📋 Mensagem copiada para clipboard como fallback');
+            __dbg('📋 Mensagem copiada para clipboard como fallback');
         }
         
     } catch (error) {
@@ -585,44 +606,7 @@ window.sendModalAnalysisToChat = async function sendModalAnalysisToChat() {
 }
 
 // � Mostrar feedback temporário
-function showTemporaryFeedback(message, duration = 3000) {
-    // Criar elemento de feedback
-    const feedback = document.createElement('div');
-    feedback.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        font-weight: 500;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        max-width: 300px;
-        word-wrap: break-word;
-    `;
-    
-    feedback.textContent = message;
-    document.body.appendChild(feedback);
-    
-    // Animar entrada
-    setTimeout(() => {
-        feedback.style.transform = 'translateX(0)';
-    }, 100);
-    
-    // Remover após o tempo especificado
-    setTimeout(() => {
-        feedback.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            if (feedback.parentNode) {
-                feedback.parentNode.removeChild(feedback);
-            }
-        }, 300);
-    }, duration);
-}
+// (definição duplicada de showTemporaryFeedback removida — mantida a versão consolidada abaixo)
 
 // �📄 Baixar relatório do modal
 function downloadModalAnalysis() {
@@ -764,11 +748,11 @@ function showTemporaryFeedback(message) {
     }, 3000);
 }
 
-console.log('🎵 Audio Analyzer Integration Script carregado!');
+__dbg('🎵 Audio Analyzer Integration Script carregado!');
 
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎵 DOM carregado, inicializando Audio Analyzer...');
+    __dbg('🎵 DOM carregado, inicializando Audio Analyzer...');
     initializeAudioAnalyzerIntegration();
 });
 

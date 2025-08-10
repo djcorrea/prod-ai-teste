@@ -17,7 +17,7 @@ class AudioAnalyzerV2 {
 			timeout: 45000 // 45 segundos
 		};
     
-		console.log('🎵 Audio Analyzer V2 initialized');
+		if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 initialized');
 	}
 
 	// 🎤 Inicializar contexto de áudio
@@ -30,23 +30,23 @@ class AudioAnalyzerV2 {
 			// Configurar Meyda
 			if (typeof Meyda !== 'undefined') {
 				Meyda.audioContext = this.audioContext;
-				console.log('✅ Meyda configurado com sucesso');
+				if (window.DEBUG_ANALYZER === true) console.log('✅ Meyda configurado com sucesso');
 			} else {
-				console.warn('⚠️ Meyda não disponível - análise espectral limitada');
+				if (window.DEBUG_ANALYZER === true) console.warn('⚠️ Meyda não disponível - análise espectral limitada');
 			}
       
 			this.isInitialized = true;
-			console.log('🎵 Audio Analyzer V2 inicializado com sucesso');
+			if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 inicializado com sucesso');
 			return true;
 		} catch (error) {
-			console.error('❌ Erro ao inicializar Audio Analyzer V2:', error);
+			if (window.DEBUG_ANALYZER === true) console.error('❌ Erro ao inicializar Audio Analyzer V2:', error);
 			return false;
 		}
 	}
 
 	// 📁 Analisar arquivo de áudio (método principal)
 	async analyzeFile(file, options = {}) {
-		console.log(`🎵 Iniciando análise V2 de: ${file.name} (${this.formatFileSize(file.size)})`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🎵 Iniciando análise V2 de: ${file.name} (${this.formatFileSize(file.size)})`);
     
 		// Validações iniciais
 		const validation = this.validateFile(file);
@@ -78,14 +78,14 @@ class AudioAnalyzerV2 {
 					const arrayBuffer = e.target.result;
           
 					// Decodificar áudio
-					console.log('🔬 Decodificando áudio...');
+					if (window.DEBUG_ANALYZER === true) console.log('🔬 Decodificando áudio...');
 					const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
           
 					// Realizar análise completa
-					console.log('📊 Realizando análise completa V2...');
+					if (window.DEBUG_ANALYZER === true) console.log('📊 Realizando análise completa V2...');
 					const analysis = await this.performFullAnalysis(audioBuffer, config);
           
-					console.log('✅ Análise V2 concluída!', {
+					if (window.DEBUG_ANALYZER === true) console.log('✅ Análise V2 concluída!', {
 						duration: `${audioBuffer.duration.toFixed(1)}s`,
 						features: Object.keys(analysis.metrics).length,
 						problems: analysis.diagnostics.problems.length,
@@ -95,7 +95,7 @@ class AudioAnalyzerV2 {
 					resolve(analysis);
 				} catch (error) {
 					clearTimeout(timeout);
-					console.error('❌ Erro na análise V2:', error);
+					if (window.DEBUG_ANALYZER === true) console.error('❌ Erro na análise V2:', error);
 					reject(error);
 				}
 			};
@@ -246,14 +246,14 @@ class AudioAnalyzerV2 {
 			};
 
 		} catch (error) {
-			console.error('❌ Erro na análise completa:', error);
+			if (window.DEBUG_ANALYZER === true) console.error('❌ Erro na análise completa:', error);
 			throw new Error(`Falha na análise: ${error.message}`);
 		}
 	}
 
 	// 🎯 ANÁLISE CORE METRICS
 	async analyzeCoreMetrics(leftChannel, rightChannel) {
-		console.log('🔬 Analisando métricas core...');
+		if (window.DEBUG_ANALYZER === true) console.log('🔬 Analisando métricas core...');
     
 		// Variáveis de acumulação
 		let peak = 0;
@@ -289,7 +289,7 @@ class AudioAnalyzerV2 {
 		const dcOffset = dcSum / length;
 		const clippingPercentage = (clippedSamples / length) * 100;
 
-		console.log(`📊 Core metrics: Peak=${peakDb.toFixed(1)}dB, RMS=${rmsDb.toFixed(1)}dB, DR=${dynamicRange.toFixed(1)}dB`);
+		if (window.DEBUG_ANALYZER === true) console.log(`📊 Core metrics: Peak=${peakDb.toFixed(1)}dB, RMS=${rmsDb.toFixed(1)}dB, DR=${dynamicRange.toFixed(1)}dB`);
 
 		return {
 			peak: peakDb,
@@ -306,7 +306,7 @@ class AudioAnalyzerV2 {
 
 	// 🌈 ANÁLISE ESPECTRAL COM MEYDA
 		async analyzeSpectralFeatures(channelData, sampleRate, quality = 'balanced') {
-			console.log('🎯 Analisando características espectrais...');
+			if (window.DEBUG_ANALYZER === true) console.log('🎯 Analisando características espectrais...');
 			try {
 				// Configurações baseadas na qualidade
 				const configs = {
@@ -418,7 +418,7 @@ class AudioAnalyzerV2 {
 					}
 				}
 
-				console.log(`🎯 Analisadas ${frameCount} janelas espectrais`);
+				if (window.DEBUG_ANALYZER === true) console.log(`🎯 Analisadas ${frameCount} janelas espectrais`);
 
 				const avgCentroid = frameCount ? (sumCentroid / frameCount) : null;
 				const avgRolloff = frameCount ? (sumRolloff / frameCount) : null;
@@ -426,7 +426,7 @@ class AudioAnalyzerV2 {
 				const avgFlatness = frameCount ? (sumFlatness / frameCount) : null;
 
 				const groupedFreqs = this.groupDominantFrequencies(dominantFrequencies);
-				console.log(`🎯 Features espectrais: Centroid=${avgCentroid?.toFixed(0)}Hz, Flux=${avgFlux?.toFixed(3)}, Dominantes=${groupedFreqs.length}`);
+				if (window.DEBUG_ANALYZER === true) console.log(`🎯 Features espectrais: Centroid=${avgCentroid?.toFixed(0)}Hz, Flux=${avgFlux?.toFixed(3)}, Dominantes=${groupedFreqs.length}`);
 
 				return {
 					spectralCentroid: avgCentroid,
@@ -436,7 +436,7 @@ class AudioAnalyzerV2 {
 					dominantFrequencies: groupedFreqs.slice(0, 8)
 				};
 			} catch (error) {
-				console.warn('⚠️ Erro na análise espectral:', error);
+				if (window.DEBUG_ANALYZER === true) console.warn('⚠️ Erro na análise espectral:', error);
 				return {
 					spectralCentroid: null,
 					spectralRolloff: null,
@@ -449,7 +449,7 @@ class AudioAnalyzerV2 {
 
 	// 🎵 ANÁLISE ESTÉREO
 	analyzeStereoMetrics(leftChannel, rightChannel) {
-		console.log('🔊 Analisando métricas estéreo...');
+		if (window.DEBUG_ANALYZER === true) console.log('🔊 Analisando métricas estéreo...');
     
 		let correlation = 0;
 		let leftPower = 0;
@@ -498,7 +498,7 @@ class AudioAnalyzerV2 {
     
 		const phaseIssues = correlation < 0.3;
     
-		console.log(`🔊 Estéreo: Correlação=${correlation.toFixed(2)}, Width=${width.toFixed(2)}, Compatibilidade=${monoCompatibility}`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🔊 Estéreo: Correlação=${correlation.toFixed(2)}, Width=${width.toFixed(2)}, Compatibilidade=${monoCompatibility}`);
     
 		return {
 			correlation: Math.max(-1, Math.min(1, correlation)),
@@ -511,7 +511,7 @@ class AudioAnalyzerV2 {
 
 	// 📊 CÁLCULO DE SCORES
 	calculateQualityScores(metrics) {
-		console.log('🏆 Calculando scores de qualidade...');
+		if (window.DEBUG_ANALYZER === true) console.log('🏆 Calculando scores de qualidade...');
     
 		const core = metrics.core;
 		const stereo = metrics.stereo;
@@ -597,7 +597,7 @@ class AudioAnalyzerV2 {
 			scores.technical * weights.technical
 		);
     
-		console.log(`🏆 Score geral: ${overall}/100 (Dinâmica:${scores.dynamics}, Técnico:${scores.technical})`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score geral: ${overall}/100 (Dinâmica:${scores.dynamics}, Técnico:${scores.technical})`);
     
 		return {
 			overall: Math.max(0, Math.min(100, overall)),
@@ -607,7 +607,7 @@ class AudioAnalyzerV2 {
 
 	// 🏥 DIAGNÓSTICO E SUGESTÕES
 	generateDiagnostics(metrics, metadata) {
-		console.log('🏥 Gerando diagnósticos...');
+		if (window.DEBUG_ANALYZER === true) console.log('🏥 Gerando diagnósticos...');
     
 		const problems = [];
 		const suggestions = [];
@@ -737,7 +737,7 @@ class AudioAnalyzerV2 {
 			feedback.push('✨ Nenhum problema técnico detectado');
 		}
     
-		console.log(`🏥 Diagnóstico: ${problems.length} problemas, ${suggestions.length} sugestões`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🏥 Diagnóstico: ${problems.length} problemas, ${suggestions.length} sugestões`);
     
 		return {
 			problems: problems.slice(0, 8),
@@ -917,7 +917,7 @@ class AudioAnalyzerV2 {
 			await this.audioContext.close();
 		}
 		this.isInitialized = false;
-		console.log('🎵 Audio Analyzer V2 disposed');
+		if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 disposed');
 	}
 }
 
@@ -930,7 +930,7 @@ if (typeof window !== 'undefined') {
 		window.audioAnalyzer = new AudioAnalyzerV2();
 	}
   
-	console.log('🎵 Audio Analyzer V2 disponível globalmente');
+	if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 disponível globalmente');
 }
 
 // ========================= MÉTODOS AUXILIARES FASE 2 =========================

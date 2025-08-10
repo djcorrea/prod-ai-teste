@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI.SYNTH - Mentor Virtual</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="audio-analyzer.css">
-    <link rel="stylesheet" href="music-button-below-chat.css">
+    <link rel="stylesheet" href="style.css?v=20250810">
+    <link rel="stylesheet" href="audio-analyzer.css?v=20250810">
+    <link rel="stylesheet" href="music-button-below-chat.css?v=20250810">
     
     <!-- Fontes otimizadas -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -18,8 +18,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
 
     <!-- Firebase e Scripts funcionais -->
-    <script type="module" src="firebase.js"></script>
-    <script src="auth.js" defer></script>
+    <script type="module" src="firebase.js?v=20250810"></script>
+    <script src="auth.js?v=20250810" defer></script>
 </head>
 <body>
     <!-- Fundo animado 3D -->
@@ -28,17 +28,17 @@
         <div class="vanta-background" id="vanta-bg"></div>
         
         <!-- Plano de fundo com rede neural (mantido como fallback) -->
-        <img src="fundo.webp" alt="Fundo futurista" class="fundo" />
+        <img src="fundo.webp?v=20250810" alt="Fundo futurista" class="fundo" />
 
         <!-- Elementos do cenário -->
         <!-- 🚨 POSSÍVEL OTIMIZAÇÃO: 
              Verificar se todas essas imagens são realmente necessárias
              Múltiplas imagens grandes podem causar overhead de memória -->
-        <img src="robo.webp" alt="Robô futurista" class="robo fade-in-start" />
-        <img src="mesa.webp" alt="Mesa" class="mesa fade-in-start" />
-        <img src="caixas.webp" alt="Caixas de som principais" class="caixas fade-in-start" />
-        <img src="notebook.webp" alt="Notebook" class="notebook fade-in-start" />
-        <img src="teclado.webp" alt="teclado" class="teclado fade-in-start" />
+    <img src="robo.webp?v=20250810" alt="Robô futurista" class="robo fade-in-start" />
+    <img src="mesa.webp?v=20250810" alt="Mesa" class="mesa fade-in-start" />
+    <img src="caixas.webp?v=20250810" alt="Caixas de som principais" class="caixas fade-in-start" />
+    <img src="notebook.webp?v=20250810" alt="Notebook" class="notebook fade-in-start" />
+    <img src="teclado.webp?v=20250810" alt="teclado" class="teclado fade-in-start" />
         
         <!-- Overlay de partículas extras -->
         <!-- 🚨 GARGALO: Div vazia que pode estar sendo usada para gerar partículas CSS
@@ -51,7 +51,7 @@
         <!-- Estado Inicial (Welcome) -->
         <div class="chatbot-welcome-state" id="chatbotWelcomeState">
             <div class="chatbot-robot-wrapper">
-                <img src="robo 2.webp" alt="AI.SYNTH Robot" class="chatbot-main-robot" id="chatbotMainRobot">
+                <img src="robo 2.webp?v=20250810" alt="AI.SYNTH Robot" class="chatbot-main-robot" id="chatbotMainRobot">
             </div>
             
             <div class="chatbot-branding" id="chatbotBranding">
@@ -214,14 +214,14 @@
 
     <!-- Script integrado com as funcionalidades existentes -->
     <!-- Otimizado: Removido cache busting desnecessário para melhor cache -->
-    <script src="script.js" defer></script>
+    <script src="script.js?v=20250810" defer></script>
     
     <!-- 🎤 VOICE MESSAGE SIMPLE - PROD.AI -->
-        <script src="voice-clean.js" defer></script>
+    <script src="voice-clean.js?v=20250810" defer></script>
     
     <!-- 🎵 AUDIO ANALYZER - Carregar os scripts -->
-    <script src="audio-analyzer.js" defer></script>
-    <script src="audio-analyzer-integration.js" defer></script>
+    <script src="audio-analyzer.js?v=20250810" defer></script>
+    <script src="audio-analyzer-integration.js?v=20250810" defer></script>
     
     <!-- Inicializar Audio Analyzer -->
     <script>
@@ -378,7 +378,7 @@
     <!-- Scripts de monitoramento desabilitados para performance -->
     <!-- <script src="plan-monitor.js"></script> -->
     <!-- <script src="force-visibility.js"></script> -->
-    <script src="plan-monitor.js"></script>
-    <script src="force-visibility.js"></script>
+    <script src="plan-monitor.js?v=20250810"></script>
+    <script src="force-visibility.js?v=20250810"></script>
 </body>
 </html>
