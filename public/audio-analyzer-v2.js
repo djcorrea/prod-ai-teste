@@ -9,6 +9,7 @@ class AudioAnalyzerV2 {
 	constructor() {
 		this.audioContext = null;
 		this.isInitialized = false;
+		this.analysisState = null; // Estado da análise atual
 		this.config = {
 			version: '2.0',
 			enableAdvanced: false,
@@ -18,6 +19,27 @@ class AudioAnalyzerV2 {
 		};
     
 		if (window.DEBUG_ANALYZER === true) console.log('🎵 Audio Analyzer V2 initialized');
+	}
+
+	// 🧹 Reset completo do estado entre análises
+	resetAnalysisState() {
+		if (window.DEBUG_ANALYZER === true) console.log('🧹 Resetando estado de análise...');
+		
+		this.analysisState = null;
+		
+		// Limpar contexto de áudio se existir (força nova instância)
+		if (this.audioContext && this.audioContext.state !== 'closed') {
+			try {
+				this.audioContext.close();
+			} catch (e) {
+				// Ignorar erros de close
+			}
+		}
+		this.audioContext = null;
+		this.isInitialized = false;
+		
+		// Forçar garbage collection de buffers anteriores
+		if (window.gc) window.gc();
 	}
 
 	// 🎤 Inicializar contexto de áudio
@@ -46,6 +68,9 @@ class AudioAnalyzerV2 {
 
 	// 📁 Analisar arquivo de áudio (método principal)
 	async analyzeFile(file, options = {}) {
+		// RESET OBRIGATÓRIO: limpar todo estado anterior
+		this.resetAnalysisState();
+		
 		if (window.DEBUG_ANALYZER === true) console.log(`🎵 Iniciando análise V2 de: ${file.name} (${this.formatFileSize(file.size)})`);
     
 		// Validações iniciais
@@ -77,11 +102,11 @@ class AudioAnalyzerV2 {
 					clearTimeout(timeout);
 					const arrayBuffer = e.target.result;
           
-					// Decodificar áudio
+					// Decodificar áudio (SEMPRE criar novo buffer, nunca reusar)
 					if (window.DEBUG_ANALYZER === true) console.log('🔬 Decodificando áudio...');
-					const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+					const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer.slice(0)); // .slice() força nova cópia
           
-					// Realizar análise completa
+					// Realizar análise completa (garantir estado limpo)
 					if (window.DEBUG_ANALYZER === true) console.log('📊 Realizando análise completa V2...');
 					const analysis = await this.performFullAnalysis(audioBuffer, config);
           
@@ -141,7 +166,27 @@ class AudioAnalyzerV2 {
 				var metrics = { core: coreMetrics };
 			}
 
-			// 2. ANÁLISE ESPECTRAL
+			// 2. ANÁLISE DE LOUDNESS (LUFS com EBU R128 gating)
+			if (config.features.includes('core') || config.features.includes('loudness')) {
+				steps.push('lufs_analysis');
+				const lufsStart = performance.now();
+        
+				const loudnessMetrics = await this.analyzeLoudnessEBUR128(leftChannel, rightChannel, audioBuffer.sampleRate);
+				metrics.loudness = loudnessMetrics;
+				analysisPerformance.loudness = performance.now() - lufsStart;
+			}
+
+			// 3. ANÁLISE TRUE PEAK (com oversampling)
+			if (config.features.includes('core') || config.features.includes('peak')) {
+				steps.push('true_peak_analysis');
+				const peakStart = performance.now();
+        
+				const truePeakMetrics = await this.analyzeTruePeak(leftChannel, rightChannel, audioBuffer.sampleRate);
+				metrics.truePeak = truePeakMetrics;
+				analysisPerformance.truePeak = performance.now() - peakStart;
+			}
+
+			// 4. ANÁLISE ESPECTRAL
 			if (config.features.includes('spectral')) {
 				steps.push('spectral_analysis');
 				const spectralStart = performance.now();
@@ -509,71 +554,90 @@ class AudioAnalyzerV2 {
 		};
 	}
 
-	// 📊 CÁLCULO DE SCORES
+	// 📊 CÁLCULO DE SCORES DINÂMICOS (baseado em métricas reais)
 	calculateQualityScores(metrics) {
-		if (window.DEBUG_ANALYZER === true) console.log('🏆 Calculando scores de qualidade...');
+		if (window.DEBUG_ANALYZER === true) console.log('🏆 Calculando scores baseados em análise real do PCM...');
     
 		const core = metrics.core;
 		const stereo = metrics.stereo;
+		const loudness = metrics.loudness;
     
-		const scores = {
-			dynamics: 50,
-			frequency: 50,
-			stereo: 50,
-			loudness: 50,
-			technical: 50
+		// Usar função sigmoide para scoring contínuo ao invés de thresholds fixos
+		const sigmoid = (x, midpoint, steepness) => {
+			return 100 / (1 + Math.exp(-steepness * (x - midpoint)));
 		};
     
-		// Score de dinâmica
-		if (core.dynamicRange >= 12) scores.dynamics = 95;
-		else if (core.dynamicRange >= 9) scores.dynamics = 85;
-		else if (core.dynamicRange >= 6) scores.dynamics = 70;
-		else if (core.dynamicRange >= 4) scores.dynamics = 50;
-		else scores.dynamics = 30;
+		const scores = {};
     
-		// Score de loudness
-		if (core.rms >= -16 && core.rms <= -12) scores.loudness = 95;
-		else if (core.rms >= -20 && core.rms <= -10) scores.loudness = 85;
-		else if (core.rms >= -25 && core.rms <= -8) scores.loudness = 70;
-		else scores.loudness = 50;
+		// Score de dinâmica (baseado em dynamic range real)
+		const dr = core.dynamicRange;
+		// Sigmoid centrado em 8dB (ideal para música moderna) com suavidade de 0.5
+		scores.dynamics = Math.round(sigmoid(dr, 8, 0.5));
+		// Bonus para dynamic range excepcional
+		if (dr > 15) scores.dynamics = Math.min(100, scores.dynamics + 5);
     
-		// Score técnico
-		scores.technical = 100;
-		if (core.clippingPercentage > 0.1) scores.technical -= 25;
-		if (core.clippingPercentage > 0.5) scores.technical -= 25;
-		if (Math.abs(core.dcOffset) > 0.01) scores.technical -= 15;
-		if (core.peak > -1) scores.technical -= 20;
-		scores.technical = Math.max(0, scores.technical);
+		// Score de loudness (baseado em LUFS integrado real ou RMS)
+		const actualLoudness = loudness?.lufs_integrated || core.rms;
+		// Sigmoid centrado em -14 LUFS (padrão streaming) com tolerância
+		const loudnessDistance = Math.abs(actualLoudness + 14);
+		scores.loudness = Math.round(100 - sigmoid(loudnessDistance, 2, 1.2));
+		scores.loudness = Math.max(20, scores.loudness); // piso mínimo
     
-		// Score de frequência
+		// Score técnico (baseado em defeitos reais detectados)
+		let technicalScore = 100;
+		// Clipping penalty proporcional ao número real de samples
+		if (core.clippingSamples > 0) {
+			const clippingPenalty = Math.min(50, 20 + Math.sqrt(core.clippingSamples) * 0.1);
+			technicalScore -= clippingPenalty;
+		}
+		// DC offset penalty baseado no valor real
+		if (Math.abs(core.dcOffset) > 0.001) {
+			const dcPenalty = Math.min(20, Math.abs(core.dcOffset) * 1000 * 2);
+			technicalScore -= dcPenalty;
+		}
+		// True peak penalty (se disponível)
+		if (metrics.truePeak?.true_peak_dbtp > -1) {
+			technicalScore -= Math.min(25, (metrics.truePeak.true_peak_dbtp + 1) * 10);
+		}
+		scores.technical = Math.max(0, Math.round(technicalScore));
+    
+		// Score de frequência (baseado em centroide espectral real)
 		if (core.spectralCentroid) {
 			const centroid = core.spectralCentroid;
-			if (centroid >= 800 && centroid <= 3500) scores.frequency = 90;
-			else if (centroid >= 400 && centroid <= 5000) scores.frequency = 75;
-			else if (centroid >= 200 && centroid <= 8000) scores.frequency = 60;
-			else scores.frequency = 45;
+			// Função Gaussiana centrada em 2000Hz para música balanceada
+			const freqScore = 100 * Math.exp(-Math.pow((centroid - 2000) / 2500, 2));
+			scores.frequency = Math.round(freqScore);
+		} else {
+			scores.frequency = 50; // neutral quando não disponível
 		}
     
-		// Score estéreo
-		if (stereo) {
-			let stereoScore = 50;
-      
-			// Compatibilidade mono
-			if (stereo.monoCompatibility === 'excellent') stereoScore = 90;
-			else if (stereo.monoCompatibility === 'good') stereoScore = 75;
-			else if (stereo.monoCompatibility === 'fair') stereoScore = 60;
-			else stereoScore = 40;
-      
-			// Penalizar largura excessiva
-			if (stereo.width > 1.8) stereoScore -= 10;
-      
-			// Penalizar desbalanceamento
-			if (Math.abs(stereo.balance) > 0.2) stereoScore -= 15;
-      
-			scores.stereo = Math.max(0, stereoScore);
+		// Score estéreo (baseado em correlação e width reais)
+		if (stereo && stereo.correlation !== null) {
+			let stereoScore = 100;
+			
+			// Correlação ideal entre 0.3 e 0.9
+			const corrPenalty = stereo.correlation < 0.3 ? (0.3 - stereo.correlation) * 100 : 
+							   stereo.correlation > 0.95 ? (stereo.correlation - 0.95) * 500 : 0;
+			stereoScore -= Math.min(40, corrPenalty);
+			
+			// Width penalty para valores extremos
+			if (stereo.width > 2.0 || stereo.width < 0.5) {
+				const widthPenalty = stereo.width > 2.0 ? (stereo.width - 2.0) * 20 : 
+									(0.5 - stereo.width) * 50;
+				stereoScore -= Math.min(25, widthPenalty);
+			}
+			
+			// Balance penalty baseado no valor real
+			if (Math.abs(stereo.balance) > 0.1) {
+				stereoScore -= Math.min(15, Math.abs(stereo.balance) * 100);
+			}
+			
+			scores.stereo = Math.max(0, Math.round(stereoScore));
+		} else {
+			scores.stereo = 80; // mono compatibility score
 		}
     
-		// Score geral (média ponderada)
+		// Score geral (média ponderada adaptativa)
 		const weights = {
 			dynamics: 0.25,
 			frequency: 0.20,
@@ -582,6 +646,7 @@ class AudioAnalyzerV2 {
 			technical: 0.15
 		};
     
+		// Redistribuir pesos quando estéreo não disponível
 		if (!stereo) {
 			weights.dynamics = 0.30;
 			weights.frequency = 0.25;
@@ -597,7 +662,13 @@ class AudioAnalyzerV2 {
 			scores.technical * weights.technical
 		);
     
-		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score geral: ${overall}/100 (Dinâmica:${scores.dynamics}, Técnico:${scores.technical})`);
+		if (window.DEBUG_ANALYZER === true) console.log(`🏆 Score calculado dinamicamente: ${overall}/100`, {
+			dynamics: `${scores.dynamics} (DR: ${dr.toFixed(1)}dB)`,
+			loudness: `${scores.loudness} (${actualLoudness.toFixed(1)}dB)`,
+			technical: `${scores.technical} (${core.clippingSamples} clips)`,
+			frequency: `${scores.frequency} (${core.spectralCentroid?.toFixed(0)}Hz)`,
+			stereo: stereo ? `${scores.stereo} (corr: ${stereo.correlation?.toFixed(2)})` : 'mono'
+		});
     
 		return {
 			overall: Math.max(0, Math.min(100, overall)),
@@ -605,9 +676,9 @@ class AudioAnalyzerV2 {
 		};
 	}
 
-	// 🏥 DIAGNÓSTICO E SUGESTÕES
+	// 🏥 DIAGNÓSTICO E SUGESTÕES (baseado em métricas reais)
 	generateDiagnostics(metrics, metadata) {
-		if (window.DEBUG_ANALYZER === true) console.log('🏥 Gerando diagnósticos...');
+		if (window.DEBUG_ANALYZER === true) console.log('🏥 Gerando diagnósticos baseados em métricas reais...');
     
 		const problems = [];
 		const suggestions = [];
@@ -615,44 +686,51 @@ class AudioAnalyzerV2 {
     
 		const core = metrics.core;
 		const stereo = metrics.stereo;
+		const loudness = metrics.loudness;
     
-		// Clipping
-		if (core.clippingPercentage > 0.05) {
+		// Clipping (baseado em contagem real de samples)
+		if (core.clippingPercentage > 0) {
+			const severity = core.clippingPercentage > 0.5 ? 'high' : 
+							core.clippingPercentage > 0.1 ? 'medium' : 'low';
 			problems.push({
 				type: 'clipping',
-				severity: core.clippingPercentage > 1.0 ? 'high' : core.clippingPercentage > 0.2 ? 'medium' : 'low',
-				message: `${core.clippingPercentage.toFixed(2)}% do áudio apresenta clipping`,
-				solution: 'Reduza o volume geral em 3-6dB ou use um limitador brick-wall'
+				severity,
+				message: `${core.clippingSamples} samples com clipping (${core.clippingPercentage.toFixed(3)}%)`,
+				solution: `Reduza ${Math.ceil(3 + core.clippingPercentage * 2)}dB ou use limitador brick-wall`
 			});
 		}
     
-		// Volume baixo
-		if (core.rms < -30) {
+		// Volume baseado em LUFS ou RMS real
+		const actualLoudness = loudness?.lufs_integrated || core.rms;
+		if (actualLoudness < -30) {
+			const severity = actualLoudness < -40 ? 'high' : 'medium';
 			problems.push({
 				type: 'low_volume',
-				severity: core.rms < -40 ? 'high' : 'medium',
-				message: `Volume muito baixo (${core.rms.toFixed(1)}dB RMS)`,
-				solution: 'Aumente o volume ou aplique normalização/compressão'
+				severity,
+				message: `Volume baixo (${actualLoudness.toFixed(1)}dB ${loudness ? 'LUFS' : 'RMS'})`,
+				solution: `Aumente ${Math.abs(actualLoudness + 14)}dB para padrão streaming`
 			});
 		}
     
-		// Sobre-compressão
-		if (core.dynamicRange < 4) {
+		// Dinâmica baseada em cálculo real
+		const actualDR = core.dynamicRange;
+		if (actualDR < 6) {
+			const severity = actualDR < 3 ? 'high' : 'medium';
 			problems.push({
 				type: 'over_compressed',
-				severity: core.dynamicRange < 2 ? 'high' : 'medium',
-				message: `Falta de dinâmica (${core.dynamicRange.toFixed(1)}dB)`,
-				solution: 'Reduza a compressão ou use compressão multibanda mais sutil'
+				severity,
+				message: `Baixa dinâmica (${actualDR.toFixed(1)}dB) - sobre-compressão detectada`,
+				solution: `Reduza ratio de compressão. Meta: ${Math.ceil(actualDR + 3)}dB+ de range dinâmico`
 			});
 		}
     
-		// DC Offset
-		if (Math.abs(core.dcOffset) > 0.01) {
+		// DC Offset baseado em cálculo real do buffer
+		if (Math.abs(core.dcOffset) > 0.005) {
 			problems.push({
 				type: 'dc_offset',
-				severity: 'low',
-				message: 'DC offset detectado',
-				solution: 'Aplique filtro high-pass em 5-20Hz'
+				severity: Math.abs(core.dcOffset) > 0.02 ? 'medium' : 'low',
+				message: `DC offset de ${(core.dcOffset * 1000).toFixed(2)}mV detectado`,
+				solution: 'Aplique filtro high-pass em 5-20Hz para remover DC'
 			});
 		}
     
@@ -744,6 +822,231 @@ class AudioAnalyzerV2 {
 			suggestions: suggestions.slice(0, 8),
 			feedback: feedback.slice(0, 4)
 		};
+	}
+	
+	// 🔊 ANÁLISE DE LOUDNESS EBU R128 (LUFS com gating correto)
+	analyzeLoudnessEBUR128(leftChannel, rightChannel = null, sampleRate) {
+		if (window.DEBUG_ANALYZER === true) console.log('📏 Calculando LUFS com gating EBU R128...');
+		
+		const isMonoMixdown = !rightChannel;
+		if (isMonoMixdown) rightChannel = leftChannel;
+		
+		// Pre-filtro K-weighting (shelving filters EBU R128)
+		const leftFiltered = this.applyKWeighting(leftChannel, sampleRate);
+		const rightFiltered = this.applyKWeighting(rightChannel, sampleRate);
+		
+		// Gating blocks de 400ms com overlap de 75%
+		const blockSamples = Math.floor(0.4 * sampleRate);
+		const hopSamples = Math.floor(blockSamples / 4); // 75% overlap = 25% hop
+		
+		const blocks = [];
+		const momentaryBlocks = []; // para 3s window
+		
+		// Calcular loudness por bloco
+		for (let i = 0; i + blockSamples <= leftFiltered.length; i += hopSamples) {
+			const leftBlock = leftFiltered.slice(i, i + blockSamples);
+			const rightBlock = rightFiltered.slice(i, i + blockSamples);
+			
+			// Mean square por canal
+			const leftMS = leftBlock.reduce((sum, s) => sum + s * s, 0) / blockSamples;
+			const rightMS = rightBlock.reduce((sum, s) => sum + s * s, 0) / blockSamples;
+			
+			// Loudness do bloco (stereo: -0.691 + 10*log10(left_MS + right_MS))
+			const channelSum = leftMS + rightMS;
+			if (channelSum > 0) {
+				const blockLoudness = -0.691 + 10 * Math.log10(channelSum);
+				blocks.push({
+					loudness: blockLoudness,
+					timestamp: i / sampleRate,
+					leftMS,
+					rightMS
+				});
+			}
+		}
+		
+		if (blocks.length === 0) {
+			return {
+				lufs_integrated: -Infinity,
+				lufs_short_term: -Infinity,
+				lufs_momentary: -Infinity,
+				lra: 0,
+				headroom_db: 0
+			};
+		}
+		
+		// Gate 1: Absolute threshold -70 LUFS
+		const gate1Blocks = blocks.filter(b => b.loudness >= -70);
+		
+		// Gate 2: Relative threshold -10dB relative to mean of gate1
+		let relativeThreshold = -70;
+		if (gate1Blocks.length > 0) {
+			const gate1Mean = gate1Blocks.reduce((sum, b) => sum + Math.pow(10, b.loudness / 10), 0) / gate1Blocks.length;
+			relativeThreshold = 10 * Math.log10(gate1Mean) - 10;
+		}
+		
+		const gate2Blocks = gate1Blocks.filter(b => b.loudness >= relativeThreshold);
+		
+		// Integrated loudness (LUFS-I)
+		let lufsIntegrated = -Infinity;
+		if (gate2Blocks.length > 0) {
+			const linearSum = gate2Blocks.reduce((sum, b) => sum + Math.pow(10, b.loudness / 10), 0);
+			lufsIntegrated = 10 * Math.log10(linearSum / gate2Blocks.length);
+		}
+		
+		// Short-term loudness (3s window, current = últimos 3s)
+		let lufsShortTerm = -Infinity;
+		const shortTermWindow = 3.0; // segundos
+		const recentBlocks = blocks.filter(b => b.timestamp >= (blocks[blocks.length - 1]?.timestamp || 0) - shortTermWindow);
+		if (recentBlocks.length > 0) {
+			const stLinearSum = recentBlocks.reduce((sum, b) => sum + Math.pow(10, b.loudness / 10), 0);
+			lufsShortTerm = 10 * Math.log10(stLinearSum / recentBlocks.length);
+		}
+		
+		// Momentary loudness (400ms, current = último bloco)
+		const lufsMomentary = blocks.length > 0 ? blocks[blocks.length - 1].loudness : -Infinity;
+		
+		// LRA (Loudness Range) - percentis 10% e 95% dos short-term values
+		const shortTermValues = [];
+		for (let i = 0; i < blocks.length; i += Math.max(1, Math.floor(hopSamples / blockSamples * 4))) {
+			const windowStart = Math.max(0, i - Math.floor(shortTermWindow * sampleRate / hopSamples));
+			const windowBlocks = blocks.slice(windowStart, i + 1);
+			if (windowBlocks.length > 0) {
+				const windowLinearSum = windowBlocks.reduce((sum, b) => sum + Math.pow(10, b.loudness / 10), 0);
+				const windowLUFS = 10 * Math.log10(windowLinearSum / windowBlocks.length);
+				if (windowLUFS > -Infinity) shortTermValues.push(windowLUFS);
+			}
+		}
+		
+		let lra = 0;
+		if (shortTermValues.length >= 2) {
+			shortTermValues.sort((a, b) => a - b);
+			const p10 = shortTermValues[Math.floor(0.1 * shortTermValues.length)];
+			const p95 = shortTermValues[Math.floor(0.95 * shortTermValues.length)];
+			lra = p95 - p10;
+		}
+		
+		// Headroom até True Peak máximo
+		const maxTruePeakDb = Math.max(
+			this.findTruePeak(leftChannel, sampleRate),
+			this.findTruePeak(rightChannel, sampleRate)
+		);
+		const headroomDb = -1.0 - maxTruePeakDb; // headroom até -1dBTP
+		
+		if (window.DEBUG_ANALYZER === true) console.log(`📏 LUFS: I=${lufsIntegrated.toFixed(1)}, S=${lufsShortTerm.toFixed(1)}, M=${lufsMomentary.toFixed(1)}, LRA=${lra.toFixed(1)}`);
+		
+		return {
+			lufs_integrated: Number.isFinite(lufsIntegrated) ? lufsIntegrated : null,
+			lufs_short_term: Number.isFinite(lufsShortTerm) ? lufsShortTerm : null,
+			lufs_momentary: Number.isFinite(lufsMomentary) ? lufsMomentary : null,
+			lra: Number.isFinite(lra) ? lra : null,
+			headroom_db: Number.isFinite(headroomDb) ? headroomDb : null
+		};
+	}
+	
+	// 🎚️ Aplicar K-weighting filter (EBU R128)
+	applyKWeighting(channel, sampleRate) {
+		// Implementação simplificada dos filtros K-weighting
+		// High shelf ~1500Hz (+4dB) + High-pass ~38Hz
+		
+		const output = new Float32Array(channel.length);
+		
+		// High-pass filter para remover DC e sub-graves
+		// Butterworth 1st order, fc = 38Hz
+		const wc = 2 * Math.PI * 38 / sampleRate;
+		const k1 = Math.exp(-wc);
+		let y1 = 0, x1 = 0;
+		
+		for (let i = 0; i < channel.length; i++) {
+			const x0 = channel[i];
+			const y0 = k1 * y1 + (1 - k1) * (x0 - x1);
+			output[i] = y0;
+			y1 = y0;
+			x1 = x0;
+		}
+		
+		// High shelf filter ~1500Hz (+4dB aproximado)
+		// Simplificação: boost suave nas altas frequências
+		const shelfOutput = new Float32Array(output.length);
+		const shelfGain = Math.pow(10, 4 / 20); // +4dB = ~1.585x
+		const shelfFreq = 1500;
+		const wShelf = 2 * Math.PI * shelfFreq / sampleRate;
+		const alpha = Math.sin(wShelf) / (2 * 0.707); // Q = 0.707
+		
+		const A = shelfGain;
+		const beta = Math.sqrt(A) / 0.707;
+		
+		// Coeficientes biquad high shelf
+		const b0 = A * ((A + 1) + (A - 1) * Math.cos(wShelf) + beta * alpha);
+		const b1 = -2 * A * ((A - 1) + (A + 1) * Math.cos(wShelf));
+		const b2 = A * ((A + 1) + (A - 1) * Math.cos(wShelf) - beta * alpha);
+		const a0 = (A + 1) - (A - 1) * Math.cos(wShelf) + beta * alpha;
+		const a1 = 2 * ((A - 1) - (A + 1) * Math.cos(wShelf));
+		const a2 = (A + 1) - (A - 1) * Math.cos(wShelf) - beta * alpha;
+		
+		// Normalizar
+		const norm = 1 / a0;
+		const nb0 = b0 * norm, nb1 = b1 * norm, nb2 = b2 * norm;
+		const na1 = a1 * norm, na2 = a2 * norm;
+		
+		// Aplicar biquad filter
+		let x2 = 0, x1_shelf = 0, y2 = 0, y1_shelf = 0;
+		for (let i = 0; i < output.length; i++) {
+			const x0 = output[i];
+			const y0 = nb0 * x0 + nb1 * x1_shelf + nb2 * x2 - na1 * y1_shelf - na2 * y2;
+			shelfOutput[i] = y0;
+			
+			x2 = x1_shelf; x1_shelf = x0;
+			y2 = y1_shelf; y1_shelf = y0;
+		}
+		
+		return shelfOutput;
+	}
+	
+	// 🔺 ANÁLISE TRUE PEAK com oversampling
+	analyzeTruePeak(leftChannel, rightChannel = null, sampleRate) {
+		if (window.DEBUG_ANALYZER === true) console.log('🔺 Calculando True Peak com oversampling...');
+		
+		const leftTruePeak = this.findTruePeak(leftChannel, sampleRate);
+		const rightTruePeak = rightChannel ? this.findTruePeak(rightChannel, sampleRate) : leftTruePeak;
+		
+		const truePeakDbtp = Math.max(leftTruePeak, rightTruePeak);
+		
+		return {
+			true_peak_dbtp: Number.isFinite(truePeakDbtp) ? truePeakDbtp : null,
+			exceeds_minus1dbtp: truePeakDbtp > -1.0,
+			sample_peak_left_db: Number.isFinite(leftTruePeak) ? leftTruePeak : null,
+			sample_peak_right_db: rightChannel && Number.isFinite(rightTruePeak) ? rightTruePeak : null
+		};
+	}
+	
+	// 🎯 Encontrar True Peak individual (com oversampling 4x)
+	findTruePeak(channel, sampleRate) {
+		// Oversampling 4x usando interpolação linear simples
+		const oversampleFactor = 4;
+		const oversampledLength = (channel.length - 1) * oversampleFactor + 1;
+		const oversampled = new Float32Array(oversampledLength);
+		
+		// Interpolação linear
+		for (let i = 0; i < channel.length - 1; i++) {
+			const startSample = channel[i];
+			const endSample = channel[i + 1];
+			const step = (endSample - startSample) / oversampleFactor;
+			
+			for (let j = 0; j < oversampleFactor; j++) {
+				oversampled[i * oversampleFactor + j] = startSample + j * step;
+			}
+		}
+		oversampled[oversampledLength - 1] = channel[channel.length - 1];
+		
+		// Encontrar pico absoluto
+		let truePeak = 0;
+		for (let i = 0; i < oversampled.length; i++) {
+			const abs = Math.abs(oversampled[i]);
+			if (abs > truePeak) truePeak = abs;
+		}
+		
+		// Converter para dB
+		return truePeak > 0 ? 20 * Math.log10(truePeak) : -Infinity;
 	}
 
 	// 🛠️ FUNÇÕES UTILITÁRIAS
